@@ -174,7 +174,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
 			container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
 
-			TransactionalComp1 comp1 = container.Resolve<TransactionalComp1>("mycomp");
+			TransactionalComp1 comp1 = container.Resolve<TransactionalComp1>();
 
 			comp1.Create();
 

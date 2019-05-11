@@ -59,7 +59,7 @@ namespace Castle.Services.Transaction.Tests
 			Monitor.Exit(serializer);
 		}
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void Setup()
 		{
 			dllPath = Environment.CurrentDirectory;

@@ -27,7 +27,7 @@ namespace Castle.Services.Transaction.Tests
 	{
 		private string curr_dir;
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void SetUp()
 		{
 			curr_dir = Path.GetPathWithoutLastBit(Path.GetFullPath(typeof (DirectoryAdapterTests).Assembly.CodeBase));
