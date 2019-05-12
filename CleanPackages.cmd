@@ -14,5 +14,9 @@ REM See the License for the specific language governing permissions and
 REM limitations under the License.
 REM ****************************************************************************
 
-@call buildscripts\BuildPackages.cmd "config=Release" "version=4.0.0"
+SET PACKAGES_DIRECTORY=build
+
+dotnet clean -c Debug
+dotnet clean -c Release
+IF EXIST %PACKAGES_DIRECTORY% RMDIR %PACKAGES_DIRECTORY% /S /Q
 

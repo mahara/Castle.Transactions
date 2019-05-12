@@ -42,10 +42,10 @@ GOTO SET_BUILD_VERSION
 IF "%version%" == "" GOTO RESTORE_PACKAGES
 SET BUILD_VERSION=%version%
 
-ECHO ----------------------------------------------------
+ECHO ---------------------------------------------------
 REM ECHO Building a "%config%" package with version "%version%"...
-ECHO Building a "%CONFIGURATION%" package with version "%BUILD_VERSION%"...
-ECHO ----------------------------------------------------
+ECHO Building "%CONFIGURATION%" packages with version "%BUILD_VERSION%"...
+ECHO ---------------------------------------------------
 
 GOTO RESTORE_PACKAGES
 
@@ -62,10 +62,10 @@ GOTO BUILD
 
 
 :BUILD
-dotnet clean ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
+REM dotnet clean ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
 dotnet build ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
-dotnet clean Castle.Transactions.sln
-dotnet build Castle.Transactions.sln -c %CONFIGURATION% /p:BuildVersion=%BUILD_VERSION%
+REM dotnet clean Castle.Transactions.sln
+dotnet build Castle.Transactions.sln -c %CONFIGURATION% /p:APPVEYOR_BUILD_VERSION=%BUILD_VERSION%
 
 GOTO TEST
 
@@ -76,11 +76,12 @@ ECHO ----------------
 ECHO Running Tests...
 ECHO ----------------
 
-dotnet test src\Castle.Services.Transaction.Tests || exit /b 1
-dotnet test src\Castle.Facilities.AutoTx.Tests || exit /b 1
+REM dotnet test src\Castle.Services.Transaction.Tests || exit /b 1
+REM dotnet test src\Castle.Facilities.AutoTx.Tests || exit /b 1
 
 GOTO NUGET_EXPLICIT_VERSIONS
-s
+
+
 :NUGET_EXPLICIT_VERSIONS
 
 .\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Services.Transaction"
