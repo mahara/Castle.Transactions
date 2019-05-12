@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Castle.Services.Transaction.Tests</AssemblyName>
-    <RootNamespace>Castle.Tests</RootNamespace>
+    <RootNamespace>Castle.Services.Transaction.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

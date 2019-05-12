@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Castle.Facilities.AutoTx.Tests</AssemblyName>
-    <RootNamespace>Castle.Tests</RootNamespace>
+    <RootNamespace>Castle.Facilities.AutoTx.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

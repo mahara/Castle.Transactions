@@ -15,7 +15,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);NU5125</NoWarn> <!-- remove once tools are truly ready for NuGet's new 'license' element -->
     <AssemblyName>Castle.Facilities.AutoTx</AssemblyName>
-    <RootNamespace>Castle</RootNamespace>
+    <RootNamespace>Castle.Facilities.AutoTx</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
