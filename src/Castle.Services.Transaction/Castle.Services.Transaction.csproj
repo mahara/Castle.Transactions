@@ -16,7 +16,6 @@
     <NoWarn>$(NoWarn);NU5125</NoWarn> <!-- remove once tools are truly ready for NuGet's new 'license' element -->
     <AssemblyName>Castle.Services.Transaction</AssemblyName>
     <RootNamespace>Castle</RootNamespace>
-    <Title>Castle.Services.Transaction</Title>
   </PropertyGroup>
 
   <ItemGroup>
