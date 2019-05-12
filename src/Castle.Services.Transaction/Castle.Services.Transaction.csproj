@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net47</TargetFrameworks>
+		<TargetFrameworks>net472</TargetFrameworks>
 	</PropertyGroup>
 
 	<Import Project="..\..\buildscripts\common.props"></Import>
@@ -28,7 +28,7 @@
 		<PackageReference Include="Castle.Windsor" Version="5.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net45'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net472'">
 		<Reference Include="System.Configuration" />
         <Reference Include="System.Data" />
         <Reference Include="System.Transactions" />
