@@ -1,44 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net472</TargetFrameworks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net472</TargetFrameworks>
+  </PropertyGroup>
 
-	<Import Project="..\..\buildscripts\common.props"></Import>
+  <Import Project="..\..\buildscripts\common.props"></Import>
 
-	<PropertyGroup>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageId>Castle.Facilities.AutoTx</PackageId>
-		<Title>Castle.Facilities.AutoTx</Title>
-		<Description>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</Description>
-		<PackageTags>castle, transactions, autotx, autotransaction</PackageTags>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>$(NoWarn);NU5125</NoWarn> <!-- remove once tools are truly ready for NuGet's new 'license' element -->
-		<AssemblyName>Castle.Facilities.AutoTx</AssemblyName>
-		<RootNamespace>Castle</RootNamespace>
-		<Title>Castle.Facilities.AutoTx</Title>
-	</PropertyGroup>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Castle.Facilities.AutoTx</PackageId>
+    <Title>Castle.Facilities.AutoTx</Title>
+    <Description>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</Description>
+    <PackageTags>castle, transactions, autotx, autotransaction</PackageTags>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);NU5125</NoWarn> <!-- remove once tools are truly ready for NuGet's new 'license' element -->
+    <AssemblyName>Castle.Facilities.AutoTx</AssemblyName>
+    <RootNamespace>Castle</RootNamespace>
+    <Title>Castle.Facilities.AutoTx</Title>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="..\..\buildscripts\CommonAssemblyInfo.cs" />
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\buildscripts\CommonAssemblyInfo.cs" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Castle.Core" Version="4.3.1" />
-		<PackageReference Include="Castle.Windsor" Version="5.0.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="Castle.Windsor" Version="5.0.0" />
+  </ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net472'">
-		<Reference Include="System.Configuration" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Transactions" />
-	</ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net472'">
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Castle.Services.Transaction\Castle.Services.Transaction.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Castle.Services.Transaction\Castle.Services.Transaction.csproj" />
+  </ItemGroup>
 
 </Project>
-
-
-
