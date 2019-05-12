@@ -51,18 +51,18 @@ GOTO RESTORE_PACKAGES
 
 
 :RESTORE_PACKAGES
-dotnet restore ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.csproj
-dotnet restore ./buildscripts/BuildScripts.csproj
-dotnet restore ./src/Castle.Services.Transaction/Castle.Services.Transaction.csproj
-dotnet restore ./src/Castle.Services.Transaction.Tests/Castle.Services.Transaction.Tests.csproj
-dotnet restore ./src/Castle.Facilities.AutoTx/Castle.Facilities.AutoTx.csproj
-dotnet restore ./src/Castle.Facilities.AutoTx.Tests/Castle.Facilities.AutoTx.Tests.csproj
+dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
+dotnet restore .\buildscripts\BuildScripts.csproj
+dotnet restore .\src\Castle.Services.Transaction\Castle.Services.Transaction.csproj
+dotnet restore .\src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj
+dotnet restore .\src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj
+dotnet restore .\src\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.csproj
 
 GOTO BUILD
 
 
 :BUILD
-dotnet build ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
+dotnet build .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln
 dotnet build Castle.Transactions.sln -c %CONFIGURATION% /p:APPVEYOR_BUILD_VERSION=%BUILD_VERSION%
 
 GOTO TEST
@@ -74,8 +74,8 @@ ECHO ----------------
 ECHO Running Tests...
 ECHO ----------------
 
-dotnet test src\Castle.Services.Transaction.Tests || exit /b 1
-dotnet test src\Castle.Facilities.AutoTx.Tests || exit /b 1
+dotnet test .\src\Castle.Services.Transaction.Tests || exit /b 1
+dotnet test .\src\Castle.Facilities.AutoTx.Tests || exit /b 1
 
 GOTO NUGET_EXPLICIT_VERSIONS
 
