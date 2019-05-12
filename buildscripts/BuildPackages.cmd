@@ -62,9 +62,7 @@ GOTO BUILD
 
 
 :BUILD
-REM dotnet clean ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
 dotnet build ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
-REM dotnet clean Castle.Transactions.sln
 dotnet build Castle.Transactions.sln -c %CONFIGURATION% /p:APPVEYOR_BUILD_VERSION=%BUILD_VERSION%
 
 GOTO TEST
@@ -76,8 +74,8 @@ ECHO ----------------
 ECHO Running Tests...
 ECHO ----------------
 
-REM dotnet test src\Castle.Services.Transaction.Tests || exit /b 1
-REM dotnet test src\Castle.Facilities.AutoTx.Tests || exit /b 1
+dotnet test src\Castle.Services.Transaction.Tests || exit /b 1
+dotnet test src\Castle.Facilities.AutoTx.Tests || exit /b 1
 
 GOTO NUGET_EXPLICIT_VERSIONS
 
