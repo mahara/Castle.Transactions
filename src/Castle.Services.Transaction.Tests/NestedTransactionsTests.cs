@@ -1,244 +1,261 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2019 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
+
+using System;
+
+using NUnit.Framework;
+
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
-	using NUnit.Framework;
+    [TestFixture]
+    public class NestedTransactionsTests
+    {
+        private DefaultTransactionManager tm;
 
-	[TestFixture]
-	public class NestedTransactionsTests
-	{
-		private DefaultTransactionManager tm;
+        [SetUp]
+        public void Init()
+        {
+            tm = new DefaultTransactionManager(new TransientActivityManager());
+        }
 
-		[SetUp]
-		public void Init()
-		{
-			tm = new DefaultTransactionManager(new TransientActivityManager());
-		}
+        [Test]
+        public void NestedRequiresWithCommits()
+        {
+            var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(root is TransactionBase);
+            root.Begin();
 
-		[Test]
-		public void NestedRequiresWithCommits()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( root is TransactionBase );
-			root.Begin();
+            var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child1 is ChildTransaction);
+            Assert.IsTrue(child1.IsChildTransaction);
+            child1.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( child1 is ChildTransaction );
-			Assert.IsTrue( child1.IsChildTransaction );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( child2 is ChildTransaction );
-			Assert.IsTrue( child2.IsChildTransaction );
-			child2.Begin();
+            var child2 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child2 is ChildTransaction);
+            Assert.IsTrue(child2.IsChildTransaction);
+            child2.Begin();
 
-			child2.Commit();
-			child1.Commit();
-			root.Commit();
-		}
+            child2.Commit();
+            child1.Commit();
+            root.Commit();
+        }
 
-		[Test]
-		public void NestedRequiresAndRequiresNew()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue(root is TransactionBase);
-			root.Begin();
+        [Test]
+        public void NestedRequiresAndRequiresNew()
+        {
+            var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(root is TransactionBase);
+            root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( child1 is ChildTransaction );
-			child1.Begin();
-			
-			ITransaction innerRoot = tm.CreateTransaction( TransactionMode.RequiresNew, IsolationMode.Unspecified );
-			Assert.IsFalse( innerRoot is ChildTransaction );
-			innerRoot.Begin();
+            var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child1 is ChildTransaction);
+            child1.Begin();
 
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( child2 is ChildTransaction );
-			child2.Begin();
+            var innerRoot = tm.CreateTransaction(TransactionMode.RequiresNew, IsolationMode.Unspecified);
+            Assert.IsFalse(innerRoot is ChildTransaction);
+            innerRoot.Begin();
 
-			child2.Commit();
-			innerRoot.Commit();
+            var child2 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child2 is ChildTransaction);
+            child2.Begin();
 
-			child1.Commit();
-			root.Commit();
-		}
+            child2.Commit();
+            innerRoot.Commit();
 
-		[Test]
-		public void SameResourcesShared_BetweenParentAndChild_ParentsResponsibility()
-		{
-			var resource = new ResourceImpl();
+            child1.Commit();
+            root.Commit();
+        }
 
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
-			root.Enlist(resource);
+        [Test]
+        public void SameResourcesShared_BetweenParentAndChild_ParentsResponsibility()
+        {
+            var resource = new ResourceImpl();
 
-			var child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			Assert.IsTrue( child1 is ChildTransaction );
-			child1.Enlist(resource);
-			child1.Begin();
-			
-			child1.Commit();
-			root.Commit();
-		}
+            var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            root.Begin();
+            root.Enlist(resource);
 
-		[Test]
-		public void NotSupportedAndNoActiveTransaction()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.NotSupported, IsolationMode.Unspecified );
-			Assert.IsNull( root );
-		}
+            var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child1 is ChildTransaction);
+            child1.Enlist(resource);
+            child1.Begin();
 
-		[Test]
-		[ExpectedException( typeof(TransactionModeUnsupportedException) )]
-		public void NotSupportedAndActiveTransaction()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+            child1.Commit();
+            root.Commit();
+        }
 
-			tm.CreateTransaction( TransactionMode.NotSupported, IsolationMode.Unspecified );
-		}
+        [Test]
+        public void NotSupportedAndNoActiveTransaction()
+        {
+            var root = tm.CreateTransaction(TransactionMode.NotSupported, IsolationMode.Unspecified);
+            Assert.IsNull(root);
+        }
 
-		[Test]
-		[ExpectedException( typeof(TransactionException) )]
-		public void NestedRollback_RollingAChildBack_TryingToCommitRoot_Fails()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+        [Test]
+        public void NotSupportedAndActiveTransaction()
+        {
+            void Method()
+            {
+                var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+                tm.CreateTransaction(TransactionMode.NotSupported, IsolationMode.Unspecified);
+            }
 
-			child2.Rollback();
-			child1.Commit();
-			root.Commit(); // Can't perform
-		}
+            Assert.Throws<TransactionModeUnsupportedException>(Method);
+        }
 
-		[Test]
-		[ExpectedException( typeof(ArgumentException) )]
-		public void InvalidDispose1()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+        [Test]
+        public void NestedRollback_RollingAChildBack_TryingToCommitRoot_Fails()
+        {
+            void Method()
+            {
+                var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+                var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child1.Begin();
 
-			tm.Dispose(child1);
-		}
+                var child2 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child2.Begin();
 
-		[Test]
-		[ExpectedException( typeof(ArgumentException) )]
-		public void InvalidDispose2()
-		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+                child2.Rollback();
+                child1.Commit();
+                root.Commit(); // Can't perform
+            }
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+            Assert.Throws<TransactionException>(Method);
+        }
 
-			tm.Dispose(root);
-		}
+        [Test]
+        public void InvalidDispose1()
+        {
+            void Method()
+            {
+                var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                root.Begin();
 
-		[Test]
-		public void WhenOneResourceFails_OtherResourcesAreNotCommitted()
-		{
-			var first = new ResourceImpl();
-			var rfail = new ThrowsExceptionResourceImpl(true, false);
-			var rsucc = new ResourceImpl();
+                var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child1.Begin();
 
-			var t = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			t.Enlist(first);
-			t.Enlist(rfail);
-			t.Enlist(rsucc);
+                var child2 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child2.Begin();
 
-			t.Begin();
+                tm.Dispose(child1);
+            }
 
-			Assert.That(rfail.Started);
-			Assert.That(rsucc.Started);
+            Assert.Throws<ArgumentException>(Method);
+        }
 
-			Assert.Throws(typeof(CommitResourceException), t.Commit);
+        [Test]
+        public void InvalidDispose2()
+        {
+            void Method()
+            {
+                var root = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                root.Begin();
 
-			Assert.That(first.Committed);
-			Assert.That(rfail.Committed, Is.False);
-			Assert.That(rsucc.Committed, Is.False);
-		}
+                var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child1.Begin();
 
-		[Test]
-		public void SynchronizationsAndCommit_NestedTransaction()
-		{
-			ITransaction root =
-				tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			Assert.IsTrue(root is TalkactiveTransaction);
-			root.Begin();
+                var child2 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+                child2.Begin();
 
-			ITransaction child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			Assert.IsTrue(child1 is ChildTransaction);
-			Assert.IsTrue(child1.IsChildTransaction);
-			child1.Begin();
+                tm.Dispose(root);
+            }
 
-			SynchronizationImpl sync = new SynchronizationImpl();
+            Assert.Throws<ArgumentException>(Method);
+        }
 
-			child1.RegisterSynchronization(sync);
+        [Test]
+        public void WhenOneResourceFails_OtherResourcesAreNotCommitted()
+        {
+            var first = new ResourceImpl();
+            var rfail = new ThrowsExceptionResourceImpl(true, false);
+            var rsucc = new ResourceImpl();
 
-			Assert.AreEqual(DateTime.MinValue, sync.Before);
-			Assert.AreEqual(DateTime.MinValue, sync.After);
+            var t = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            t.Enlist(first);
+            t.Enlist(rfail);
+            t.Enlist(rsucc);
 
-			child1.Commit();
-			root.Commit();
+            t.Begin();
 
-			Assert.IsTrue(sync.Before > DateTime.MinValue);
-			Assert.IsTrue(sync.After > DateTime.MinValue);
-		}
+            Assert.That(rfail.Started);
+            Assert.That(rsucc.Started);
 
-		[Test]
-		public void SynchronizationsAndRollback_NestedTransaction()
-		{
-			ITransaction root =
-				tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			Assert.IsTrue(root is TalkactiveTransaction);
-			root.Begin();
+            Assert.Throws(typeof(CommitResourceException), t.Commit);
 
-			ITransaction child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			Assert.IsTrue(child1 is ChildTransaction);
-			Assert.IsTrue(child1.IsChildTransaction);
-			child1.Begin();
+            Assert.That(first.Committed);
+            Assert.That(rfail.Committed, Is.False);
+            Assert.That(rsucc.Committed, Is.False);
+        }
 
-			SynchronizationImpl sync = new SynchronizationImpl();
+        [Test]
+        public void SynchronizationsAndCommit_NestedTransaction()
+        {
+            var root =
+                tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(root is TalkactiveTransaction);
+            root.Begin();
 
-			child1.RegisterSynchronization(sync);
+            var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child1 is ChildTransaction);
+            Assert.IsTrue(child1.IsChildTransaction);
+            child1.Begin();
 
-			Assert.AreEqual(DateTime.MinValue, sync.Before);
-			Assert.AreEqual(DateTime.MinValue, sync.After);
+            var sync = new SynchronizationImpl();
 
-			child1.Rollback();
-			root.Rollback();
+            child1.RegisterSynchronization(sync);
 
-			Assert.IsTrue(sync.Before > DateTime.MinValue);
-			Assert.IsTrue(sync.After > DateTime.MinValue);
-		}
-	}
+            Assert.AreEqual(DateTime.MinValue, sync.Before);
+            Assert.AreEqual(DateTime.MinValue, sync.After);
+
+            child1.Commit();
+            root.Commit();
+
+            Assert.IsTrue(sync.Before > DateTime.MinValue);
+            Assert.IsTrue(sync.After > DateTime.MinValue);
+        }
+
+        [Test]
+        public void SynchronizationsAndRollback_NestedTransaction()
+        {
+            var root =
+                tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(root is TalkactiveTransaction);
+            root.Begin();
+
+            var child1 = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.IsTrue(child1 is ChildTransaction);
+            Assert.IsTrue(child1.IsChildTransaction);
+            child1.Begin();
+
+            var sync = new SynchronizationImpl();
+
+            child1.RegisterSynchronization(sync);
+
+            Assert.AreEqual(DateTime.MinValue, sync.Before);
+            Assert.AreEqual(DateTime.MinValue, sync.After);
+
+            child1.Rollback();
+            root.Rollback();
+
+            Assert.IsTrue(sync.Before > DateTime.MinValue);
+            Assert.IsTrue(sync.After > DateTime.MinValue);
+        }
+    }
 }
