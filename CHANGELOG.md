@@ -13,7 +13,7 @@ Enhancements:
 - Added .NET Core support
 
 
-## 3.3.x (2016-05-22)
+## 3.3.0 (2016-05-22)
 
 ### All
 
