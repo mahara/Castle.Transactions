@@ -138,27 +138,35 @@ namespace Castle.Services.Transaction.Tests
 		}
 
 		[Test]
-		[ExpectedException( typeof(TransactionException) )]
 		public void InvalidBegin()
 		{
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			void Method()
+			{
+				var transaction = this.tm.CreateTransaction(
+					TransactionMode.Requires, IsolationMode.Unspecified);
 
-			transaction.Begin();
-			transaction.Begin();
+				transaction.Begin();
+				transaction.Begin();
+			}
+
+			Assert.That(Method, Throws.TypeOf<TransactionException>());
 		}
 
 		[Test]
-		[ExpectedException( typeof(TransactionException) )]
 		public void InvalidCommit()
 		{
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			void Method()
+			{
+				var transaction = this.tm.CreateTransaction(
+					TransactionMode.Requires, IsolationMode.Unspecified);
 
-			transaction.Begin();
-			transaction.Rollback();
-			
-			transaction.Commit();
+				transaction.Begin();
+				transaction.Rollback();
+
+				transaction.Commit();
+			}
+
+			Assert.That(Method, Throws.TypeOf<TransactionException>());
 		}
 
 		[Test]

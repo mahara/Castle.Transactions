@@ -26,10 +26,16 @@ namespace Castle.Facilities.AutoTx.Tests
 	[TestFixture]
 	public class ConfiguredComponentsTests
 	{
-		[Test, ExpectedException(typeof(FacilityException), ExpectedMessage = "The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node.")]
+		[Test]
 		public void IsTransactionalMissing()
 		{
-			new WindsorContainer( "IsTransactionalMissing.xml" );
+			void Method()
+			{
+				new WindsorContainer("IsTransactionalMissing.xml");
+			}
+
+			Assert.That(Method, Throws.TypeOf<FacilityException>()
+			                          .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
 		}
 
 		[Test]
@@ -55,10 +61,16 @@ namespace Castle.Facilities.AutoTx.Tests
 			Assert.AreEqual(3, meta.Methods.Count());
 		}
 
-		[Test, ExpectedException(typeof(Exception), ExpectedMessage = "The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found.")]
+		[Test]
 		public void HasInvalidMethod()
 		{
-			new WindsorContainer( "HasInvalidMethod.xml" );
+			void Method()
+			{
+				new WindsorContainer("HasInvalidMethod.xml");
+			}
+
+			Assert.That(Method, Throws.TypeOf<Exception>()
+			                          .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
 		}
 
 		[Test]

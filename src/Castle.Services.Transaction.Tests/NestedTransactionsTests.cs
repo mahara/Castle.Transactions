@@ -104,63 +104,79 @@ namespace Castle.Services.Transaction.Tests
 		}
 
 		[Test]
-		[ExpectedException( typeof(TransactionModeUnsupportedException) )]
 		public void NotSupportedAndActiveTransaction()
 		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+			void Method()
+			{
+				var root = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				root.Begin();
 
-			tm.CreateTransaction( TransactionMode.NotSupported, IsolationMode.Unspecified );
+				this.tm.CreateTransaction(TransactionMode.NotSupported, IsolationMode.Unspecified);
+			}
+
+			Assert.That(Method, Throws.TypeOf<TransactionModeUnsupportedException>());
 		}
 
 		[Test]
-		[ExpectedException( typeof(TransactionException) )]
 		public void NestedRollback_RollingAChildBack_TryingToCommitRoot_Fails()
 		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+			void Method()
+			{
+				var root = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+				var child1 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child1.Begin();
 
-			child2.Rollback();
-			child1.Commit();
-			root.Commit(); // Can't perform
+				var child2 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child2.Begin();
+
+				child2.Rollback();
+				child1.Commit();
+				root.Commit(); // Can't perform
+			}
+
+			Assert.That(Method, Throws.TypeOf<TransactionException>());
 		}
 
 		[Test]
-		[ExpectedException( typeof(ArgumentException) )]
 		public void InvalidDispose1()
 		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+			void Method()
+			{
+				var root = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+				var child1 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child1.Begin();
 
-			tm.Dispose(child1);
+				var child2 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child2.Begin();
+
+				this.tm.Dispose(child1);
+			}
+
+			Assert.That(Method, Throws.TypeOf<ArgumentException>());
 		}
 
 		[Test]
-		[ExpectedException( typeof(ArgumentException) )]
 		public void InvalidDispose2()
 		{
-			ITransaction root = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			root.Begin();
+			void Method()
+			{
+				var root = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				root.Begin();
 
-			ITransaction child1 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child1.Begin();
-			
-			ITransaction child2 = tm.CreateTransaction( TransactionMode.Requires, IsolationMode.Unspecified );
-			child2.Begin();
+				var child1 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child1.Begin();
 
-			tm.Dispose(root);
+				var child2 = this.tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+				child2.Begin();
+
+				this.tm.Dispose(root);
+			}
+
+			Assert.That(Method, Throws.TypeOf<ArgumentException>());
 		}
 
 		[Test]
