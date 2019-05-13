@@ -60,7 +60,7 @@ Jan, 2007
 
 - Added ActivityManager/Activity concept
 
-Feb, 2006 
+Feb, 2006
 
 - Added logging support
 
