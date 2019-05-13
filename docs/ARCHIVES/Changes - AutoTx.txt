@@ -13,7 +13,7 @@
 2010-04-01
 ==========
 Both version 2.0 and version 2.1 compile and work well, but version 2.1 is actually compiled
-against castle.core.dll which is the binary in the lib folder, as opposed to 
+against castle.core.dll which is the binary in the lib folder, as opposed to
 2.0 which is compiled against an updated source code of the core.core project where I had added
 .IO as a namespace.
 
@@ -25,7 +25,7 @@ Henrik: Going to release version 2.1. Just cloned. The project builds. S.Tx does
 
 
 -----
-- SERVICES-7 Fixed 
+- SERVICES-7 Fixed
   "Can't explictly rollback transaction using ATM"
 
 == Beta 5 ==
@@ -44,22 +44,22 @@ Henrik: Going to release version 2.1. Just cloned. The project builds. S.Tx does
     {
     }
   }
-  
-  is equivalent to 
-  
-  <component 
-	id="someid" 
+
+  is equivalent to
+
+  <component
+	id="someid"
 	type="MyTransactionalComponent, MyAssembly"
 	isTransactional="true">
-  
+
     <transaction>
       <method name="Save" />
     </transaction>
-  
+
   </component>
 
   You can also specify the transaction mode and isolation:
-  
+
   <transaction>
     <method name="Save" transactionMode="Requires" isolationLevel="Chaos" />
   </transaction>
