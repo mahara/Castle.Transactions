@@ -1,120 +1,68 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Facilities.AutoTx", "src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj", "{9962F772-E75C-4998-A45B-3CD99C2E2903}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Facilities.AutoTx.Tests", "src\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.csproj", "{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B358A960-356B-47CD-8E66-C275F15BF893}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36203.30
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Castle Build", "Castle Build", "{F2092D1F-09A8-4918-A22F-1F0C1E337CCB}"
 	ProjectSection(SolutionItems) = preProject
-		build.cmd = build.cmd
-		Changes - AutoTx.txt = Changes - AutoTx.txt
-		Changes - Transaction.txt = Changes - Transaction.txt
-		ClickToBuild.cmd = ClickToBuild.cmd
-		License.txt = License.txt
-		Settings.proj = Settings.proj
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		BuildPackages.cmd = BuildPackages.cmd
+		Castle.Transactions.sln.licenseheader = Castle.Transactions.sln.licenseheader
+		CHANGELOG.md = CHANGELOG.md
+		CleanPackages.cmd = CleanPackages.cmd
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Services.Transaction", "src\Castle.Services.Transaction\Castle.Services.Transaction.csproj", "{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildscripts", "buildscripts", "{0A2F5BB0-BD23-4C1B-829A-2846C983C1D0}"
+	ProjectSection(SolutionItems) = preProject
+		buildscripts\AssemblyInfo.Global.cs = buildscripts\AssemblyInfo.Global.cs
+		buildscripts\Build.props = buildscripts\Build.props
+		buildscripts\Build.References.props = buildscripts\Build.References.props
+		buildscripts\BuildPackages.cmd = buildscripts\BuildPackages.cmd
+		buildscripts\CastleKey.snk = buildscripts\CastleKey.snk
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Services.Transaction.Tests", "src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj", "{67CDFD3A-450F-4CD4-9401-EF15361E2713}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Services.Transaction", "src\Castle.Services.Transaction\Castle.Services.Transaction.csproj", "{C975C2E4-F615-4B05-8AD2-D505EFD212BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Services.Transaction.Tests", "src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj", "{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Facilities.AutoTx", "src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj", "{0D149CF8-9CD7-4381-9D2B-075BC0D20853}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Facilities.AutoTx.Tests", "src\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.csproj", "{B757FC8A-DD68-401F-BD54-25D19317D257}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		MONO26-Debug|Any CPU = MONO26-Debug|Any CPU
-		MONO26-Release|Any CPU = MONO26-Release|Any CPU
-		MONO28-Debug|Any CPU = MONO28-Debug|Any CPU
-		MONO28-Release|Any CPU = MONO28-Release|Any CPU
-		NET35-Debug|Any CPU = NET35-Debug|Any CPU
-		NET35-Release|Any CPU = NET35-Release|Any CPU
-		NET40-Debug|Any CPU = NET40-Debug|Any CPU
-		NET40-Release|Any CPU = NET40-Release|Any CPU
-		NET45-Debug|Any CPU = NET45-Debug|Any CPU
-		NET45-Release|Any CPU = NET45-Release|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO26-Debug|Any CPU.ActiveCfg = MONO26-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO26-Debug|Any CPU.Build.0 = MONO26-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO26-Release|Any CPU.ActiveCfg = MONO26-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO26-Release|Any CPU.Build.0 = MONO26-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO28-Debug|Any CPU.ActiveCfg = MONO28-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO28-Debug|Any CPU.Build.0 = MONO28-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO28-Release|Any CPU.ActiveCfg = MONO28-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.MONO28-Release|Any CPU.Build.0 = MONO28-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET35-Debug|Any CPU.ActiveCfg = NET35-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET35-Debug|Any CPU.Build.0 = NET35-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET35-Release|Any CPU.ActiveCfg = NET35-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET35-Release|Any CPU.Build.0 = NET35-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET40-Debug|Any CPU.ActiveCfg = NET40-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET40-Debug|Any CPU.Build.0 = NET40-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET40-Release|Any CPU.ActiveCfg = NET40-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET40-Release|Any CPU.Build.0 = NET40-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET45-Debug|Any CPU.ActiveCfg = NET45-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET45-Debug|Any CPU.Build.0 = NET45-Debug|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET45-Release|Any CPU.ActiveCfg = NET45-Release|Any CPU
-		{9962F772-E75C-4998-A45B-3CD99C2E2903}.NET45-Release|Any CPU.Build.0 = NET45-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO26-Debug|Any CPU.ActiveCfg = MONO26-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO26-Debug|Any CPU.Build.0 = MONO26-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO26-Release|Any CPU.ActiveCfg = MONO26-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO26-Release|Any CPU.Build.0 = MONO26-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO28-Debug|Any CPU.ActiveCfg = MONO28-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO28-Debug|Any CPU.Build.0 = MONO28-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO28-Release|Any CPU.ActiveCfg = MONO28-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.MONO28-Release|Any CPU.Build.0 = MONO28-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET35-Debug|Any CPU.ActiveCfg = NET35-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET35-Debug|Any CPU.Build.0 = NET35-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET35-Release|Any CPU.ActiveCfg = NET35-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET35-Release|Any CPU.Build.0 = NET35-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET40-Debug|Any CPU.ActiveCfg = NET40-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET40-Debug|Any CPU.Build.0 = NET40-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET40-Release|Any CPU.ActiveCfg = NET40-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET40-Release|Any CPU.Build.0 = NET40-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET45-Debug|Any CPU.ActiveCfg = NET45-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET45-Debug|Any CPU.Build.0 = NET45-Debug|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET45-Release|Any CPU.ActiveCfg = NET45-Release|Any CPU
-		{8A7E5413-3F2C-4C09-92A7-F5A3AC9F2F93}.NET45-Release|Any CPU.Build.0 = NET45-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO26-Debug|Any CPU.ActiveCfg = MONO26-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO26-Debug|Any CPU.Build.0 = MONO26-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO26-Release|Any CPU.ActiveCfg = MONO26-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO26-Release|Any CPU.Build.0 = MONO26-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO28-Debug|Any CPU.ActiveCfg = MONO28-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO28-Debug|Any CPU.Build.0 = MONO28-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO28-Release|Any CPU.ActiveCfg = MONO28-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.MONO28-Release|Any CPU.Build.0 = MONO28-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET35-Debug|Any CPU.ActiveCfg = NET35-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET35-Debug|Any CPU.Build.0 = NET35-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET35-Release|Any CPU.ActiveCfg = NET35-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET35-Release|Any CPU.Build.0 = NET35-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET40-Debug|Any CPU.ActiveCfg = NET40-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET40-Debug|Any CPU.Build.0 = NET40-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET40-Release|Any CPU.ActiveCfg = NET40-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET40-Release|Any CPU.Build.0 = NET40-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET45-Debug|Any CPU.ActiveCfg = NET45-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET45-Debug|Any CPU.Build.0 = NET45-Debug|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET45-Release|Any CPU.ActiveCfg = NET45-Release|Any CPU
-		{0F611C1B-EDFD-46E6-9C3A-95420946E9CC}.NET45-Release|Any CPU.Build.0 = NET45-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO26-Debug|Any CPU.ActiveCfg = MONO26-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO26-Debug|Any CPU.Build.0 = MONO26-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO26-Release|Any CPU.ActiveCfg = MONO26-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO26-Release|Any CPU.Build.0 = MONO26-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO28-Debug|Any CPU.ActiveCfg = MONO28-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO28-Debug|Any CPU.Build.0 = MONO28-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO28-Release|Any CPU.ActiveCfg = MONO28-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.MONO28-Release|Any CPU.Build.0 = MONO28-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET35-Debug|Any CPU.ActiveCfg = NET35-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET35-Debug|Any CPU.Build.0 = NET35-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET35-Release|Any CPU.ActiveCfg = NET35-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET35-Release|Any CPU.Build.0 = NET35-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET40-Debug|Any CPU.ActiveCfg = NET40-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET40-Debug|Any CPU.Build.0 = NET40-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET40-Release|Any CPU.ActiveCfg = NET40-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET40-Release|Any CPU.Build.0 = NET40-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET45-Debug|Any CPU.ActiveCfg = NET45-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET45-Debug|Any CPU.Build.0 = NET45-Debug|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET45-Release|Any CPU.ActiveCfg = NET45-Release|Any CPU
-		{67CDFD3A-450F-4CD4-9401-EF15361E2713}.NET45-Release|Any CPU.Build.0 = NET45-Release|Any CPU
+		{C975C2E4-F615-4B05-8AD2-D505EFD212BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C975C2E4-F615-4B05-8AD2-D505EFD212BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C975C2E4-F615-4B05-8AD2-D505EFD212BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C975C2E4-F615-4B05-8AD2-D505EFD212BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D149CF8-9CD7-4381-9D2B-075BC0D20853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D149CF8-9CD7-4381-9D2B-075BC0D20853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D149CF8-9CD7-4381-9D2B-075BC0D20853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D149CF8-9CD7-4381-9D2B-075BC0D20853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B757FC8A-DD68-401F-BD54-25D19317D257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B757FC8A-DD68-401F-BD54-25D19317D257}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B757FC8A-DD68-401F-BD54-25D19317D257}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B757FC8A-DD68-401F-BD54-25D19317D257}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0A2F5BB0-BD23-4C1B-829A-2846C983C1D0} = {F2092D1F-09A8-4918-A22F-1F0C1E337CCB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BAE869CE-5D18-4A9E-B279-2C499E576FA7}
 	EndGlobalSection
 EndGlobal
