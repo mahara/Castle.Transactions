@@ -21,3 +21,5 @@ Breaking Changes:
 - Updated Castle.Core dependency to 3.3.0
 - Updated Castle.Windsor dependency to 3.3.0
 
+
+
