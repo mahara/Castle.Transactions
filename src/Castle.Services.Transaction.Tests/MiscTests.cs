@@ -17,6 +17,7 @@ namespace Castle.Services.Transaction.Tests
 		{
 			var aptState = Thread.CurrentThread.GetApartmentState();
 
+			// This is somehow appear to be MTA.
 			Assert.IsTrue(aptState == ApartmentState.STA);
 		}
 	}

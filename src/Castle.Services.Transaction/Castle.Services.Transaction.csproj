@@ -28,9 +28,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net472'">
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
 
 </Project>
