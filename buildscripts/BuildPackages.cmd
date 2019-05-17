@@ -51,7 +51,7 @@ GOTO RESTORE_PACKAGES
 
 
 :RESTORE_PACKAGES
-dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
+REM dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
 dotnet restore .\buildscripts\BuildScripts.csproj
 dotnet restore .\src\Castle.Services.Transaction\Castle.Services.Transaction.csproj
 dotnet restore .\src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj
@@ -62,7 +62,7 @@ GOTO BUILD
 
 
 :BUILD
-dotnet build .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln --no-restore
+REM dotnet build .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln --no-restore
 dotnet build Castle.Transactions.sln -c %CONFIGURATION% /p:APPVEYOR_BUILD_VERSION=%BUILD_VERSION% --no-restore
 
 GOTO TEST
