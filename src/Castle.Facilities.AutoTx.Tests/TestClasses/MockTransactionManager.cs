@@ -18,9 +18,6 @@ using Castle.Services.Transaction;
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    /// <summary>
-    /// Summary description for MockTransactionManager.
-    /// </summary>
     public class MockTransactionManager : DefaultTransactionManager
     {
         public MockTransactionManager()
@@ -37,9 +34,9 @@ namespace Castle.Facilities.AutoTx.Tests
         private void SetupStatistics()
         {
             TransactionCreated += (sender, ev) => { TransactionCount++; };
-            ChildTransactionCreated += (sender, ev) => { TransactionCount++; };
             TransactionCompleted += (sender, ev) => { CommittedCount++; };
             TransactionRolledBack += (sender, ev) => { RolledBackCount++; };
+            ChildTransactionCreated += (sender, ev) => { TransactionCount++; };
         }
     }
 }

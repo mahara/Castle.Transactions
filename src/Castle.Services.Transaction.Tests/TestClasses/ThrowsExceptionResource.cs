@@ -20,33 +20,33 @@ namespace Castle.Services.Transaction.Tests
 {
     public class ThrowsExceptionResourceImpl : ResourceImpl
     {
-        private readonly bool throwOnCommit = false;
-        private readonly bool throwOnRollback = false;
+        private readonly bool _throwOnCommit = false;
+        private readonly bool _throwOnRollback = false;
 
         public ThrowsExceptionResourceImpl(bool throwOnCommit, bool throwOnRollback)
         {
-            this.throwOnCommit = throwOnCommit;
-            this.throwOnRollback = throwOnRollback;
-        }
-
-        public override void Rollback()
-        {
-            if (throwOnRollback)
-            {
-                throw new Exception("Simulated rollback error");
-            }
-
-            base.Rollback();
+            _throwOnCommit = throwOnCommit;
+            _throwOnRollback = throwOnRollback;
         }
 
         public override void Commit()
         {
-            if (throwOnCommit)
+            if (_throwOnCommit)
             {
-                throw new Exception("Simulated commit error");
+                throw new Exception("Simulated commit error.");
             }
 
             base.Commit();
+        }
+
+        public override void Rollback()
+        {
+            if (_throwOnRollback)
+            {
+                throw new Exception("Simulated rollback error.");
+            }
+
+            base.Rollback();
         }
     }
 }

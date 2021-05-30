@@ -17,26 +17,22 @@
 namespace Castle.Services.Transaction
 {
     /// <summary>
-    /// Represents a contract for a resource that
-    /// can be enlisted within transactions.
+    /// Represents a contract for a resource that can be enlisted within transactions.
     /// </summary>
     public interface IResource
     {
         /// <summary>
-        /// Implementors should start the
-        /// transaction on the underlying resource.
+        /// Implementors should start the transaction on the underlying resource.
         /// </summary>
         void Start();
 
         /// <summary>
-        /// Implementors should commit the
-        /// transaction on the underlying resource
+        /// Implementors should commit the transaction on the underlying resource.
         /// </summary>
         void Commit();
 
         /// <summary>
-        /// Implementors should rollback the
-        /// transaction on the underlying resource
+        /// Implementors should rollback the transaction on the underlying resource.
         /// </summary>
         void Rollback();
     }

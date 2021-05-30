@@ -17,28 +17,25 @@
 namespace Castle.Services.Transaction
 {
     /// <summary>
-    /// Depicts a synchronization contract.
-    /// <para>
-    /// Code can be executed before and after the
-    /// transaction completes
-    /// </para>
+    /// Defines a synchronization contract.
     /// </summary>
+    /// <remarks>
+    /// Code that will be executed before and after the transaction completes.
+    /// </remarks>
     public interface ISynchronization
     {
         /// <summary>
-        /// Implementors may have code executing
-        /// just before the transaction completes or rolls back.
-        /// There be dragons: if a resource fails BeforeCompletion
-        /// could be called twice, as it's first called before commit
-        /// and then if the transaction has made changes and needs to
-        /// be rolled back because of one of its resources failing,
-        /// then again, this method will be called.
+        /// Implementors may have code executing just before the transaction completes or rolls back.
+        /// There will be dragons:
+        /// if a resource fails, then <see cref="BeforeCompletion" /> could be called twice,
+        /// as it's first called before commit;
+        /// and then if the transaction has made changes and needs to be rolled back
+        /// because of one of its resources failing, this method could be called again.
         /// </summary>
         void BeforeCompletion();
 
         /// <summary>
-        /// Implementors may have code executing
-        /// just after the transaction completes
+        /// Implementors may have code executing just after the transaction completes.
         /// </summary>
         void AfterCompletion();
     }

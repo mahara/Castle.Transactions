@@ -24,8 +24,9 @@ namespace Castle.Services.Transaction
     internal interface IKernelTransaction
     {
         /// <summary>
-        /// Gets a safe transaction handle. If we instead use IntPtr we
-        /// might not release the transaction handle properly.
+        /// Gets a safe transaction handle.
+        /// If we instead use <see cref="System.IntPtr" />,
+        /// we might not release the transaction handle properly.
         /// </summary>
         /// <param name="handle"></param>
         void GetHandle([Out] out SafeTransactionHandle handle);

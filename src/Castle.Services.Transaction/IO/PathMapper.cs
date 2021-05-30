@@ -18,39 +18,33 @@ using System;
 
 namespace Castle.Services.Transaction.IO
 {
-    ///<summary>
-    /// An implementation of the MapPath which seems to be working well with
-    /// both testfixtures and online. Consumed by <see cref="IDirectoryAdapter"/>
-    /// (or any other object wanting the functionality).
-    ///</summary>
-    public class MapPathImpl : IMapPath
+    /// <summary>
+    /// An implementation of the <see cref="IPathMapper" /> which seems to be working well with both TestFixtures and online.
+    /// Used by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
+    /// </summary>
+    public class PathMapper : IPathMapper
     {
-        private readonly Func<string, string> _Function;
+        private readonly Func<string, string> _function;
 
-        ///<summary>
-        /// Default c'tor.
-        ///</summary>
-        public MapPathImpl()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PathMapper" /> class.
+        /// </summary>
+        public PathMapper()
         {
         }
 
         /// <summary>
-        /// Function may be null.
+        /// Initializes a new instance of the <see cref="PathMapper" /> class.
         /// </summary>
         /// <param name="function"></param>
-        public MapPathImpl(Func<string, string> function)
+        /// <remarks>
+        /// <paramref name="function" /> may be null.
+        /// </remarks>
+        public PathMapper(Func<string, string> function)
         {
-            _Function = function;
+            _function = function;
         }
 
-        ///<summary>
-        /// Gets the absolute path given a string formatted
-        /// as a map path, for example:
-        /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
-        /// would all be valid map paths.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns></returns>
         public string MapPath(string path)
         {
             if (Path.IsRooted(path))
@@ -58,12 +52,12 @@ namespace Castle.Services.Transaction.IO
                 return Path.GetFullPath(path);
             }
 
-            if (_Function != null)
+            if (_function != null)
             {
-                return _Function(path);
+                return _function(path);
             }
 
-            path = Path.NormDirSepChars(path);
+            path = Path.NormalizeDirectorySeparatorChars(path);
 
             if (path == string.Empty)
             {
@@ -80,13 +74,14 @@ namespace Castle.Services.Transaction.IO
                 return AppDomain.CurrentDomain.BaseDirectory;
             }
 
-            if (Path.DirectorySeparatorChar == path[0])
+            if (path[0] == Path.DirectorySeparatorChar)
             {
                 path = path.Substring(1);
             }
 
-            return path == string.Empty ? AppDomain.CurrentDomain.BaseDirectory :
-                Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
+            return path == string.Empty ?
+                   AppDomain.CurrentDomain.BaseDirectory :
+                   Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
         }
     }
 }

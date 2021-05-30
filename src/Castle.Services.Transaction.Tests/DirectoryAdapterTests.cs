@@ -15,71 +15,82 @@
 #endregion
 
 using System;
+using System.IO;
 
 using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;
+
+using Path = Castle.Services.Transaction.IO.Path;
 
 namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
     public class DirectoryAdapterTests
     {
-        private string curr_dir;
+        private string _testFixtureRootDirectoryPath;
 
         [OneTimeSetUp]
-        public void SetUp()
+        public void OneTimeSetUp()
         {
-            curr_dir = Path.GetPathWithoutLastBit(Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase));
+            var assemblyFilePath = Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase);
+            _testFixtureRootDirectoryPath = Path.GetPathWithoutLastSegment(assemblyFilePath);
+
+            // TODO: Remove this workaround in future NUnit3TestAdapter version (4.x).
+            Directory.SetCurrentDirectory(_testFixtureRootDirectoryPath);
         }
 
         [Test]
-        public void CtorWorksIfNullAndNotConstaint()
+        public void ConstructorWorksIfNullAndNotConstraint()
         {
-            var adapter = new DirectoryAdapter(new MapPathImpl(), false, null);
-            Assert.That(adapter.UseTransactions);
-        }
+            var da = new DirectoryAdapter(new PathMapper(), false, null);
 
-        //      [Test]
-        //      public void IsInAllowedDir_ReturnsFalseIfConstaint_AndOutside()
-        //      {
-        //          var d = new DirectoryAdapter(new MapPathImpl(), true, curr_dir);
-        //
-        //          Assert.IsFalse(d.IsInAllowedDir("\\"));
-        //          Assert.IsFalse(d.IsInAllowedDir("\\\\?\\C:\\"));
-        //          Assert.IsFalse(d.IsInAllowedDir(@"\\.\dev0"));
-        //          Assert.IsFalse(d.IsInAllowedDir(@"\\?\UNC\/"));
-        //      }
+            Assert.That(da.UseTransactions);
+        }
 
         [Test]
         public void CanGetLocalFile()
         {
             // "C:\Users\xyz\Documents\dev\logibit_cms\scm\trunk\Tests\Henrik.Cms.Tests\TestGlobals.cs";
-            var d = new DirectoryAdapter(new MapPathImpl(), false, null);
-            var path = Path.GetPathWithoutLastBit(d.MapPath("~/../../TestGlobals.cs")); // get directory instead
-            Console.WriteLine(path);
-            Assert.That(d.Exists(path));
+            var da = new DirectoryAdapter(new PathMapper(), false, null);
+
+            var directoryPath = Path.GetPathWithoutLastSegment(da.MapPath("~/../../TestGlobals.cs")); // Get the directory instead.
+            Console.WriteLine(directoryPath);
+
+            Assert.That(da.Exists(directoryPath));
         }
 
+        [Test]
+        public void IsInAllowedDirectoryReturnsFalseIfConstraintAndOutside()
+        {
+            var da = new DirectoryAdapter(new PathMapper(), true, _testFixtureRootDirectoryPath);
 
-        //      [Test]
-        //      public void IsInAllowedDir_ReturnsTrueForInside()
-        //      {
-        //          var d = new DirectoryAdapter(new MapPathImpl(), true, curr_dir);
-        //          Assert.IsTrue(d.IsInAllowedDir(curr_dir));
-        //          Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej/something/test")));
-        //          Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej")));
-        //          Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej.txt")));
-        //
-        //          Assert.IsTrue(d.IsInAllowedDir("hej"), "It should return true for relative paths.");
-        //          Assert.IsTrue(d.IsInAllowedDir("hej.txt"), "It should return true for relative paths");
-        //      }
-        //
-        //      [Test]
-        //      public void IsInAllowedDirReturnsTrueIfNoConstraint()
-        //      {
-        //          var ad = new DirectoryAdapter(new MapPathImpl(), false, null);
-        //          Assert.IsTrue(ad.IsInAllowedDir("\\"));
-        //      }
+            Assert.That(da.IsInAllowedDirectory(@"\"), Is.False);
+            Assert.That(da.IsInAllowedDirectory(@"\\?\C:\"), Is.False);
+            Assert.That(da.IsInAllowedDirectory(@"\\.\dev0"), Is.False);
+            Assert.That(da.IsInAllowedDirectory(@"\\?\UNC\"), Is.False);
+        }
+
+        [Test]
+        public void IsInAllowedDirectoryReturnsTrueForInside()
+        {
+            var da = new DirectoryAdapter(new PathMapper(), true, _testFixtureRootDirectoryPath);
+
+            Assert.That(da.IsInAllowedDirectory(_testFixtureRootDirectoryPath));
+            Assert.That(da.IsInAllowedDirectory(_testFixtureRootDirectoryPath.Combine("hej/something/test")));
+            Assert.That(da.IsInAllowedDirectory(_testFixtureRootDirectoryPath.Combine("hej")));
+            Assert.That(da.IsInAllowedDirectory(_testFixtureRootDirectoryPath.Combine("hej.txt")));
+
+            Assert.That(da.IsInAllowedDirectory("hej"), "It should return true for relative paths.");
+            Assert.That(da.IsInAllowedDirectory("hej.txt"), "It should return true for relative paths.");
+        }
+
+        [Test]
+        public void IsInAllowedDirectoryReturnsTrueIfNoConstraint()
+        {
+            var da = new DirectoryAdapter(new PathMapper(), false, null);
+
+            Assert.That(da.IsInAllowedDirectory(@"\"));
+        }
     }
 }

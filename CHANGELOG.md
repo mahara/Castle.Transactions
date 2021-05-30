@@ -17,6 +17,21 @@ Breaking Changes:
 - Updated **`Castle.Core`** to 4.4.0.
 - Updated **`Castle.Windsor`** to 5.0.0.
 
+### Castle.Services.Transaction
+
+Improvements:
+- Added `AsyncLocalActivityManager` and `ThreadLocalActivityManager`.
+
+Breaking Changes:
+- Changed the default `IActivityManager` in `DefaultTransactionManager` from `CallContextActivityManager` to `AsyncLocalActivityManager`.
+- Changed the property type of `Castle.Services.Transaction.ITransaction.Context` from `System.Collections.IDictionary` to `System.Collections.Generic.IDictionary<string, object>`.
+- Renamed `IMapPath` to `IPathMapper`.
+
+### Castle.Facilities.AutoTx
+
+Breaking Changes:
+- Renamed `AutoTxFacility`'s properties `AllowAccessOutsideRootFolder` to `AllowAccessOutsideRootDirectory` and `RootFolder` to `RootDirectory`.
+
 
 ## 3.3.0 (2016-05-22)
 
