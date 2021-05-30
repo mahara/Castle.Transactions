@@ -25,25 +25,15 @@ namespace Castle.Services.Transaction
     [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
     internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        internal SafeFindHandle()
-            : base(true)
+        internal SafeFindHandle() :
+            base(true)
         {
         }
 
-        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
-            : base(ownsHandle)
+        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle) :
+            base(ownsHandle)
         {
             SetHandle(preExistingHandle);
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            if (!(IsInvalid || IsClosed))
-            {
-                return FindClose(this);
-            }
-
-            return IsInvalid || IsClosed;
         }
 
         protected override void Dispose(bool disposing)
@@ -54,6 +44,16 @@ namespace Castle.Services.Transaction
             }
 
             base.Dispose(disposing);
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                return FindClose(this);
+            }
+
+            return IsInvalid || IsClosed;
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]

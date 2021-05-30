@@ -28,57 +28,76 @@ namespace Castle.Facilities.AutoTx.Tests
     public class AutoTxFacilityTests
     {
         [Test]
-        public void Container_InjectsTransactions_IfTransactionInjectAttribute_is_set()
+        public void Container_InjectsTransactions_IfInjectTransactionAttributeIsSet()
         {
-            var c = new WindsorContainer(new DefaultConfigurationStore());
+            var container = new WindsorContainer(new DefaultConfigurationStore());
 
-            c.AddFacility(new AutoTxFacility());
-            c.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-            c.Register(Component.For<ISomething>().ImplementedBy<AClass>().Named("AClass"));
+            container.AddFacility(new AutoTxFacility());
 
-            var something = c.Resolve<ISomething>();
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"),
+                Component.For<ITransactionManagerService>()
+                         .ImplementedBy<TransactionManagerService>()
+                         .Named("TransactionManagerService"));
 
-            Assert.That(something, Is.Not.Null);
-            Assert.That(something.Da, Is.Not.Null);
-            Assert.That(something.Fa, Is.Not.Null);
+            var service = container.Resolve<ITransactionManagerService>();
 
-            something.A(null);
-            something.B(null);
+            Assert.That(service, Is.Not.Null);
+            Assert.That(service.DA, Is.Not.Null);
+            Assert.That(service.FA, Is.Not.Null);
+
+            service.A(null);
+            service.B(null);
         }
 
         [Test]
-        public void TestChildTransactions()
+        public void ChildTransactions()
         {
             var container = new WindsorContainer();
 
             container.AddFacility(new AutoTxFacility());
+
             container.Register(
-                Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
 
-            container.Register(Component.For<CustomerService>().Named("mycomp"));
-            container.Register(Component.For<ProxyService>().Named("delegatecomp"));
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"),
+                Component.For<CustomerDelegateComponent>()
+                         .Named("DelegateService"));
 
-            var serv = container.Resolve<ProxyService>("delegatecomp");
+            var service = container.Resolve<CustomerDelegateComponent>("DelegateService");
 
-            serv.DelegateInsert("John", "Home Address");
+            service.DelegateInsert("John", "Home Address");
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(2));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
         }
 
         [Test]
-        public void TestReadonlyTransactions()
-
+        public void ReadOnlyTransactions()
         {
-            IWindsorContainer container = new WindsorContainer();
-            container.AddFacility(new AutoTxFacility());
-            container.Register(
-                Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-            container.Register(Component.For<CustomerService>().Named("mycomp"));
+            var container = new WindsorContainer();
 
-            var service = container.Resolve<CustomerService>();
+            container.AddFacility(new AutoTxFacility());
+
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
+
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"));
+
+            var service = container.Resolve<CustomerService2>();
+
             service.DoSomethingNotMarkedAsReadOnly();
             service.DoSomethingReadOnly();
         }
@@ -89,16 +108,24 @@ namespace Castle.Facilities.AutoTx.Tests
             var container = new WindsorContainer();
 
             container.AddFacility(new AutoTxFacility());
-            container.Register(
-                Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
 
-            container.Register(Component.For<CustomerService>().Named("mycomp"));
-            container.Register(Component.For<ProxyService>().Named("delegatecomp"));
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
+
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"),
+                Component.For<CustomerDelegateComponent>()
+                         .Named("DelegateService"));
 
             var fa = (FileAdapter) container.Resolve<IFileAdapter>();
+
             Assert.That(fa.TransactionManager, Is.Not.Null);
 
             var da = (DirectoryAdapter) container.Resolve<IDirectoryAdapter>();
+
             Assert.That(da.TransactionManager, Is.Not.Null);
         }
 
@@ -107,37 +134,44 @@ namespace Castle.Facilities.AutoTx.Tests
         {
             var container = new WindsorContainer();
 
-            // these lines have been permuted
+            // These lines have been permuted.
             container.Register(
-                Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
+
             container.AddFacility(new AutoTxFacility());
 
-            container.Register(Component.For<CustomerService>().Named("mycomp"));
-            container.Register(Component.For<ProxyService>().Named("delegatecomp"));
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"),
+                Component.For<CustomerDelegateComponent>()
+                         .Named("DelegateService"));
 
             var fa = (FileAdapter) container.Resolve<IFileAdapter>();
+
             Assert.That(fa.TransactionManager, Is.Not.Null);
 
             var da = (DirectoryAdapter) container.Resolve<IDirectoryAdapter>();
+
             Assert.That(da.TransactionManager, Is.Not.Null);
         }
     }
 
     [Transactional]
-    public class ProxyService
+    public class CustomerDelegateComponent
     {
-        private readonly CustomerService customerService;
+        private readonly CustomerService2 _customerComponent;
 
-        public ProxyService(CustomerService customerService)
+        public CustomerDelegateComponent(CustomerService2 customerComponent)
         {
-            this.customerService = customerService;
+            _customerComponent = customerComponent;
         }
 
         [Transaction(TransactionMode.Requires)]
-        public virtual void DelegateInsert(string name, string
-                                                            address)
+        public virtual void DelegateInsert(string name, string address)
         {
-            customerService.Insert(name, address);
+            _customerComponent.Insert(name, address);
         }
     }
 }
