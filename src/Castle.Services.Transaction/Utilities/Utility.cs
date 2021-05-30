@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-using Castle.Core;
 using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction
@@ -26,10 +25,11 @@ namespace Castle.Services.Transaction
     /// <summary>
     /// Utility class for whatever is needed to make the code better.
     /// </summary>
-    internal static class Fun
+    internal static class Utility
     {
         public static void Fire<TEventArgs>(this EventHandler<TEventArgs> handler,
-                                            object sender, TEventArgs args)
+                                            object sender,
+                                            TEventArgs args)
             where TEventArgs : EventArgs
         {
             if (handler == null)
@@ -40,115 +40,111 @@ namespace Castle.Services.Transaction
             handler(sender, args);
         }
 
-        public static void AtomRead(this ReaderWriterLockSlim sem, Action a)
+        public static void AtomicRead(this ReaderWriterLockSlim @lock, Action action)
         {
-            AtomRead(sem, a, false);
+            AtomicRead(@lock, action, false);
         }
 
-        public static void AtomRead(this ReaderWriterLockSlim sem, Action a, bool upgradable)
+        public static void AtomicRead(this ReaderWriterLockSlim @lock, Action action, bool upgradable)
         {
-            if (sem == null)
+            if (@lock == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(@lock));
             }
-
-            if (a == null)
+            if (action == null)
             {
-                throw new ArgumentNullException("a");
+                throw new ArgumentNullException(nameof(action));
             }
 
             if (!upgradable)
             {
-                sem.EnterReadLock();
+                @lock.EnterReadLock();
             }
             else
             {
-                sem.EnterUpgradeableReadLock();
+                @lock.EnterUpgradeableReadLock();
             }
 
             try
             {
-                a();
+                action();
             }
             finally
             {
                 if (!upgradable)
                 {
-                    sem.ExitReadLock();
+                    @lock.ExitReadLock();
                 }
                 else
                 {
-                    sem.ExitUpgradeableReadLock();
+                    @lock.ExitUpgradeableReadLock();
                 }
             }
         }
 
-        public static T AtomRead<T>(this ReaderWriterLockSlim sem, Func<T> f)
+        public static T AtomicRead<T>(this ReaderWriterLockSlim @lock, Func<T> function)
         {
-            if (sem == null)
+            if (@lock == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(@lock));
+            }
+            if (function == null)
+            {
+                throw new ArgumentNullException(nameof(function));
             }
 
-            if (f == null)
-            {
-                throw new ArgumentNullException("f");
-            }
-
-            sem.EnterReadLock();
+            @lock.EnterReadLock();
 
             try
             {
-                return f();
+                return function();
             }
             finally
             {
-                sem.ExitReadLock();
+                @lock.ExitReadLock();
             }
         }
 
-        public static void AtomWrite(this ReaderWriterLockSlim sem, Action a)
+        public static void AtomicWrite(this ReaderWriterLockSlim @lock, Action action)
         {
-            if (sem == null)
+            if (@lock == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(@lock));
+            }
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
             }
 
-            if (a == null)
-            {
-                throw new ArgumentNullException("a");
-            }
-
-            sem.EnterWriteLock();
+            @lock.EnterWriteLock();
 
             try
             {
-                a();
+                action();
             }
             finally
             {
-                sem.ExitWriteLock();
+                @lock.ExitWriteLock();
             }
         }
 
         /// <summary>
-        /// Iterates over a sequence and performs the action on each.
+        /// Iterates over a sequence and performs the action on each element.
         /// </summary>
-        public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
+        public static void ForEach<TSource>(this IEnumerable<TSource> source, Action<TSource> action)
         {
-            if (items == null)
+            if (source == null)
             {
-                throw new ArgumentNullException("items");
+                throw new ArgumentNullException(nameof(source));
             }
-
             if (action == null)
             {
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
             }
 
-            foreach (var item in items)
+            foreach (var element in source)
             {
-                action(item);
+                action(element);
             }
         }
 
@@ -156,63 +152,60 @@ namespace Castle.Services.Transaction
         /// Given a logger and action, performs the action and catches + logs exceptions.
         /// </summary>
         /// <returns>Whether the lambda was a success or not.</returns>
-        public static Error TryLogFail(this ILogger logger, Action a)
+        public static Error TryLogFail(this ILogger logger, Action action)
         {
             try
             {
-                a();
+                action();
+
                 return Error.OK;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.Error(e.Message, e);
-                return new Error(false, e);
-            }
-        }
+                logger.Error(ex.Message, ex);
 
-        public static Pair<T, T2> And<T, T2>(this T first, T2 second)
-        {
-            return new Pair<T, T2>(first, second);
+                return new Error(false, ex);
+            }
         }
     }
 
     /// <summary>
-    /// Error monad
+    /// Error monad.
     /// </summary>
     internal struct Error
     {
-        public static Error OK = new Error(true, null);
+        public static Error OK = new(true, null);
 
-        private readonly Exception _Ex;
-        private readonly bool _Success;
+        private readonly bool _success;
+        private readonly Exception _exception;
 
-        public Error(bool success, Exception ex)
+        public Error(bool success, Exception exception)
         {
-            _Success = success;
-            _Ex = success ? null : ex;
+            _success = success;
+            _exception = success ? null : exception;
         }
 
-        /// <summary>
-        /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        public Error Exception(Action<Exception> a)
+        public Error Success(Action action)
         {
-            if (!_Success)
+            if (_success)
             {
-                a(_Ex);
+                action();
             }
 
             return this;
         }
 
-        public Error Success(Action a)
+        /// <summary>
+        /// Takes a lambda what to do if the result failed.
+        /// Returns the result so that it can be managed in whatever way is needed.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Error Exception(Action<Exception> action)
         {
-            if (_Success)
+            if (!_success)
             {
-                a();
+                action(_exception);
             }
 
             return this;
@@ -220,43 +213,43 @@ namespace Castle.Services.Transaction
     }
 
     /// <summary>
-    /// Error monad
+    /// Error monad.
     /// </summary>
     /// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
     internal readonly struct Error<T>
     {
-        private readonly Exception _Ex;
-        private readonly bool _Success;
-        private readonly T _Param;
+        private readonly bool _success;
+        private readonly Exception _exception;
+        private readonly T _parameter;
 
-        public Error(bool success, Exception ex, T param)
+        public Error(bool success, Exception exception, T parameter)
         {
-            _Success = success;
-            _Param = param;
-            _Ex = success ? null : ex;
+            _success = success;
+            _exception = success ? null : exception;
+            _parameter = parameter;
         }
 
         /// <summary>
-        /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
+        /// Takes a lambda what to do if the result failed.
+        /// Returns the result so that it can be managed in whatever way is needed.
         /// </summary>
-        /// <param name="a"></param>
+        /// <param name="action"></param>
         /// <returns></returns>
-        public Error<T> Exception(Action<Exception> a)
+        public Error<T> Exception(Action<Exception> action)
         {
-            if (!_Success)
+            if (!_success)
             {
-                a(_Ex);
+                action(_exception);
             }
 
             return this;
         }
 
-        public Error<T> Success(Action<T> a)
+        public Error<T> Success(Action<T> action)
         {
-            if (_Success)
+            if (_success)
             {
-                a(_Param);
+                action(_parameter);
             }
 
             return this;

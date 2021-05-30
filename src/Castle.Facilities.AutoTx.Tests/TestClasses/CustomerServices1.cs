@@ -14,12 +14,30 @@
 // limitations under the License.
 #endregion
 
+using System;
+
+using Castle.Services.Transaction;
+
 namespace Castle.Facilities.AutoTx.Tests
 {
-    public interface ICustomerService
+    public interface ICustomerService1
     {
         void Insert(string name, string address);
-
         void Delete(int id);
+    }
+
+    [Transactional]
+    public class CustomerService1 : ICustomerService1
+    {
+        [Transaction(TransactionMode.Requires)]
+        public void Insert(string name, string address)
+        {
+        }
+
+        [Transaction(TransactionMode.Requires)]
+        public void Delete(int id)
+        {
+            throw new ApplicationException("Whopps. Problems!");
+        }
     }
 }
