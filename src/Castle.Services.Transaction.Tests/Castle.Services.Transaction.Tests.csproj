@@ -17,15 +17,15 @@
     <PackageReference Include="Castle.Core" Version="4.4.0" />
     <PackageReference Include="Castle.Core-log4net" Version="4.4.0" />
     <PackageReference Include="Castle.Core-NLog" Version="4.4.0" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net472'">
     <Reference Include="System.Transactions" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.10.0" />
   </ItemGroup>
 
   <ItemGroup>
