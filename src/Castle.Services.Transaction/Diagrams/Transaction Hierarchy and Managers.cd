@@ -1,44 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
   <Class Name="Castle.Services.Transaction.FileTransaction">
-    <Position X="5.25" Y="5.5" Width="2.5" />
+    <Position X="6.5" Y="5.75" Width="3" />
     <Members>
-      <Field Name="_Disposed" Hidden="true" />
-      <Field Name="_TransactionHandle" Hidden="true" />
       <Field Name="ERROR_TRANSACTIONAL_CONFLICT" Hidden="true" />
     </Members>
     <NestedTypes>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.FINDEX_INFO_LEVELS" Collapsed="true">
+      <Struct Name="Castle.Services.Transaction.FileTransaction.WIN32_FIND_DATA" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
-      </Enum>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.NativeFileAccess" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.NativeFileShare" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
+      </Struct>
       <Delegate Name="Castle.Services.Transaction.FileTransaction.CopyProgressRoutine" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
       </Delegate>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.MoveFileFlags" Collapsed="true">
+      <Struct Name="Castle.Services.Transaction.FileTransaction.SECURITY_ATTRIBUTES" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Enum Name="Castle.Services.Transaction.FileTransaction.NativeFileShare" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.CopyProgressResult" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Enum Name="Castle.Services.Transaction.FileTransaction.FINDEX_SEARCH_OPS" Collapsed="true">
+      <Enum Name="Castle.Services.Transaction.FileTransaction.NativeFileAccess" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
@@ -53,27 +41,37 @@
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
-      <Struct Name="Castle.Services.Transaction.FileTransaction.WIN32_FIND_DATA" Collapsed="true">
+      <Enum Name="Castle.Services.Transaction.FileTransaction.CopyProgressResult" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
-      </Struct>
-      <Struct Name="Castle.Services.Transaction.FileTransaction.SECURITY_ATTRIBUTES" Collapsed="true">
+      </Enum>
+      <Enum Name="Castle.Services.Transaction.FileTransaction.MoveFileFlags" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
         </TypeIdentifier>
-      </Struct>
+      </Enum>
+      <Enum Name="Castle.Services.Transaction.FileTransaction.FINDEX_SEARCH_OPS" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Castle.Services.Transaction.FileTransaction.FINDEX_INFO_LEVELS" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>FileTransactions\FileTransaction.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>BCAgQQEIKiSAIBFAAWJQRVQAQQgAQBAAALAAAAQSoAE=</HashCode>
+      <HashCode>BQAgAQAAKiCAIBFQATDEBVQIQQhEYAAAALAAAAQYoAE=</HashCode>
       <FileName>FileTransactions\FileTransaction.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Castle.Services.Transaction.ChildTransaction">
-    <Position X="2" Y="8.75" Width="2.5" />
+    <Position X="3" Y="8.75" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAAAEAACAAAAIACAAAABQAAAAAAEACAAIAAAAAUAAA=</HashCode>
+      <HashCode>AAAAAEAACAAAAIASAAABBQAQAAABEACAAIAAAAAEAAA=</HashCode>
       <FileName>GenericTransactions\ChildTransaction.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -85,77 +83,73 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Castle.Services.Transaction.TransactionAttribute" Collapsed="true">
-    <Position X="0.5" Y="1.5" Width="2" />
+    <Position X="0.5" Y="1.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>ABABAAAAAAAAAAAAAAAAAAQAACAAAAAAAAAAAIAAAAA=</HashCode>
+      <HashCode>ABAAAAQAAAAAAAAQAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Attributes\TransactionAttribute.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Castle.Services.Transaction.TransactionEventArgs" Collapsed="true">
-    <Position X="10.25" Y="0.5" Width="2" />
+    <Position X="12.75" Y="0.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Events\TransactionEventArgs.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Castle.Services.Transaction.TransactionFailedEventArgs" Collapsed="true">
-    <Position X="10.25" Y="1.5" Width="2" />
+    <Position X="12.75" Y="2" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAABAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>Events\TransactionFailedEventArgs.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Castle.Services.Transaction.TalkativeTransaction">
-    <Position X="5.25" Y="0.5" Width="2.5" />
+  <Class Name="Castle.Services.Transaction.TalkactiveTransaction">
+    <Position X="6.5" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>AABAAEAACAAAAAAGAAAABQAAAIAAEAAAAIAAAACAIAA=</HashCode>
-      <FileName>GenericTransactions\TalkativeTransaction.cs</FileName>
+      <HashCode>AABAAEAACAAAAAASAAAABQAAAIAAEAAEIIAAAACAAAA=</HashCode>
+      <FileName>GenericTransactions\TalkactiveTransaction.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Castle.Services.Transaction.TransactionBase">
-    <Position X="3" Y="0.5" Width="1.5" />
+    <Position X="3" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>ABAAAEAEKyAAAIACIAABBYQAAgABEACAgIgSAACEIAA=</HashCode>
+      <HashCode>CBAAAEAcCiIAAIISAAABBSQAAAABEACgAIACCACEAAA=</HashCode>
       <FileName>GenericTransactions\TransactionBase.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Castle.Services.Transaction.DefaultTransactionManager">
-    <Position X="14.75" Y="0.5" Width="2.5" />
-    <Members>
-      <Field Name="_ActivityManager" Hidden="true" />
-      <Field Name="_Logger" Hidden="true" />
-    </Members>
+    <Position X="18" Y="0.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAhAAAAAjCAAAQACABCIAAAAAMAAAAAAIAAAQACAogA=</HashCode>
+      <HashCode>AAhAAAAAjCIAAUACAACIAAAAAMAAAAAAAAAAAACAkgA=</HashCode>
       <FileName>Managers\DefaultTransactionManager.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Interface Name="Castle.Services.Transaction.ITransaction">
-    <Position X="8" Y="0.5" Width="1.5" />
+    <Position X="10" Y="0.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>ABAAAEAEIgAAAIACAAABBAQAAAABEACAAAAAAAAEAAA=</HashCode>
+      <HashCode>ABAAAEAEAgAAAIASAAABBAQAAAABEACAAAAACAAEAAA=</HashCode>
       <FileName>ITransaction.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="Castle.Services.Transaction.IEventPublisher">
-    <Position X="12.5" Y="0.5" Width="1.75" />
+    <Position X="15.25" Y="0.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAACAAAA=</HashCode>
       <FileName>IEventPublisher.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="Castle.Services.Transaction.ITransactionManager">
-    <Position X="12.5" Y="3.25" Width="1.75" />
+    <Position X="15.25" Y="2.75" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAACAAAQACAAAAAAAAAAAAAAAAAAAAAAAAggA=</HashCode>
       <FileName>Managers\ITransactionManager.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="Castle.Services.Transaction.IResource">
-    <Position X="8" Y="4.75" Width="1.5" />
+    <Position X="10" Y="5.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAACAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IResource.cs</FileName>

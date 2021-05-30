@@ -15,8 +15,8 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Transactions;
 
 namespace Castle.Services.Transaction
 {
@@ -26,15 +26,66 @@ namespace Castle.Services.Transaction
     public interface ITransaction
     {
         /// <summary>
-        /// Starts the transaction. Implementors
-        /// should activate the apropriate resources
-        /// in order to start the underlying transaction
+        /// Gets the name of the transaction.
+        /// </summary>
+        /// <remarks>
+        /// The transaction name is a friendly name (if set),
+        /// or an unfriendly integer hash name (if not set) of the transaction.
+        /// </remarks>
+        string Name { get; }
+
+        /// <summary>
+        /// Gets the transaction mode of the transaction.
+        /// </summary>
+        TransactionMode TransactionMode { get; }
+
+        /// <summary>
+        /// Gets the isolation mode of the transaction.
+        /// </summary>
+        IsolationMode IsolationMode { get; }
+
+        /// <summary>
+        /// Gets current transaction status.
+        /// </summary>
+        TransactionStatus Status { get; }
+
+        /// <summary>
+        /// Transaction context. Can be used by applications.
+        /// </summary>
+        IDictionary<string, object> Context { get; }
+
+        /// <summary>
+        /// Gets whether the transaction is running inside another of transaction.
+        /// </summary>
+        bool IsChildTransaction { get; }
+
+        /// <summary>
+        /// Gets whether the transaction found an ambient transaction to run in.
+        /// This is <see langword="true" /> if the transaction is running in the DTC or a <see cref="TransactionScope" />,
+        /// but doesn't imply a distributed transaction
+        /// (as TransactionScopes automatically choose the least performance invasive option).
+        /// </summary>
+        bool IsAmbient { get; }
+
+        /// <summary>
+        /// Gets whether the transaction is read-only.
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Gets whether rollback only is set.
+        /// </summary>
+        bool IsRollbackOnlySet { get; }
+
+        /// <summary>
+        /// Starts the transaction.
+        /// Implementors should activate the apropriate resources
+        /// in order to start the underlying transaction.
         /// </summary>
         void Begin();
 
         /// <summary>
-        /// Succeed the transaction, persisting the
-        /// modifications
+        /// Succeed the transaction, persisting the modifications.
         /// </summary>
         void Commit();
 
@@ -48,33 +99,28 @@ namespace Castle.Services.Transaction
         /// </item>
         /// <item>
         /// Post:
-        /// <list><item>InnerRollback will be called for inheritors, then</item>
+        /// <list>
+        /// <item>InnerRollback will be called for inheritors, then</item>
         /// <item>All resources will have Rollback called, then</item>
-        /// <item>All sync infos will have AfterCompletion called.</item>
+        /// <item>All synchronization objects will have AfterCompletion called.</item>
         /// </list>
         /// </item>
         /// </list>
         /// </summary>
         /// <remarks>
         /// If you are interfacing the transaction through an inversion of control engine
-        /// and in particylar AutoTx, calling this method is not recommended. Instead use
-        /// <see cref="SetRollbackOnly"/>.
+        /// and in particular AutoTx, calling this method is not recommended.
+        /// Use <see cref="SetRollbackOnly" /> instead.
         /// </remarks>
         /// <exception cref="RollbackResourceException">If any resource(s) failed.</exception>
         /// <exception cref="TransactionException">If the transaction status was not active.</exception>
         void Rollback();
 
         /// <summary>
-        /// Signals that this transaction can only be rolledback.
-        /// This is used when the transaction is not being managed by
-        /// the callee.
+        /// Signals that this transaction can only be rolled back.
+        /// This is used when the transaction is not being managed by the callee.
         /// </summary>
         void SetRollbackOnly();
-
-        /// <summary>
-        /// Returns the current transaction status.
-        /// </summary>
-        TransactionStatus Status { get; }
 
         /// <summary>
         /// Register a participant on the transaction.
@@ -83,62 +129,17 @@ namespace Castle.Services.Transaction
         void Enlist(IResource resource);
 
         /// <summary>
-        /// Registers a synchronization object that will be
-        /// invoked prior and after the transaction completion
-        /// (commit or rollback)
+        /// Registers a synchronization object that will be invoked
+        /// prior and after the transaction completion (commit or rollback).
         /// </summary>
         /// <param name="synchronization"></param>
-        /// <exception cref="ArgumentNullException">If the parameter is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="synchronization" /> is <see langword="null" />.</exception>
         void RegisterSynchronization(ISynchronization synchronization);
-
-        /// <summary>
-        /// Transaction context. Can be used by applications.
-        /// </summary>
-        IDictionary Context { get; }
-
-        /// <summary>
-        /// Gets whether the transaction is running inside another of castle's transactions.
-        /// </summary>
-        bool IsChildTransaction { get; }
-
-        /// <summary>
-        /// Gets whether rollback only is set.
-        /// </summary>
-        bool IsRollbackOnlySet { get; }
-
-        /// <summary>
-        /// Gets the transaction mode of the transaction.
-        /// </summary>
-        TransactionMode TransactionMode { get; }
-
-        /// <summary>
-        /// Gets the isolation mode in use for the transaction.
-        /// </summary>
-        IsolationMode IsolationMode { get; }
-
-        /// <summary>
-        /// Gets whether the transaction "found an" ambient transaction to run in.
-        /// This is true if the tx is running in the DTC or a TransactionScope, but
-        /// doesn't imply a distributed transaction (as TransactionScopes automatically choose the least
-        /// performance invasive option)
-        /// </summary>
-        bool IsAmbient { get; }
-
-        /// <summary>
-        /// Gets the friendly name (if set) or an unfriendly integer hash name (if not set).
-        /// Never returns null.
-        /// </summary>
-        string Name { get; }
 
         /// <summary>
         /// Gets an enumerable of the resources present.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<IResource> Resources();
-
-        /// <summary>
-        /// Returns true for a read only transaction, false otherwise.
-        /// </summary>
-        bool IsReadOnly { get; }
+        IEnumerable<IResource> GetResources();
     }
 }

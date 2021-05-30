@@ -16,34 +16,39 @@
 
 using System;
 
+using Castle.Services.Transaction.Utilities;
+
 namespace Castle.Services.Transaction
 {
     public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
     {
-        private bool _IsAmbient;
-        private bool _IsReadOnly;
+        private bool _isAmbient;
+        private bool _isReadOnly;
 
-        public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
-
-        public TalkactiveTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly) :
+        public TalkactiveTransaction(TransactionMode transactionMode,
+                                     IsolationMode isolationMode,
+                                     bool isAmbient,
+                                     bool isReadOnly) :
             base(null, transactionMode, isolationMode)
         {
-            _IsAmbient = isAmbient;
-            _IsReadOnly = isReadOnly;
+            _isAmbient = isAmbient;
+            _isReadOnly = isReadOnly;
         }
+
+        public event EventHandler<TransactionEventArgs> TransactionCompleted;
+        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
+        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
 
         public override bool IsAmbient
         {
-            get => _IsAmbient;
-            protected set => _IsAmbient = value;
+            get => _isAmbient;
+            protected set => _isAmbient = value;
         }
 
         public override bool IsReadOnly
         {
-            get => _IsReadOnly;
-            protected set => _IsReadOnly = value;
+            get => _isReadOnly;
+            protected set => _isReadOnly = value;
         }
 
         public override void Begin()
@@ -52,9 +57,10 @@ namespace Castle.Services.Transaction
             {
                 base.Begin();
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                this.Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
                 throw;
             }
         }
@@ -66,11 +72,13 @@ namespace Castle.Services.Transaction
             try
             {
                 base.Commit();
-                this.Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
+
+                Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                this.Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
                 throw;
             }
         }
@@ -82,11 +90,13 @@ namespace Castle.Services.Transaction
             try
             {
                 base.Rollback();
-                this.Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
+
+                Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                this.Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
                 throw;
             }
         }
