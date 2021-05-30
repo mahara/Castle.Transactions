@@ -23,7 +23,7 @@
     <Authors>Castle Project Contributors</Authors>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/mahara/Castle.Transactions</PackageProjectUrl>
-    <PackageIconUrl>https://www.castleproject.org/img/services_transactions-logo.png</PackageIconUrl>
+    <!-- <PackageIconUrl>https://www.castleproject.org/img/services_transactions-logo.png</PackageIconUrl> -->
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageOutputPath>../../build/</PackageOutputPath>
     <PackageVersion>$(BuildVersion)</PackageVersion>
