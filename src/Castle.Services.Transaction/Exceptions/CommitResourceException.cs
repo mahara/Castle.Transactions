@@ -15,28 +15,19 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Castle.Services.Transaction
 {
     [Serializable]
     public class CommitResourceException : TransactionException
     {
-        private readonly IResource failedResource;
+        private readonly IResource _failedResource;
 
-        public CommitResourceException(string message, Exception innerException, IResource failedResource)
-            : base(message, innerException)
+        public CommitResourceException(string message, Exception innerException, IResource failedResource) : base(message, innerException)
         {
-            this.failedResource = failedResource;
+            _failedResource = failedResource;
         }
 
-        public CommitResourceException(SerializationInfo info, StreamingContext context, IResource failedResource) : base(info, context)
-        {
-            this.failedResource = failedResource;
-        }
-
-        public CommitResourceException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        public IResource FailedResource => _failedResource;
     }
 }
