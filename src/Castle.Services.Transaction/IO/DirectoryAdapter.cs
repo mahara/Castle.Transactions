@@ -20,162 +20,113 @@ using System.IO;
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
-    /// Adapter which wraps the functionality in <see cref="File"/>
+    /// Adapter which wraps the functionality in <see cref="File" />
     /// together with native kernel transactions.
     /// </summary>
     public sealed class DirectoryAdapter : TransactionAdapterBase, IDirectoryAdapter
     {
-        private readonly IMapPath _PathFinder;
+        private readonly IPathMapper _pathMapper;
 
-        ///<summary>
-        /// c'tor
-        ///</summary>
-        ///<param name="pathFinder"></param>
-        ///<param name="constrainToSpecifiedDir"></param>
-        ///<param name="specifiedDir"></param>
-        public DirectoryAdapter(IMapPath pathFinder, bool constrainToSpecifiedDir, string specifiedDir)
-            : base(constrainToSpecifiedDir, specifiedDir)
+        public DirectoryAdapter(IPathMapper pathMapper,
+                                bool constrainToSpecifiedDirectory,
+                                string specifiedDirectory) :
+            base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
-            _PathFinder = pathFinder ?? throw new ArgumentNullException("pathFinder");
+            _pathMapper = pathMapper ?? throw new ArgumentNullException(nameof(pathMapper));
         }
 
-        /// <summary>Creates a directory at the path given.
-        /// Contrary to the Win32 API, doesn't throw if the directory already
-        /// exists, but instead returns true. The 'safe' value to get returned
-        /// for be interopable with other path/dirutil implementations would
-        /// hence be false (i.e. that the directory didn't already exist).
-        /// </summary>
-        ///<param name="path">The path to create the directory at.</param>
-        /// <remarks>True if the directory already existed, False otherwise.</remarks>
         public bool Create(string path)
         {
             AssertAllowed(path);
 
-#if !MONO
             if (HasTransaction(out var tx))
             {
                 return ((IDirectoryAdapter) tx).Create(path);
             }
-#endif
+
             if (Directory.Exists(path))
             {
                 return true;
             }
 
             Directory.CreateDirectory(path);
+
             return false;
         }
 
-        /// <summary>
-        /// Checks whether the path exists.
-        /// </summary>
-        /// <param name="path">Path to check.</param>
-        /// <returns>True if it exists, false otherwise.</returns>
-        public bool Exists(string path)
-        {
-            AssertAllowed(path);
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return ((IDirectoryAdapter) tx).Exists(path);
-            }
-#endif
-
-            return Directory.Exists(path);
-        }
-
-        /// <summary>
-        /// Deletes a folder recursively.
-        /// </summary>
-        /// <param name="path"></param>
         public void Delete(string path)
         {
             AssertAllowed(path);
-#if !MONO
+
             if (HasTransaction(out var tx))
             {
                 ((IDirectoryAdapter) tx).Delete(path);
+
                 return;
             }
-#endif
+
             Directory.Delete(path);
         }
 
-        /// <summary>
-        /// Deletes a folder.
-        /// </summary>
-        /// <param name="path">The path to the folder to delete.</param>
-        /// <param name="recursively">
-        /// Whether to delete recursively or not.
-        /// When recursive, we delete all subfolders and files in the given
-        /// directory as well.
-        /// </param>
         public bool Delete(string path, bool recursively)
         {
             AssertAllowed(path);
-#if !MONO
+
             if (HasTransaction(out var tx))
             {
                 return tx.Delete(path, recursively);
             }
-#endif
+
             Directory.Delete(path, recursively);
+
             return true;
         }
 
-        /// <summary>
-        /// Gets the full path of the specified directory.
-        /// </summary>
-        /// <param name="path">The relative path.</param>
-        /// <returns>A string with the full path.</returns>
-        public string GetFullPath(string path)
+        public void Move(string path, string newPath)
         {
             AssertAllowed(path);
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return tx.GetFullPath(path);
-            }
-#endif
-            return Path.GetFullPath(path);
-        }
-
-        ///<summary>
-        /// Gets the MapPath of the path.
-        ///
-        /// This will be relative to the root web directory if we're in a
-        /// web site and otherwise to the executing assembly.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns></returns>
-        public string MapPath(string path)
-        {
-            return _PathFinder.MapPath(path);
-        }
-
-        ///<summary>
-        /// TODO: Moves the directory from the original path to the new path.
-        ///</summary>
-        ///<param name="originalPath">Path from</param>
-        ///<param name="newPath">Path to</param>
-        public void Move(string originalPath, string newPath)
-        {
-            AssertAllowed(originalPath);
             AssertAllowed(newPath);
 
             throw new NotImplementedException("This hasn't been completely implemented with the >255 character paths. Please help out and send a patch.");
 
-            //#if !MONO
-            //          IFileTransaction tx;
-            //          if (HasTransaction(out tx))
-            //          {
-            //              (tx as IDirectoryAdapter).Move(originalPath, newPath);
-            //              return;
-            //          }
-            //#endif
+            // TODO: Move(string path, string newPath)
+            //if (HasTransaction(out var tx))
+            //{
+            //    ((IDirectoryAdapter) tx).Move(path, newPath);
 
+            //    return;
+            //}
 
-            //Directory.Move(originalPath, newPath);
+            //Directory.Move(path, newPath);
+        }
+
+        public bool Exists(string path)
+        {
+            AssertAllowed(path);
+
+            if (HasTransaction(out var tx))
+            {
+                return ((IDirectoryAdapter) tx).Exists(path);
+            }
+
+            return Directory.Exists(path);
+        }
+
+        public string GetFullPath(string path)
+        {
+            AssertAllowed(path);
+
+            if (HasTransaction(out var tx))
+            {
+                return tx.GetFullPath(path);
+            }
+
+            return Path.GetFullPath(path);
+        }
+
+        public string MapPath(string path)
+        {
+            return _pathMapper.MapPath(path);
         }
     }
 }

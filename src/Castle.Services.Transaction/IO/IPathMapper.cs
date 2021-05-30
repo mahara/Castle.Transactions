@@ -14,26 +14,25 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction.IO
 {
     /// <summary>
-    /// Represents a contract for a resource that can be enlisted within transactions.
+    /// An interface for the path mapping functionality.
     /// </summary>
-    public interface IResource
+    public interface IPathMapper
     {
         /// <summary>
-        /// Implementors should start the transaction on the underlying resource.
+        /// Gets the absolute (physical) path that corresponds to
+        /// the specified a relative (virtual) path.
+        /// For example:
+        /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
+        /// would all be valid mapped paths.
         /// </summary>
-        void Start();
-
-        /// <summary>
-        /// Implementors should commit the transaction on the underlying resource.
-        /// </summary>
-        void Commit();
-
-        /// <summary>
-        /// Implementors should rollback the transaction on the underlying resource.
-        /// </summary>
-        void Rollback();
+        /// <param name="path">The relative (virtual) path.</param>
+        /// <returns>An absolute (physical) path.</returns>
+        /// <remarks>
+        /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.web.httpserverutility.mappath" />
+        /// </remarks>
+        string MapPath(string path);
     }
 }

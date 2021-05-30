@@ -16,20 +16,24 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    public interface TransactionalService
+    public class TransactionalComponent1
     {
-        void Save();
-
-        void Create();
-    }
-
-    public class TransactionalComp3 : TransactionalService
-    {
-        public void Save()
+        public virtual void Create()
         {
         }
 
-        public void Create()
+        public virtual void Save()
+        {
+        }
+
+        public virtual void Delete()
+        {
+        }
+    }
+
+    public class TransactionalComponent2 : TransactionalComponent1
+    {
+        public virtual void SaveThat()
         {
         }
     }

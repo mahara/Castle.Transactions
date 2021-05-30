@@ -29,32 +29,43 @@ namespace Castle.Services.Transaction.Tests
     [TestFixture]
     public class FileTransactions_File_Tests
     {
-        #region Setup/Teardown
+        private readonly object _lock = new();
 
-        private string dllPath;
-        private string testFixturePath;
-        private readonly List<string> infosCreated = new List<string>();
-        private static readonly object serializer = new object();
+        private readonly List<string> _fileSystemPathsCreated = new();
+
+        private string _testFixtureRootDirectoryPath;
+        private string _testFixtureDirectoryPath;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            _testFixtureRootDirectoryPath = TestContext.CurrentContext.TestDirectory;
+            _testFixtureDirectoryPath = _testFixtureRootDirectoryPath.Combine("Kernel");
+
+            // TODO: Remove this workaround in future NUnit3TestAdapter version (4.x).
+            Directory.SetCurrentDirectory(_testFixtureRootDirectoryPath);
+        }
 
         [SetUp]
         public void CleanOutListEtc()
         {
-            Monitor.Enter(serializer);
-            infosCreated.Clear();
+            Monitor.Enter(_lock);
+
+            _fileSystemPathsCreated.Clear();
         }
 
         [TearDown]
         public void RemoveAllCreatedFiles()
         {
-            foreach (var filePath in infosCreated)
+            foreach (var path in _fileSystemPathsCreated)
             {
-                if (File.Exists(filePath))
+                if (File.Exists(path))
                 {
-                    File.Delete(filePath);
+                    File.Delete(path);
                 }
-                else if (Directory.Exists(filePath))
+                else if (Directory.Exists(path))
                 {
-                    Directory.Delete(filePath);
+                    Directory.Delete(path);
                 }
             }
 
@@ -63,67 +74,62 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete("testing", true);
             }
 
-            Monitor.Exit(serializer);
+            Monitor.Exit(_lock);
         }
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            dllPath = Environment.CurrentDirectory;
-            testFixturePath = dllPath.Combine("..\\..\\Kernel");
-        }
-
-        #endregion
-
-        #region File Tests
 
         [Test]
-        public void CanMove_File()
+        public void CanMoveFile()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
+
                 return;
             }
 
-            var folder = dllPath.CombineAssert("testing");
-            Console.WriteLine(string.Format("Directory \"{0}\"", folder));
-            var toFolder = dllPath.CombineAssert("testing2");
+            var directoryPath_Source = _testFixtureDirectoryPath.CombineAssert("testing");
+            Console.WriteLine($"Directory: '{directoryPath_Source}'");
 
-            var file = folder.Combine("file");
-            Assert.That(File.Exists(file), Is.False);
-            var file2 = folder.Combine("file2");
-            Assert.That(File.Exists(file2), Is.False);
+            var directoryPath_Target = _testFixtureDirectoryPath.CombineAssert("testing2");
 
-            File.WriteAllText(file, "hello world");
-            File.WriteAllText(file2, "hello world 2");
+            var filePath = directoryPath_Source.Combine("file");
 
-            infosCreated.Add(file);
-            infosCreated.Add(file2);
-            infosCreated.Add(toFolder.Combine("file2"));
-            infosCreated.Add(toFolder.Combine("file"));
-            infosCreated.Add(toFolder);
+            Assert.That(File.Exists(filePath), Is.False);
 
-            using (var t = new FileTransaction("moving file"))
+            var filePath2 = directoryPath_Source.Combine("file2");
+
+            Assert.That(File.Exists(filePath2), Is.False);
+
+            File.WriteAllText(filePath, "Hello world");
+            File.WriteAllText(filePath2, "Hello world 2");
+
+            _fileSystemPathsCreated.Add(filePath);
+            _fileSystemPathsCreated.Add(filePath2);
+            _fileSystemPathsCreated.Add(directoryPath_Target.Combine("file2"));
+            _fileSystemPathsCreated.Add(directoryPath_Target.Combine("file"));
+            _fileSystemPathsCreated.Add(directoryPath_Target);
+
+            using (var txF = new FileTransaction("can_move_file"))
             {
-                t.Begin();
-                Assert.That(File.Exists(toFolder.Combine("file")), Is.False, "Should not exist before move");
-                Assert.That(File.Exists(toFolder.Combine("file2")), Is.False, "Should not exist before move");
+                txF.Begin();
 
-                (t as IFileAdapter).Move(file, toFolder); // moving file to folder
-                (t as IFileAdapter).Move(file2, toFolder.Combine("file2")); // moving file to folder+new file name.
+                Assert.That(File.Exists(directoryPath_Target.Combine("file")), Is.False, "Should not exist before move");
+                Assert.That(File.Exists(directoryPath_Target.Combine("file2")), Is.False, "Should not exist before move");
 
-                Assert.That(File.Exists(toFolder.Combine("file")), Is.False, "Should not be visible to the outside");
-                Assert.That(File.Exists(toFolder.Combine("file2")), Is.False, "Should not be visible to the outside");
+                ((IFileAdapter) txF).Move(filePath, directoryPath_Target); // Moving file to target directory.
+                ((IFileAdapter) txF).Move(filePath2, directoryPath_Target.Combine("file2")); // Moving file to target directory + new file name.
 
-                t.Commit();
+                Assert.That(File.Exists(directoryPath_Target.Combine("file")), Is.False, "Should not be visible to the outside");
+                Assert.That(File.Exists(directoryPath_Target.Combine("file2")), Is.False, "Should not be visible to the outside");
 
-                Assert.That(File.Exists(toFolder.Combine("file")), Is.True,
-                            "Should be visible to the outside now and since we tried to move it to an existing folder, it should put itself in that folder with its current name.");
-                Assert.That(File.Exists(toFolder.Combine("file2")), Is.True, "Should be visible to the outside now.");
+                txF.Commit();
+
+                Assert.That(File.Exists(directoryPath_Target.Combine("file")), Is.True,
+                            "Should be visible to the outside now and since we tried to move it to an existing directory, it should put itself in that directory with its current name.");
+                Assert.That(File.Exists(directoryPath_Target.Combine("file2")), Is.True, "Should be visible to the outside now.");
             }
 
-            Assert.That(File.ReadAllText(toFolder.Combine("file2")), Is.EqualTo("hello world 2"),
+            Assert.That(File.ReadAllText(directoryPath_Target.Combine("file2")), Is.EqualTo("Hello world 2"),
                         "Make sure we moved the contents.");
         }
 
@@ -132,31 +138,33 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
+
                 return;
             }
 
-            var filePath = testFixturePath.CombineAssert("temp").Combine("temp__");
-            infosCreated.Add(filePath);
+            var filePath = _testFixtureDirectoryPath.CombineAssert("temp").Combine("temp__");
+            _fileSystemPathsCreated.Add(filePath);
 
-            // simply write something to to file.
-            using (var wr = File.CreateText(filePath))
+            // Simply write something to to file.
+            using (var sw = File.CreateText(filePath))
             {
-                wr.WriteLine("Hello");
+                sw.WriteLine("Hello");
             }
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
+                txF.Begin();
 
-                using (var fs = (tx as IFileAdapter).Create(filePath))
+                using (var fs = ((IFileAdapter) txF).Create(filePath))
                 {
                     var str = new UTF8Encoding().GetBytes("Goodbye");
                     fs.Write(str, 0, str.Length);
+
                     fs.Flush();
                 }
 
-                tx.Commit();
+                txF.Commit();
             }
 
             Assert.That(File.ReadAllLines(filePath)[0], Is.EqualTo("Goodbye"));
@@ -167,31 +175,33 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
+
                 return;
             }
 
-            var filePath = testFixturePath.CombineAssert("temp").Combine("temp2");
-            infosCreated.Add(filePath);
+            var filePath = _testFixtureDirectoryPath.CombineAssert("temp").Combine("temp2");
+            _fileSystemPathsCreated.Add(filePath);
 
-            // simply write something to to file.
-            using (var wr = File.CreateText(filePath))
+            // Simply write something to to file.
+            using (var sw = File.CreateText(filePath))
             {
-                wr.WriteLine("Hello");
+                sw.WriteLine("Hello");
             }
 
-            using (var tx = new FileTransaction("Rollback tx"))
+            using (var txF = new FileTransaction("rollback_transaction"))
             {
-                tx.Begin();
+                txF.Begin();
 
-                using (var fs = tx.Open(filePath, FileMode.Truncate))
+                using (var fs = txF.Open(filePath, FileMode.Truncate))
                 {
                     var str = new UTF8Encoding().GetBytes("Goodbye");
                     fs.Write(str, 0, str.Length);
+
                     fs.Flush();
                 }
 
-                tx.Rollback();
+                txF.Rollback();
             }
 
             Assert.That(File.ReadAllLines(filePath)[0], Is.EqualTo("Hello"));
@@ -202,32 +212,33 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
+
                 return;
             }
 
-            var filepath = testFixturePath.CombineAssert("temp").Combine("test");
+            var filePath = _testFixtureDirectoryPath.CombineAssert("temp").Combine("test");
 
-            if (File.Exists(filepath))
+            if (File.Exists(filePath))
             {
-                File.Delete(filepath);
+                File.Delete(filePath);
             }
 
-            infosCreated.Add(filepath);
+            _fileSystemPathsCreated.Add(filePath);
 
-            using (var tx = new FileTransaction("Commit TX"))
+            using (var txF = new FileTransaction("commit_transaction"))
             {
-                tx.Begin();
-                tx.WriteAllText(filepath, "Transactioned file.");
-                tx.Commit();
+                txF.Begin();
 
-                Assert.That(tx.Status == TransactionStatus.Committed);
+                txF.WriteAllText(filePath, "Transactioned file.");
+
+                txF.Commit();
+
+                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
             }
 
-            Assert.That(File.Exists(filepath), "The file should exists after the transaction.");
-            Assert.That(File.ReadAllLines(filepath)[0], Is.EqualTo("Transactioned file."));
+            Assert.That(File.Exists(filePath), "The file should exists after the transaction.");
+            Assert.That(File.ReadAllLines(filePath)[0], Is.EqualTo("Transactioned file."));
         }
-
-        #endregion
     }
 }

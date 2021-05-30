@@ -14,21 +14,20 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO
+using Castle.Services.Transaction;
+
+namespace Castle.Facilities.AutoTx.Tests
 {
-    ///<summary>
-    /// Small interface for the map path functionality.
-    ///</summary>
-    public interface IMapPath
+    public abstract class BaseTransactionalComponent
     {
-        ///<summary>
-        /// Gets the absolute path given a string formatted
-        /// as a map path, for example:
-        /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
-        /// would all be valid map paths.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns></returns>
-        string MapPath(string path);
+        [Transaction]
+        public virtual void BaseMethod()
+        {
+        }
+    }
+
+    [Transactional]
+    public class SubTransactionalComponent : BaseTransactionalComponent
+    {
     }
 }
