@@ -4,11 +4,14 @@
   <facilities>
     <facility type="Castle.Facilities.AutoTx.AutoTxFacility, Castle.Facilities.AutoTx" />
   </facilities>
+
   <components>
-    <component id="mycomp" type="Castle.Facilities.AutoTx.Tests.TransactionalComp1, Castle.Facilities.AutoTx.Tests" isTransactional="true">
+    <component id="mycomponent"
+               type="Castle.Facilities.AutoTx.Tests.TransactionalComponent1, Castle.Facilities.AutoTx.Tests"
+               isTransactional="true">
       <transaction>
-        <method name="Save" />
         <method name="Create" />
+        <method name="Save" />
         <method name="HelloGoodbye" />
       </transaction>
     </component>

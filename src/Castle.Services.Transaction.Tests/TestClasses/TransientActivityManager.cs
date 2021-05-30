@@ -23,10 +23,6 @@ namespace Castle.Services.Transaction.Tests
             CurrentActivity = new Activity();
         }
 
-        /// <summary>
-        /// Gets the current activity.
-        /// </summary>
-        /// <value>The current activity.</value>
         public Activity CurrentActivity { get; }
     }
 }

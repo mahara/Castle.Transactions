@@ -15,7 +15,6 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Castle.Services.Transaction
 {
@@ -26,10 +25,6 @@ namespace Castle.Services.Transaction
         }
 
         public TransactionalConflictException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public TransactionalConflictException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
