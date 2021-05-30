@@ -18,36 +18,36 @@ using System.IO;
 
 namespace Castle.Services.Transaction.Tests
 {
-    public static class Exts
+    public static class PathExtensions
     {
         /// <summary>
         /// Combines an input path and a path together
-        /// using <see><cref>System.IO.Path.Combine</cref></see>
+        /// using <see cref="Path.Combine(string,string)" />
         /// and returns the result.
         /// </summary>
+        /// <returns>A combined paths.</returns>
         public static string Combine(this string input, string path)
         {
-            return System.IO.Path.Combine(input, path);
+            return Path.Combine(input, path);
         }
 
         /// <summary>
-        /// Combines two paths and makes sure the
-        /// DIRECTORY resulting from the combination exists
+        /// Combines two paths and makes sure the directory resulting from the combination exists
         /// by creating it with default permissions if it doesn't.
         /// </summary>
         /// <param name="input">The path to combine the latter with.</param>
         /// <param name="path">The latter path.</param>
-        /// <returns>The combined path string.</returns>
+        /// <returns>A combined paths.</returns>
         public static string CombineAssert(this string input, string path)
         {
-            var p = input.Combine(path);
+            var result = input.Combine(path);
 
-            if (!Directory.Exists(p))
+            if (!Directory.Exists(result))
             {
-                Directory.CreateDirectory(p);
+                Directory.CreateDirectory(result);
             }
 
-            return p;
+            return result;
         }
     }
 }

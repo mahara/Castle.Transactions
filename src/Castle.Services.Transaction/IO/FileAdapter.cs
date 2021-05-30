@@ -21,152 +21,140 @@ using System.Text;
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
-    /// Adapter class for the file transactions
-    /// which implement the same interface.
-    ///
-    /// This adapter chooses intelligently whether there's an ambient
-    /// transaction, and if there is, joins it.
+    /// Adapter class for the file transactions which implement the same interface.
     /// </summary>
+    /// <remarks>
+    /// This adapter chooses intelligently whether there's an ambient transaction,
+    /// and if there is, joins it.
+    /// </remarks>
     public sealed class FileAdapter : TransactionAdapterBase, IFileAdapter
     {
-        ///<summary>
-        /// c'tor
-        ///</summary>
-        public FileAdapter() : this(false, null)
+        public FileAdapter() :
+            this(false, null)
         {
         }
 
-        ///<summary>
-        /// c'tor
-        ///</summary>
-        ///<param name="constrainToSpecifiedDir"></param>
-        ///<param name="specifiedDir"></param>
-        public FileAdapter(bool constrainToSpecifiedDir, string specifiedDir) : base(constrainToSpecifiedDir, specifiedDir)
+        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory) :
+            base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
-            if (this.Logger.IsDebugEnabled)
+            if (Logger.IsDebugEnabled)
             {
-                if (constrainToSpecifiedDir)
+                if (constrainToSpecifiedDirectory)
                 {
-                    this.Logger.Debug(string.Format("FileAdapter c'tor, constraining to dir: {0}", specifiedDir));
+                    Logger.Debug($"'{nameof(FileAdapter)}' constructor, constraining to directory: '{specifiedDirectory}'.");
                 }
                 else
                 {
-                    this.Logger.Debug("FileAdapter c'tor, no directory constraint.");
+                    Logger.Debug($"'{nameof(FileAdapter)}' constructor, no directory constraint.");
                 }
             }
         }
 
-        ///<summary>
-        /// Creates a new file from the given path for ReadWrite,
-        /// different depending on whether we're in a transaction or not.
-        ///</summary>
-        ///<param name="path">Path to create file at.</param>
-        ///<returns>A filestream for the path.</returns>
-        public FileStream Create(string path)
-        {
-            AssertAllowed(path);
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return (tx as IFileAdapter).Create(path);
-            }
-#endif
-            return File.Create(path);
-        }
-
-        ///<summary>
-        /// Returns whether the specified file exists or not.
-        ///</summary>
-        ///<param name="filePath">The file path.</param>
-        ///<returns></returns>
-        public bool Exists(string filePath)
+        public FileStream Create(string filePath)
         {
             AssertAllowed(filePath);
-#if !MONO
+
             if (HasTransaction(out var tx))
             {
-                return (tx as IFileAdapter).Exists(filePath);
+                return ((IFileAdapter) tx).Create(filePath);
             }
-#endif
-            return File.Exists(filePath);
-        }
 
-        public string ReadAllText(string path, Encoding encoding)
-        {
-            AssertAllowed(path);
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return tx.ReadAllText(path, encoding);
-            }
-#endif
-            return File.ReadAllText(path, encoding);
-
-        }
-
-        public void Move(string originalFilePath, string newFilePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ReadAllText(string path)
-        {
-            return ReadAllText(path, Encoding.UTF8);
-        }
-
-        public void WriteAllText(string path, string contents)
-        {
-            AssertAllowed(path);
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                tx.WriteAllText(path, contents);
-                return;
-            }
-#endif
-            File.WriteAllText(path, contents);
+            return File.Create(filePath);
         }
 
         public void Delete(string filePath)
         {
             AssertAllowed(filePath);
-#if !MONO
+
             if (HasTransaction(out var tx))
             {
-                (tx as IFileAdapter).Delete(filePath);
+                ((IFileAdapter) tx).Delete(filePath);
+
                 return;
             }
-#endif
+
             File.Delete(filePath);
         }
 
-        public FileStream Open(string filePath, FileMode mode)
+        public void Move(string filePath, string newFilePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Exists(string filePath)
         {
             AssertAllowed(filePath);
-#if !MONO
+
             if (HasTransaction(out var tx))
             {
-                return tx.Open(filePath, mode);
+                return ((IFileAdapter) tx).Exists(filePath);
             }
-#endif
-            return File.Open(filePath, mode);
+
+            return File.Exists(filePath);
+        }
+
+        public FileStream Open(string filePath, FileMode fileMode)
+        {
+            AssertAllowed(filePath);
+
+            if (HasTransaction(out var tx))
+            {
+                return tx.Open(filePath, fileMode);
+            }
+
+            return File.Open(filePath, fileMode);
         }
 
         public int WriteStream(string toFilePath, Stream fromStream)
         {
             var offset = 0;
+
             using (var fs = Create(toFilePath))
             {
-                var buf = new byte[4096];
-                int read;
-                while ((read = fromStream.Read(buf, 0, buf.Length)) != 0)
+                var buffer = new byte[4096];
+
+                int bytesRead;
+                while ((bytesRead = fromStream.Read(buffer, 0, buffer.Length)) != 0)
                 {
-                    fs.Write(buf, 0, read);
-                    offset += read;
+                    fs.Write(buffer, 0, bytesRead);
+
+                    offset += bytesRead;
                 }
             }
 
             return offset;
+        }
+
+        public string ReadAllText(string filePath)
+        {
+            return ReadAllText(filePath, Encoding.UTF8);
+        }
+
+        public string ReadAllText(string filePath, Encoding encoding)
+        {
+            AssertAllowed(filePath);
+
+            if (HasTransaction(out var tx))
+            {
+                return tx.ReadAllText(filePath, encoding);
+            }
+
+            return File.ReadAllText(filePath, encoding);
+
+        }
+
+        public void WriteAllText(string filePath, string contents)
+        {
+            AssertAllowed(filePath);
+
+            if (HasTransaction(out var tx))
+            {
+                tx.WriteAllText(filePath, contents);
+
+                return;
+            }
+
+            File.WriteAllText(filePath, contents);
         }
     }
 }

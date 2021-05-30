@@ -14,16 +14,22 @@
 // limitations under the License.
 #endregion
 
-using Castle.Services.Transaction;
-using Castle.Services.Transaction.IO;
+using System.Threading;
 
-namespace Castle.Facilities.AutoTx.Tests
+using NUnit.Framework;
+
+namespace Castle.Services.Transaction.Tests
 {
-    public interface ISomething
+    public class ThreadingTests
     {
-        void A(ITransaction tx);
-        void B(ITransaction tx);
-        IDirectoryAdapter Da { get; }
-        IFileAdapter Fa { get; }
+        [Test]
+        [Description("As we are working on the same directories, we don't want to run the tests concurrently.")]
+        [Ignore("TODO: This somehow appears to be MTA, instead of STA, in test projects, which is unexpected.")]
+        public void CheckSTA()
+        {
+            var apartmentState = Thread.CurrentThread.GetApartmentState();
+
+            Assert.That(apartmentState, Is.EqualTo(ApartmentState.STA));
+        }
     }
 }
