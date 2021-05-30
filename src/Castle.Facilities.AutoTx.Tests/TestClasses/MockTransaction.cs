@@ -22,19 +22,8 @@ namespace Castle.Facilities.AutoTx.Tests
 {
     public class MockTransaction : TransactionBase
     {
-        public MockTransaction() : base(null, TransactionMode.Unspecified, IsolationMode.Unspecified)
-        {
-        }
-
-        protected override void InnerBegin()
-        {
-        }
-
-        protected override void InnerCommit()
-        {
-        }
-
-        protected override void InnerRollback()
+        public MockTransaction() :
+            base(null, TransactionMode.Unspecified, IsolationMode.Unspecified)
         {
         }
 
@@ -50,6 +39,18 @@ namespace Castle.Facilities.AutoTx.Tests
         {
             get => throw new NotImplementedException();
             protected set => throw new NotImplementedException();
+        }
+
+        protected override void InnerBegin()
+        {
+        }
+
+        protected override void InnerCommit()
+        {
+        }
+
+        protected override void InnerRollback()
+        {
         }
     }
 }

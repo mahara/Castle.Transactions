@@ -20,33 +20,36 @@ namespace Castle.Services.Transaction.Tests
 {
     internal class TestResource : ResourceImpl
     {
-        private readonly Action _S;
-        private readonly Action _C;
-        private readonly Action _R;
+        private readonly Action _s;
+        private readonly Action _c;
+        private readonly Action _r;
 
         public TestResource(Action s, Action c, Action r)
         {
-            _S = s;
-            _C = c;
-            _R = r;
+            _s = s;
+            _c = c;
+            _r = r;
         }
 
         public override void Start()
         {
             base.Start();
-            _S();
+
+            _s();
         }
 
         public override void Commit()
         {
             base.Commit();
-            _C();
+
+            _c();
         }
 
         public override void Rollback()
         {
             base.Rollback();
-            _R();
+
+            _r();
         }
     }
 }

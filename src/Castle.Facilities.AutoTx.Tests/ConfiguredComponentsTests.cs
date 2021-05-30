@@ -15,7 +15,6 @@
 #endregion
 
 using System;
-using System.Linq;
 
 using Castle.MicroKernel.Facilities;
 using Castle.Windsor;
@@ -30,13 +29,15 @@ namespace Castle.Facilities.AutoTx.Tests
         [Test]
         public void IsTransactionalMissing()
         {
-            void Method()
+            static void Method()
             {
-                new WindsorContainer("IsTransactionalMissing.xml");
+                _ = new WindsorContainer("IsTransactionalMissing.xml");
             }
 
-            Assert.That(Method, Throws.TypeOf<FacilityException>()
-                                      .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
+            Assert.That(
+                Method,
+                Throws.TypeOf<FacilityException>()
+                      .And.Message.EqualTo("The class 'Castle.Facilities.AutoTx.Tests.TransactionalService2' has configured transaction in a child node, but has not specified 'isTransactional=\"true\"' on the component node."));
         }
 
         [Test]
@@ -46,8 +47,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-            Assert.IsNull(meta);
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService2));
+
+            Assert.That(metaInfo, Is.Null);
         }
 
         [Test]
@@ -57,21 +59,24 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(3, meta.Methods.Count());
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService2));
+
+            Assert.That(metaInfo, Is.Not.Null);
+            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(3));
         }
 
         [Test]
         public void HasInvalidMethod()
         {
-            void Method()
+            static void Method()
             {
-                new WindsorContainer("HasInvalidMethod.xml");
+                _ = new WindsorContainer("HasInvalidMethod.xml");
             }
 
-            Assert.That(Method, Throws.TypeOf<Exception>()
-                                      .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
+            Assert.That(
+                Method,
+                Throws.TypeOf<Exception>()
+                      .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalService2 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
         }
 
         [Test]
@@ -81,9 +86,10 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp2));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(4, meta.Methods.Count());
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService21));
+
+            Assert.That(metaInfo, Is.Not.Null);
+            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(4));
         }
 
         [Test]
@@ -93,9 +99,10 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp3));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(2, meta.Methods.Count());
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService1));
+
+            Assert.That(metaInfo, Is.Not.Null);
+            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(2));
         }
     }
 }

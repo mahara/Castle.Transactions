@@ -26,49 +26,33 @@ using NUnit.Framework;
 namespace Castle.Facilities.AutoTx.Tests
 {
     [TestFixture]
-    public class FacilityBasicTests
+    public class AutoTxFacilityBasicTests
     {
         [Test]
-        public void TestReportedBug()
+        public void BasicOperations()
         {
             var container = new WindsorContainer(new DefaultConfigurationStore());
 
             container.AddFacility(new AutoTxFacility());
 
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-            container.Register(Component.For<SubTransactionalComp>().Named("comp"));
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
 
-            var service = container.Resolve<SubTransactionalComp>("comp");
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"));
 
-            service.BaseMethod();
-
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
-
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
-        }
-
-        [Test]
-        public void TestBasicOperations()
-        {
-            var container = new WindsorContainer(new DefaultConfigurationStore());
-
-            container.AddFacility(new AutoTxFacility());
-
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-
-            container.Register(Component.For<CustomerService>().Named("services.customer"));
-
-            var service = container.Resolve<CustomerService>("services.customer");
+            var service = container.Resolve<CustomerService2>("MyService");
 
             service.Insert("TestCustomer", "Rua P Leite, 33");
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(1));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
@@ -76,32 +60,40 @@ namespace Castle.Facilities.AutoTx.Tests
             }
             catch (Exception)
             {
-                // Expected
+                // Expected.
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(2));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(1));
         }
 
         [Test]
-        public void TestBasicOperationsWithInterfaceService()
+        public void BasicOperationsWithInterfaceService()
         {
             var container = new WindsorContainer(new DefaultConfigurationStore());
 
             container.AddFacility(new AutoTxFacility());
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-            container.Register(Component.For<ICustomerService>().ImplementedBy<AnotherCustomerService>().Named("services.customer"));
 
-            var service = container.Resolve<ICustomerService>("services.customer");
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
+
+            container.Register(
+                Component.For<ICustomerService1>()
+                         .ImplementedBy<CustomerService1>()
+                         .Named("MyService"));
+
+            var service = container.Resolve<ICustomerService1>("MyService");
 
             service.Insert("TestCustomer", "Rua P Leite, 33");
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(1));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
@@ -109,92 +101,101 @@ namespace Castle.Facilities.AutoTx.Tests
             }
             catch (Exception)
             {
-                // Expected
+                // Expected.
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(2));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(1));
         }
 
         [Test]
-        public void TestBasicOperationsWithGenericService()
+        public void BasicOperationsWithGenericService()
         {
             var container = new WindsorContainer(new DefaultConfigurationStore());
 
             container.AddFacility(new AutoTxFacility());
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
-            container.Register(Component.For(typeof(GenericService<>)).Named("generic.services"));
 
-            var genericService = container.Resolve<GenericService<string>>();
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
 
-            genericService.Foo();
+            container.Register(
+                Component.For(typeof(GenericService<>))
+                         .Named("GenericService"));
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var service = container.Resolve<GenericService<string>>();
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            service.Foo();
+
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
+
+            Assert.That(manager.TransactionCount, Is.EqualTo(1));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
-                genericService.Throw();
+                service.Throw();
             }
             catch (Exception)
             {
-                // Expected
+                // Expected.
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(2));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(1));
 
-            genericService.Bar<int>();
+            service.Bar<int>();
 
-            Assert.AreEqual(3, transactionManager.TransactionCount);
-            Assert.AreEqual(2, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(3));
+            Assert.That(manager.CommittedCount, Is.EqualTo(2));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(1));
 
             try
             {
-                genericService.Throw<float>();
+                service.Throw<float>();
             }
             catch
             {
-                //exepected
+                // Expected.
             }
 
-            Assert.AreEqual(4, transactionManager.TransactionCount);
-            Assert.AreEqual(2, transactionManager.CommittedCount);
-            Assert.AreEqual(2, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(4));
+            Assert.That(manager.CommittedCount, Is.EqualTo(2));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(2));
         }
 
         [Test]
-        public void TestBasicOperationsWithConfigComponent()
+        public void BasicOperationsWithConfigComponent()
         {
             var container = new WindsorContainer("HasConfiguration.xml");
 
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
 
-            var comp1 = container.Resolve<TransactionalComp1>("mycomp");
+            var component = container.Resolve<TransactionalService2>("MyService");
 
-            comp1.Create();
+            component.Create();
 
-            comp1.Delete();
+            component.Delete();
 
-            comp1.Save();
+            component.Save();
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
 
-            Assert.AreEqual(3, transactionManager.TransactionCount);
-            Assert.AreEqual(3, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(3));
+            Assert.That(manager.CommittedCount, Is.EqualTo(3));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
         }
 
         /// <summary>
-        /// Tests the situation where the class uses
-        /// ATM, but grab the transaction manager and rollbacks the
-        /// transaction manually
+        /// Tests the situation where the class uses ATM,
+        /// but grab the transaction manager and rollbacks the transaction manually.
         /// </summary>
         [Test]
         public void RollBackExplicitOnClass()
@@ -203,19 +204,51 @@ namespace Castle.Facilities.AutoTx.Tests
 
             container.AddFacility(new AutoTxFacility());
 
-            container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
 
-            container.Register(Component.For<CustomerService>().Named("mycomp"));
+            container.Register(
+                Component.For<CustomerService2>()
+                         .Named("MyService"));
 
-            var serv = container.Resolve<CustomerService>("mycomp");
+            var service = container.Resolve<CustomerService2>("MyService");
 
-            serv.Update(1);
+            service.Update(1);
 
-            var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
-            Assert.AreEqual(0, transactionManager.CommittedCount);
+            Assert.That(manager.TransactionCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(1));
+            Assert.That(manager.CommittedCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ReportedBug()
+        {
+            var container = new WindsorContainer(new DefaultConfigurationStore());
+
+            container.AddFacility(new AutoTxFacility());
+
+            container.Register(
+                Component.For<ITransactionManager>()
+                         .ImplementedBy<MockTransactionManager>()
+                         .Named("TransactionManager"));
+
+            container.Register(
+                Component.For<DerivedTransactionalService>()
+                         .Named("MyService"));
+
+            var service = container.Resolve<DerivedTransactionalService>("MyService");
+
+            service.BaseMethod();
+
+            var manager = container.Resolve<MockTransactionManager>("TransactionManager");
+
+            Assert.That(manager.TransactionCount, Is.EqualTo(1));
+            Assert.That(manager.CommittedCount, Is.EqualTo(1));
+            Assert.That(manager.RolledBackCount, Is.EqualTo(0));
         }
     }
 }
