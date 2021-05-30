@@ -18,33 +18,30 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-using Castle.Core;
-
 namespace Castle.Services.Transaction
 {
     [Serializable]
     public class RollbackResourceException : TransactionException
     {
-        private readonly List<Pair<IResource, Exception>> failedResources = new List<Pair<IResource, Exception>>();
+        private readonly List<(IResource, Exception)> _failedResources = new();
 
-        public RollbackResourceException(string message,
-            IEnumerable<Pair<IResource, Exception>> failedResources)
-            : base(message, null)
+        public RollbackResourceException(string message, IEnumerable<(IResource, Exception)> failedResources) :
+            base(message, null)
         {
-            this.failedResources.AddRange(failedResources);
+            _failedResources.AddRange(failedResources);
         }
 
-        public RollbackResourceException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        protected RollbackResourceException(SerializationInfo info, StreamingContext context) :
+            base(info, context)
         {
         }
 
-        public RollbackResourceException(SerializationInfo info, StreamingContext context,
-            IEnumerable<Pair<IResource, Exception>> failedResources) : base(info, context)
+        protected RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<(IResource, Exception)> failedResources) :
+            base(info, context)
         {
-            this.failedResources.AddRange(failedResources);
+            _failedResources.AddRange(failedResources);
         }
 
-        public IList<Pair<IResource, Exception>> FailedResources => failedResources;
+        public IReadOnlyList<(IResource, Exception)> FailedResources => _failedResources;
     }
 }
