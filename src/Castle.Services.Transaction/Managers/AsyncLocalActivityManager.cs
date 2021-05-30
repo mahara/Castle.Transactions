@@ -15,41 +15,34 @@
 #endregion
 
 using System;
+using System.Threading;
 
 namespace Castle.Services.Transaction
 {
-    /// <summary>
-    /// </summary>
-    /// <remarks>
-    /// REFERENCES:
-    /// -   <see href="https://learn.microsoft.com/en-us/dotnet/standard/threading/thread-local-storage-thread-relative-static-fields-and-data-slots" />
-    /// -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.threadstaticattribute" />
-    /// -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.localdatastoreslot" />
-    /// </remarks>
-    [Obsolete($"Use '{nameof(ThreadLocalActivityManager)}' instead.")]
-    public class TLSActivityManager : MarshalByRefObject, IActivityManager
+    public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        [ThreadStatic]
-        private static Activity _activity;
-
         private readonly object _lock = new();
+
+        private readonly AsyncLocal<Activity> _data = new();
 
         public Activity CurrentActivity
         {
             get
             {
-                if (_activity == null)
+                Activity activity;
+
+                if ((activity = _data.Value) == null)
                 {
                     lock (_lock)
                     {
-                        if (_activity == null)
+                        if ((activity = _data.Value) == null)
                         {
-                            _activity = new Activity();
+                            activity = _data.Value = new Activity();
                         }
                     }
                 }
 
-                return _activity;
+                return activity;
             }
         }
 

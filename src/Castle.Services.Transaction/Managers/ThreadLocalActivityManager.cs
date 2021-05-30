@@ -14,16 +14,20 @@
 // limitations under the License.
 #endregion
 
-using Castle.Services.Transaction;
-using Castle.Services.Transaction.IO;
+using System;
+using System.Threading;
 
-namespace Castle.Facilities.AutoTx.Tests
+namespace Castle.Services.Transaction
 {
-    public interface ISomething
+    public class ThreadLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        void A(ITransaction tx);
-        void B(ITransaction tx);
-        IDirectoryAdapter Da { get; }
-        IFileAdapter Fa { get; }
+        private readonly ThreadLocal<Activity> _activity = new(() => new Activity());
+
+        public Activity CurrentActivity => _activity.Value;
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
     }
 }

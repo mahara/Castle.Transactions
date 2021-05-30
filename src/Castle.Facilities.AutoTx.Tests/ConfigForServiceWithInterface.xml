@@ -4,11 +4,15 @@
   <facilities>
     <facility type="Castle.Facilities.AutoTx.AutoTxFacility, Castle.Facilities.AutoTx" />
   </facilities>
+
   <components>
-    <component id="mycomp" service="Castle.Facilities.AutoTx.Tests.TransactionalService, Castle.Facilities.AutoTx.Tests" type="Castle.Facilities.AutoTx.Tests.TransactionalComp3, Castle.Facilities.AutoTx.Tests" isTransactional="true">
+    <component id="MyService"
+               service="Castle.Facilities.AutoTx.Tests.ITransactionalService1, Castle.Facilities.AutoTx.Tests"
+               type="Castle.Facilities.AutoTx.Tests.TransactionalService1, Castle.Facilities.AutoTx.Tests"
+               isTransactional="true">
       <transaction>
-        <method name="Save" />
         <method name="Create" />
+        <method name="Save" />
       </transaction>
     </component>
   </components>

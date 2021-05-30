@@ -18,18 +18,16 @@ using Castle.Services.Transaction;
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    public abstract class BaseTransactionalComp
+    public abstract class BaseTransactionalService
     {
         [Transaction]
         public virtual void BaseMethod()
         {
-
         }
     }
 
     [Transactional]
-    public class SubTransactionalComp : BaseTransactionalComp
+    public class DerivedTransactionalService : BaseTransactionalService
     {
-
     }
 }
