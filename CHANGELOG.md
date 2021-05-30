@@ -1,5 +1,14 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
+## Unreleased (5.1.0) (2021-05-xx)
+
+### All
+
+Improvements:
+- Updated Castle.Core dependency to 4.4.1
+- Updated Castle.Windsor dependency to 5.1.1
+
+
 ## 5.0.0 (2021-05-30)
 
 ### All
