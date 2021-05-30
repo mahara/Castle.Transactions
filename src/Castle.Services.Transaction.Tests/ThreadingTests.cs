@@ -20,15 +20,16 @@ using NUnit.Framework;
 
 namespace Castle.Services.Transaction.Tests
 {
-    public class MiscTests
+    public class ThreadingTests
     {
-        [Test, Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
-        [Ignore("TODO: This is somehow appear to be MTA.")]
+        [Test]
+        [Description("As we are working on the same directories, we don't want to run the tests concurrently.")]
+        [Ignore("TODO: This somehow appears to be MTA, instead of STA, in test projects, which is unexpected.")]
         public void CheckSTA()
         {
-            var aptState = Thread.CurrentThread.GetApartmentState();
+            var apartmentState = Thread.CurrentThread.GetApartmentState();
 
-            Assert.IsTrue(aptState == ApartmentState.STA);
+            Assert.That(apartmentState, Is.EqualTo(ApartmentState.STA));
         }
     }
 }

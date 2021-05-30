@@ -23,17 +23,14 @@ using NUnit.Framework;
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    /// <summary>
-    /// Summary description for CustomerService.
-    /// </summary>
     [Transactional]
-    public class CustomerService
+    public class CustomerService2
     {
-        private readonly IKernel kernel;
+        private readonly IKernel _kernel;
 
-        public CustomerService(IKernel kernel)
+        public CustomerService2(IKernel kernel)
         {
-            this.kernel = kernel;
+            _kernel = kernel;
         }
 
         [Transaction(TransactionMode.Requires)]
@@ -50,31 +47,38 @@ namespace Castle.Facilities.AutoTx.Tests
         [Transaction]
         public virtual void Update(int id)
         {
-            var tm = kernel.Resolve<ITransactionManager>();
+            var manager = _kernel.Resolve<ITransactionManager>();
 
-            Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+            var currentTransaction = manager.CurrentTransaction;
 
-            tm.CurrentTransaction.SetRollbackOnly();
+            Assert.That(currentTransaction, Is.Not.Null);
+            Assert.That(currentTransaction.Status, Is.EqualTo(TransactionStatus.Active));
 
-            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+            currentTransaction.SetRollbackOnly();
+
+            Assert.That(currentTransaction.Status, Is.EqualTo(TransactionStatus.Active));
         }
 
         [Transaction(TransactionMode.Requires)]
         public virtual void DoSomethingNotMarkedAsReadOnly()
         {
-            var tm = kernel.Resolve<ITransactionManager>();
-            Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.IsFalse(tm.CurrentTransaction.IsReadOnly);
+            var manager = _kernel.Resolve<ITransactionManager>();
+
+            var currentTransaction = manager.CurrentTransaction;
+
+            Assert.That(currentTransaction, Is.Not.Null);
+            Assert.That(currentTransaction.IsReadOnly, Is.False);
         }
 
-
-        [Transaction(TransactionMode.Requires, ReadOnly = true)]
+        [Transaction(TransactionMode.Requires, IsReadOnly = true)]
         public virtual void DoSomethingReadOnly()
         {
-            var tm = kernel.Resolve<ITransactionManager>();
-            Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.IsTrue(tm.CurrentTransaction.IsReadOnly);
+            var manager = _kernel.Resolve<ITransactionManager>();
+
+            var currentTransaction = manager.CurrentTransaction;
+
+            Assert.That(currentTransaction, Is.Not.Null);
+            Assert.That(currentTransaction.IsReadOnly);
         }
     }
 }
