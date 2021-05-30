@@ -15,9 +15,7 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Reflection;
 
 using Castle.Core.Configuration;
@@ -29,158 +27,152 @@ using Castle.Services.Transaction;
 namespace Castle.Facilities.AutoTx
 {
     /// <summary>
-    /// Pendent
+    /// A store for <see cref="TransactionMetaInfo" />.
     /// </summary>
     public class TransactionMetaInfoStore : MarshalByRefObject
     {
-        private static readonly string TransactionModeAtt = "transactionMode";
-        private static readonly string IsolationModeAtt = "isolationLevel";
+        private const string TransactionModeAttribute = "transactionMode";
+        private const string IsolationModeAttribute = "isolationMode";
 
-        private readonly IDictionary type2MetaInfo = new HybridDictionary();
+        private static readonly BindingFlags BindingFlags =
+            BindingFlags.Instance |
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.DeclaredOnly;
 
-        #region MarshalByRefObject overrides
+        private readonly Dictionary<Type, TransactionMetaInfo> _implementationTypeToMetaInfo = new();
 
         /// <summary>
-        /// Overrides the MBRO Lifetime initialization
+        /// Creates <see cref="TransactionMetaInfo" /> from a type.
         /// </summary>
-        /// <returns>Null</returns>
-        public override object InitializeLifetimeService()
-        {
-            return null;
-        }
-
-        #endregion
-        ///<summary>
-        /// Creates meta-information from a type.
-        ///</summary>
-        public TransactionMetaInfo CreateMetaFromType(Type implementation)
+        public TransactionMetaInfo CreateMetaInfoFrom(Type implementationType)
         {
             var metaInfo = new TransactionMetaInfo();
 
-            PopulateMetaInfoFromType(metaInfo, implementation);
+            PopulateMetaInfoFrom(metaInfo, implementationType);
 
-            Register(implementation, metaInfo);
+            RegisterMetaInfo(implementationType, metaInfo);
 
             return metaInfo;
         }
 
-        private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type implementation)
+        private static void PopulateMetaInfoFrom(TransactionMetaInfo metaInfo, Type implementationType)
         {
-            if (implementation == typeof(object) || implementation == typeof(MarshalByRefObject))
+            if (implementationType == null ||
+                implementationType == typeof(object) ||
+                implementationType == typeof(MarshalByRefObject))
             {
                 return;
             }
 
-            var methods = implementation.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            var methods = implementationType.GetMethods(BindingFlags);
 
             foreach (var method in methods)
             {
-                var atts = method.GetCustomAttributes(typeof(TransactionAttribute), true);
+                var attributes = method.GetCustomAttributes(typeof(TransactionAttribute), true);
 
-                if (atts.Length != 0)
+                if (attributes.Length > 0)
                 {
-                    metaInfo.Add(method, atts[0] as TransactionAttribute);
-                    // only add the method as transaction injection if we also have specified a transaction attribute.
-                    atts = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
+                    metaInfo.AddTransactionalMethod(method, (TransactionAttribute) attributes[0]);
 
-                    if (atts.Length != 0)
+                    // Only add the method as transaction injection if we also have specified a transaction attribute.
+                    attributes = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
+
+                    if (attributes.Length > 0)
                     {
-                        metaInfo.AddInjection(method);
+                        metaInfo.AddTransactionInjectionTo(method);
                     }
                 }
             }
 
-            PopulateMetaInfoFromType(metaInfo, implementation.BaseType);
+            PopulateMetaInfoFrom(metaInfo, implementationType.BaseType);
         }
-        ///<summary>
-        /// Create meta-information from the configuration about
-        /// what methods should be overridden.
-        ///</summary>
-        public TransactionMetaInfo CreateMetaFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration config)
-        {
-            var metaInfo = GetMetaFor(implementation);
 
-            if (metaInfo == null)
-            {
-                metaInfo = new TransactionMetaInfo();
-            }
+        /// <summary>
+        /// Create <see cref="TransactionMetaInfo" /> from the configuration
+        /// that specify what methods should be overridden.
+        /// </summary>
+        public TransactionMetaInfo CreateMetaInfoFromConfiguration(Type implementationType, IList<MethodInfo> methods, IConfiguration configuration)
+        {
+            var metaInfo = GetMetaInfoFor(implementationType) ??
+                           new TransactionMetaInfo();
 
             foreach (var method in methods)
             {
-                var transactionMode = config.Attributes[TransactionModeAtt];
-                var isolationLevel = config.Attributes[IsolationModeAtt];
+                var transactionModeName = configuration.Attributes[TransactionModeAttribute];
+                var transactionMode = ParseTransactionModeName(implementationType, method, transactionModeName);
 
-                var mode = ObtainTransactionMode(implementation, method, transactionMode);
-                var level = ObtainIsolation(implementation, method, isolationLevel);
+                var isolationModeName = configuration.Attributes[IsolationModeAttribute];
+                var isolationMode = ParseIsolationModeName(implementationType, method, isolationModeName);
 
-                metaInfo.Add(method, new TransactionAttribute(mode, level));
+                metaInfo.AddTransactionalMethod(method, new TransactionAttribute(transactionMode, isolationMode));
             }
 
-            Register(implementation, metaInfo);
+            RegisterMetaInfo(implementationType, metaInfo);
 
             return metaInfo;
         }
-        ///<summary>
-        /// Gets the meta-data for the implementation.
-        ///</summary>
-        ///<param name="implementation"></param>
-        ///<returns></returns>
-        public TransactionMetaInfo GetMetaFor(Type implementation)
+
+        /// <summary>
+        /// Gets the <see cref="TransactionMetaInfo" /> for the implementation type.
+        /// </summary>
+        /// <param name="implementationType"></param>
+        /// <returns></returns>
+        public TransactionMetaInfo GetMetaInfoFor(Type implementationType)
         {
-            return (TransactionMetaInfo) type2MetaInfo[implementation];
+            _implementationTypeToMetaInfo.TryGetValue(implementationType, out var metaInfo);
+
+            return metaInfo;
         }
 
-        private static TransactionMode ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
+        private void RegisterMetaInfo(Type implementationType, TransactionMetaInfo metaInfo)
         {
-            if (mode == null)
+            _implementationTypeToMetaInfo[implementationType] = metaInfo;
+        }
+
+        private static TransactionMode ParseTransactionModeName(Type implementationType, MethodInfo method, string transactionModeName)
+        {
+            if (string.IsNullOrEmpty(transactionModeName))
             {
                 return TransactionMode.Unspecified;
             }
 
-            try
-            {
-                return (TransactionMode) Enum.Parse(typeof(TransactionMode), mode, true);
-            }
-            catch (Exception)
+            if (!Enum.TryParse(transactionModeName, true, out TransactionMode transactionMode))
             {
                 var values = (string[]) Enum.GetValues(typeof(TransactionMode));
 
-                var message = string.Format("The configuration for the class {0}, " +
-                    "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                    "The possible values are {4}",
-                    implementation.FullName, method.Name, mode, TransactionModeAtt, string.Join(", ", values));
-
-                throw new FacilityException(message);
+                throw new FacilityException(
+                    $"The configuration for the class '{implementationType.FullName}', method '{method.Name}', " +
+                    $"has specified '{transactionModeName}' on '{TransactionModeAttribute}' attribute which is not supported. " +
+                    $"The possible values are '{string.Join(", ", values)}'.");
             }
+
+            return transactionMode;
         }
 
-        private IsolationMode ObtainIsolation(Type implementation, MethodInfo method, string level)
+        private static IsolationMode ParseIsolationModeName(Type implementationType, MethodInfo method, string isolationModeName)
         {
-            if (level == null)
+            if (string.IsNullOrEmpty(isolationModeName))
             {
                 return IsolationMode.Unspecified;
             }
 
-            try
-            {
-                return (IsolationMode) Enum.Parse(typeof(IsolationMode), level, true);
-            }
-            catch (Exception)
+            if (!Enum.TryParse(isolationModeName, true, out IsolationMode isolationMode))
             {
                 var values = (string[]) Enum.GetValues(typeof(TransactionMode));
 
-                var message = string.Format("The configuration for the class {0}, " +
-                    "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                    "The possible values are {4}",
-                    implementation.FullName, method.Name, level, IsolationModeAtt, string.Join(", ", values));
-
-                throw new FacilityException(message);
+                throw new FacilityException(
+                    $"The configuration for the class '{implementationType.FullName}', method '{method.Name}', " +
+                    $"has specified '{isolationModeName}' on '{IsolationModeAttribute}' attribute which is not supported. " +
+                    $"The possible values are '{string.Join(", ", values)}'.");
             }
+
+            return isolationMode;
         }
 
-        private void Register(Type implementation, TransactionMetaInfo metaInfo)
+        public override object InitializeLifetimeService()
         {
-            type2MetaInfo[implementation] = metaInfo;
+            return null;
         }
     }
 }

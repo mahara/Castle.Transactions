@@ -16,19 +16,23 @@
 
 namespace Castle.Services.Transaction.IO
 {
-    ///<summary>
-    /// Small interface for the map path functionality.
-    ///</summary>
-    public interface IMapPath
+    /// <summary>
+    /// An interface for the path mapping functionality.
+    /// </summary>
+    public interface IPathMapper
     {
-        ///<summary>
-        /// Gets the absolute path given a string formatted
-        /// as a map path, for example:
+        /// <summary>
+        /// Gets the absolute (physical) path that corresponds to
+        /// the specified a relative (virtual) path.
+        /// For example:
         /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
-        /// would all be valid map paths.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns></returns>
+        /// would all be valid mapped paths.
+        /// </summary>
+        /// <param name="path">The relative (virtual) path.</param>
+        /// <returns>An absolute (physical) path.</returns>
+        /// <remarks>
+        /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.web.httpserverutility.mappath" />
+        /// </remarks>
         string MapPath(string path);
     }
 }

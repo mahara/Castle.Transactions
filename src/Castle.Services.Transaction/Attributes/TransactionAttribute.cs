@@ -24,30 +24,29 @@ namespace Castle.Services.Transaction
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public sealed class TransactionAttribute : Attribute
     {
-
         /// <summary>
-        /// Declares unspecified values for transaction and isolation, which
-        /// means that the transaction manager will use the default values
-        /// for them
+        /// Declares <see cref="TransactionMode.Unspecified" /> for transaction
+        /// and <see cref="IsolationMode.Unspecified" /> for isolation,
+        /// which means that the transaction manager will use the default values for them.
         /// </summary>
-        public TransactionAttribute() : this(TransactionMode.Unspecified, IsolationMode.Unspecified)
+        public TransactionAttribute() :
+            this(TransactionMode.Unspecified, IsolationMode.Unspecified)
         {
         }
 
         /// <summary>
         /// Declares the transaction mode, but omits the isolation,
-        /// which means that the transaction manager should use the
-        /// default value for it.
+        /// which means that the transaction manager should use the default value for it.
         /// </summary>
         /// <param name="transactionMode"></param>
-        public TransactionAttribute(TransactionMode transactionMode) : this(transactionMode, IsolationMode.Unspecified)
+        public TransactionAttribute(TransactionMode transactionMode) :
+            this(transactionMode, IsolationMode.Unspecified)
         {
         }
 
         /// <summary>
-        /// Declares both the transaction mode and isolation
-        /// desired for this method. The transaction manager should
-        /// obey the declaration.
+        /// Declares both the transaction mode and isolation desired for this method.
+        /// The transaction manager should obey the declaration.
         /// </summary>
         /// <param name="transactionMode"></param>
         /// <param name="isolationMode"></param>
@@ -58,12 +57,12 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Returns the <see cref="TransactionMode"/>
+        /// Returns the <see cref="TransactionMode" />.
         /// </summary>
         public TransactionMode TransactionMode { get; }
 
         /// <summary>
-        /// Returns the <see cref="IsolationMode"/>
+        /// Returns the <see cref="IsolationMode" />.
         /// </summary>
         public IsolationMode IsolationMode { get; }
 
@@ -71,13 +70,14 @@ namespace Castle.Services.Transaction
         /// Gets or sets a value indicating whether the transaction should be distributed.
         /// </summary>
         /// <value>
-        /// <c>true</c> if a distributed transaction should be created; otherwise, <c>false</c>.
+        /// <see langword="true" /> if a distributed transaction should be created;
+        /// otherwise, <see langword="false" />.
         /// </value>
-        public bool Distributed { get; set; }
+        public bool IsDistributed { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the transaction should be read only.
+        /// Gets or sets a value indicating whether the transaction should be read-only.
         /// </summary>
-        public bool ReadOnly { get; set; }
+        public bool IsReadOnly { get; set; }
     }
 }
