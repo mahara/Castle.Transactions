@@ -16,49 +16,98 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Castle.Services.Transaction.IO
 {
-    ///<summary>
-    /// Utility class meant to replace the <see cref="System.IO.Path"/> class completely. This class handles these types of paths:
+    /// <summary>
+    /// Utility class meant to replace the <see cref="System.IO.Path" /> class completely.
+    /// This class handles these types of paths:
     /// <list>
-    /// <item>UNC network paths: \\server\folder</item>
-    /// <item>UNC-specified network paths: \\?\UNC\server\folder</item>
-    /// <item>IPv4 network paths: \\192.168.3.22\folder</item>
+    /// <item>UNC network paths: \\server\directory</item>
+    /// <item>UNC-specified network paths: \\?\UNC\server\directory</item>
+    /// <item>IPv4 network paths: \\192.168.3.22\directory</item>
     /// <item>Rooted paths: /dev/cdrom0</item>
-    /// <item>Rooted paths: C:\folder</item>
-    /// <item>UNC-rooted paths: \\?\C:\folder\file</item>
+    /// <item>Rooted paths: C:\directory</item>
+    /// <item>UNC-rooted paths: \\?\C:\directory\file</item>
     /// <item>Fully expanded IPv6 paths</item>
     /// </list>
-    ///</summary>
+    /// </summary>
     public static class Path
     {
-        // can of worms shut!
+        // Can of worms shut!
 
         // TODO: 2001:0db8::1428:57ab and 2001:0db8:0:0::1428:57ab are not matched!
-        // ip6: thanks to http://blogs.msdn.com/mpoulson/archive/2005/01/10/350037.aspx
+        // IPv6: Thanks to
+        // https://learn.microsoft.com/en-us/archive/blogs/mpoulson/regular-expressions-and-ip-addresses-ipv4-and-ipv6
+        // http://blogs.msdn.com/mpoulson/archive/2005/01/10/350037.aspx
 
-        private static readonly List<char> _InvalidChars;
+        public static readonly char DirectorySeparatorChar = System.IO.Path.DirectorySeparatorChar;
+        public static readonly char AltDirectorySeparatorChar = System.IO.Path.AltDirectorySeparatorChar;
+        public static readonly char[] DirectorySeparatorChars = new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
+        public static readonly char[] WhitespaceChars = new[] { ' ' };
+
+        private static readonly List<char> _invalidPathChars = new List<char>(GetInvalidPathChars());
 
         static Path()
         {
-            //          _Reserved = new List<string>("CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9"
-            //              .Split('|'));
-            _InvalidChars = new List<char>(GetInvalidPathChars());
+            //_reserved = new List<string>("CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9".Split('|'));
         }
 
-        ///<summary>
+        /// <summary>
+        /// Gets the full path for a given path.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>The full path of the given path.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
+        public static string GetFullPath(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (path.StartsWith(@"\\?\") || path.StartsWith(@"\\.\"))
+            {
+                return System.IO.Path.GetFullPath(path.Substring(4));
+            }
+
+            if (path.StartsWith(@"\\?\UNC\"))
+            {
+                return System.IO.Path.GetFullPath(path.Substring(8));
+            }
+
+            if (path.StartsWith(@"file:///"))
+            {
+                return new Uri(path).LocalPath;
+            }
+
+            return System.IO.Path.GetFullPath(path);
+        }
+
+        /// <summary>
+        /// Gets path info (drive and non-root path).
+        /// </summary>
+        /// <param name="path">The path to get the path info from.</param>
+        /// <returns>The path info.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static PathInfo GetPathInfo(string path)
+        {
+            return PathInfo.Parse(path);
+        }
+
+        /// <summary>
         /// Returns whether the path is rooted.
-        ///</summary>
-        ///<param name="path">Gets whether the path is rooted or relative.</param>
-        ///<returns>Whether the path is rooted or not.</returns>
-        ///<exception cref="ArgumentNullException">If the passed argument is null.</exception>
+        /// </summary>
+        /// <param name="path">Gets whether the path is rooted or relative.</param>
+        /// <returns>Whether the path is rooted or not.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
         public static bool IsRooted(string path)
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
@@ -66,44 +115,39 @@ namespace Castle.Services.Transaction.IO
                 return false;
             }
 
-            return PathInfo.Parse(path).Root != string.Empty;
+            return PathInfo.Parse(path).IsRooted;
         }
 
         /// <summary>
-        /// Gets the path root, i.e. e.g. \\?\C:\ if the passed argument is \\?\C:\a\b\c.abc.
+        /// Gets the path root, i.e. \\?\C:\ if the passed argument is \\?\C:\a\b\c.abc.
         /// </summary>
         /// <param name="path">The path to get the root for.</param>
-        /// <returns>The string denoting the root.</returns>
+        /// <returns>The root of the path.</returns>
         public static string GetPathRoot(string path)
         {
-            if (path == null)
+            if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
 
-            if (path == string.Empty)
+            if (ContainsInvalidPathChars(path))
             {
-                throw new ArgumentException("path was empty.");
-            }
-
-            if (ContainsInvalidChars(path))
-            {
-                throw new ArgumentException("path contains invalid characters.");
+                throw new ArgumentException("Path contains invalid characters.", nameof(path));
             }
 
             return PathInfo.Parse(path).Root;
         }
 
-        private static bool ContainsInvalidChars(string path)
+        private static bool ContainsInvalidPathChars(string path)
         {
-            var c = _InvalidChars.Count;
-            var l = path.Length;
+            var length = path.Length;
+            var count = _invalidPathChars.Count;
 
-            for (var i = 0; i < l; i++)
+            for (var i = 0; i < length; i++)
             {
-                for (var j = 0; j < c; j++)
+                for (var j = 0; j < count; j++)
                 {
-                    if (path[i] == _InvalidChars[j])
+                    if (path[i] == _invalidPathChars[j])
                     {
                         return true;
                     }
@@ -113,20 +157,20 @@ namespace Castle.Services.Transaction.IO
             return false;
         }
 
-        ///<summary>
+        /// <summary>
         /// Gets a path without root.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns></returns>
-        ///<exception cref="ArgumentNullException"></exception>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>The path without root.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
         public static string GetPathWithoutRoot(string path)
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
-            if (path.Length == 0)
+            if (path == string.Empty)
             {
                 return string.Empty;
             }
@@ -134,19 +178,134 @@ namespace Castle.Services.Transaction.IO
             return path.Substring(GetPathRoot(path).Length);
         }
 
-        ///<summary>
-        /// Normalize all the directory separation chars.
-        /// Also removes empty space in beginning and end of string.
-        ///</summary>
-        ///<param name="pathWithAlternatingChars"></param>
-        ///<returns>The directory string path with all occurrances of the alternating chars
-        /// replaced for that specified in <see cref="System.IO.Path.DirectorySeparatorChar"/></returns>
-        public static string NormDirSepChars(string pathWithAlternatingChars)
+        /// <summary>
+        /// Removes the last segment, whether a directory/file, off the path.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// For a path "/a/b/c" would return "/a/b" or
+        /// for "\\?\C:\directoryA\directory\B\C\d.txt" would return "\\?\C:\directoryA\directory\B\C".
+        /// </remarks>
+        public static string GetPathWithoutLastSegment(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
+            var separatorChars = new List<char>(DirectorySeparatorChars);
+
+            var endsWithSlash = false;
+            var secondLastIndex = -1;
+            var lastIndex = -1;
+            var lastSeparatorChar = separatorChars[0];
+
+            for (var i = 0; i < path.Length; i++)
+            {
+                if (i == path.Length - 1 && separatorChars.Contains(path[i]))
+                {
+                    endsWithSlash = true;
+                }
+
+                if (!separatorChars.Contains(path[i]))
+                {
+                    continue;
+                }
+
+                secondLastIndex = lastIndex;
+                lastIndex = i;
+                lastSeparatorChar = path[i];
+            }
+
+            if (lastIndex == -1)
+            {
+                throw new ArgumentException($"Unable to find a path separator character in the path '{path}'.", nameof(path));
+            }
+
+            var result = path.Substring(0, endsWithSlash ? secondLastIndex : lastIndex);
+            return result == string.Empty ? new string(lastSeparatorChar, 1) : result;
+        }
+
+        public static string GetFileName(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
+            if (path.EndsWith("\\") || path.EndsWith("/"))
+            {
+                return string.Empty;
+            }
+
+            var result = PathInfo.Parse(path).DirectoryAndFile;
+
+            int separatorCharIndex;
+            if ((separatorCharIndex = result.LastIndexOfAny(DirectorySeparatorChars)) != -1)
+            {
+                return result.Substring(separatorCharIndex + 1);
+            }
+
+            return result;
+        }
+
+        public static string GetFileNameWithoutExtension(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
+            var fileName = GetFileName(path);
+            var lastPeriodIndex = fileName.LastIndexOf('.');
+            return lastPeriodIndex == -1 ? fileName : fileName.Substring(0, lastPeriodIndex);
+        }
+
+        public static bool HasExtension(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
+            return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
+        }
+
+        public static string GetExtension(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
+            var fileName = GetFileName(path);
+            var lastPeriodIndex = fileName.LastIndexOf('.');
+            return lastPeriodIndex == -1 ? string.Empty : fileName.Substring(lastPeriodIndex + 1);
+        }
+
+        /// <summary>
+        /// Normalize all the directory separator chars.
+        /// Also removes empty spaces at the beginning and the end of the path.
+        /// </summary>
+        /// <param name="pathWithAlternatingChars"></param>
+        /// <returns>
+        /// The directory path with all occurrences of the alternating chars
+        /// replaced with <see cref="DirectorySeparatorChar" />.
+        /// </returns>
+        public static string NormalizeDirectorySeparatorChars(string pathWithAlternatingChars)
+        {
+            if (string.IsNullOrEmpty(pathWithAlternatingChars))
+            {
+                throw new ArgumentException($"'{nameof(pathWithAlternatingChars)}' cannot be null or empty.", nameof(pathWithAlternatingChars));
+            }
+
             var sb = new StringBuilder();
+
             for (var i = 0; i < pathWithAlternatingChars.Length; i++)
             {
-                if ((pathWithAlternatingChars[i] == '\\') || (pathWithAlternatingChars[i] == '/'))
+                if ((pathWithAlternatingChars[i] == '\\') ||
+                    (pathWithAlternatingChars[i] == '/'))
                 {
                     sb.Append(DirectorySeparatorChar);
                 }
@@ -156,201 +315,31 @@ namespace Castle.Services.Transaction.IO
                 }
             }
 
-            return sb.ToString().Trim(new[] { ' ' });
+            return sb.ToString().Trim(WhitespaceChars);
         }
 
-        ///<summary>
-        /// Gets path info (drive and non root path)
-        ///</summary>
-        ///<param name="path">The path to get the info from.</param>
-        ///<returns></returns>
-        ///<exception cref="ArgumentNullException"></exception>
-        public static PathInfo GetPathInfo(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            return PathInfo.Parse(path);
-        }
-
-        ///<summary>
-        /// Gets the full path for a given path.
-        ///</summary>
-        ///<param name="path"></param>
-        ///<returns>The full path string</returns>
-        ///<exception cref="ArgumentNullException">if path is null</exception>
-        public static string GetFullPath(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
-            {
-                return System.IO.Path.GetFullPath(path.Substring(4));
-            }
-
-            if (path.StartsWith("\\\\?\\UNC\\"))
-            {
-                return System.IO.Path.GetFullPath(path.Substring(8));
-            }
-
-            if (path.StartsWith("file:///"))
-            {
-                return new Uri(path).LocalPath;
-            }
-
-            return System.IO.Path.GetFullPath(path);
-        }
-
-        /// <summary>
-        /// Removes the last directory/file off the path.
-        ///
-        /// For a path "/a/b/c" would return "/a/b"
-        /// or for "\\?\C:\folderA\folder\B\C\d.txt" would return "\\?\C:\folderA\folder\B\C"
-        /// </summary>
-        /// <param name="path">The path string to modify</param>
-        /// <returns></returns>
-        public static string GetPathWithoutLastBit(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            var chars = new List<char>(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar });
-
-            var endsWithSlash = false;
-            var secondLast = -1;
-            var last = -1;
-            var lastType = chars[0];
-
-            for (var i = 0; i < path.Length; i++)
-            {
-                if (i == path.Length - 1 && chars.Contains(path[i]))
-                {
-                    endsWithSlash = true;
-                }
-
-                if (!chars.Contains(path[i]))
-                {
-                    continue;
-                }
-
-                secondLast = last;
-                last = i;
-                lastType = path[i];
-            }
-
-            if (last == -1)
-            {
-                throw new ArgumentException(string.Format("Could not find a path separator character in the path \"{0}\"", path));
-            }
-
-            var res = path.Substring(0, endsWithSlash ? secondLast : last);
-            return res == string.Empty ? new string(lastType, 1) : res;
-        }
-
-        public static string GetFileName(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (path == string.Empty)
-            {
-                throw new ArgumentException("path musn't be null", "path");
-            }
-
-            if (path.EndsWith("/") || path.EndsWith("\\"))
-            {
-                return string.Empty;
-            }
-
-            var nonRoot = PathInfo.Parse(path).FolderAndFiles;
-
-            int strIndex;
-
-            // resharper is wrong that you can transform this to a ternary operator.
-            if ((strIndex = nonRoot.LastIndexOfAny(new[] {
-                                                            DirectorySeparatorChar, AltDirectorySeparatorChar })) != -1)
-            {
-                return nonRoot.Substring(strIndex + 1);
-            }
-
-            return nonRoot;
-        }
-
-        public static bool HasExtension(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (path == string.Empty)
-            {
-                throw new ArgumentException("Path musn't be empty.", "path");
-            }
-
-            return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
-        }
-
-        public static string GetExtension(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (path == string.Empty)
-            {
-                throw new ArgumentException("Path musn't be empty.", "path");
-            }
-
-            var fn = GetFileName(path);
-            var lastPeriod = fn.LastIndexOf('.');
-            return lastPeriod == -1 ? string.Empty : fn.Substring(lastPeriod + 1);
-        }
-
-        public static string GetFileNameWithoutExtension(string path)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            var filename = GetFileName(path);
-            var lastPeriod = filename.LastIndexOf('.');
-            return lastPeriod == -1 ? filename : filename.Substring(0, lastPeriod);
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetRandomFileName()
         {
             return System.IO.Path.GetRandomFileName();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char[] GetInvalidPathChars()
         {
             return System.IO.Path.GetInvalidPathChars();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char[] GetInvalidFileNameChars()
         {
             return System.IO.Path.GetInvalidFileNameChars();
         }
 
-        public static char DirectorySeparatorChar => System.IO.Path.DirectorySeparatorChar;
-
-        public static char AltDirectorySeparatorChar => System.IO.Path.AltDirectorySeparatorChar;
-
-        public static char[] GetDirectorySeparatorChars()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string TrimEndingDirectorySeparator(string path)
         {
-            return new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
+            return path.TrimEnd(DirectorySeparatorChars);
         }
     }
 }
