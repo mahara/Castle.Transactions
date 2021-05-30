@@ -15,356 +15,245 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
 
-using Castle.Core;
 using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction
 {
     public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDisposable
     {
-        private readonly IList<IResource> _Resources = new List<IResource>();
-        private readonly IList<ISynchronization> _SyncInfo = new List<ISynchronization>();
+        private readonly List<IResource> _resources = new();
+        private readonly List<ISynchronization> _synchronizationObjects = new();
 
-        protected readonly string theName;
-        private TransactionScope _AmbientTransaction;
-        private volatile bool _CanCommit;
+        protected readonly string InnerName;
 
-        protected TransactionBase(string name, TransactionMode mode, IsolationMode isolationMode)
+        private TransactionScope _ambientTransaction;
+        private volatile bool _canCommit;
+
+        protected TransactionBase(string name,
+                                  TransactionMode transactionMode,
+                                  IsolationMode isolationMode)
         {
-            theName = name ?? string.Empty;
-            TransactionMode = mode;
+            InnerName = name ?? string.Empty;
+            TransactionMode = transactionMode;
             IsolationMode = isolationMode;
             Status = TransactionStatus.NoTransaction;
-            Context = new Hashtable();
+            Context = new Dictionary<string, object>();
+        }
+
+        public virtual void Dispose()
+        {
+            _resources.Select(r => r as IDisposable)
+                      .Where(r => r != null)
+                      .ForEach(r => r.Dispose());
+
+            _resources.Clear();
+            _synchronizationObjects.Clear();
+
+            if (_ambientTransaction != null)
+            {
+                DisposeAmbientTransaction();
+            }
+
+            GC.SuppressFinalize(this);
         }
 
         public ILogger Logger { get; set; } = NullLogger.Instance;
 
-        #region Nice-to-have properties
+        public virtual string Name =>
+            string.IsNullOrEmpty(InnerName) ?
+            $"{nameof(Transaction)} #{GetHashCode()}" :
+            InnerName;
 
-        /// <summary>
-        /// Returns the current transaction status.
-        /// </summary>
-        public TransactionStatus Status { get; private set; }
-
-        /// <summary>
-        /// Transaction context. Can be used by applications.
-        /// </summary>
-        public IDictionary Context { get; private set; }
-
-        ///<summary>
-        /// Gets whether the transaction is a child transaction or not.
-        ///</summary>
-        public virtual bool IsChildTransaction => false;
-
-        /// <summary>
-        /// <see cref="ITransaction.IsAmbient"/>.
-        /// </summary>
-        public abstract bool IsAmbient { get; protected set; }
-
-        /// <summary>
-        /// <see cref="ITransaction.IsReadOnly"/>.
-        /// </summary>
-        public abstract bool IsReadOnly { get; protected set; }
-
-        /// <summary>
-        /// Gets whether rollback only is set.
-        /// </summary>
-        public virtual bool IsRollbackOnlySet => !_CanCommit;
-
-        ///<summary>
-        /// Gets the transaction mode of the transaction.
-        ///</summary>
         public TransactionMode TransactionMode { get; }
 
-        ///<summary>
-        /// Gets the isolation mode of the transaction.
-        ///</summary>
         public IsolationMode IsolationMode { get; }
 
-        ///<summary>
-        /// Gets the name of the transaction.
-        ///</summary>
-        public virtual string Name => string.IsNullOrEmpty(theName)
-                        ? string.Format("Tx #{0}", GetHashCode())
-                        : theName;
+        public TransactionStatus Status { get; private set; }
+
+        public IDictionary<string, object> Context { get; private set; }
+
+        public abstract bool IsAmbient { get; protected set; }
+
+        public virtual bool IsChildTransaction => false;
+
+        public abstract bool IsReadOnly { get; protected set; }
+
+        public virtual bool IsRollbackOnlySet => !_canCommit;
+
+        public void CreateAmbientTransaction()
+        {
+            _ambientTransaction = new TransactionScope();
+
+            Logger.Debug($"Created a '{nameof(TransactionScope)}' (Ambient Transaction) for '{Name}'.");
+        }
+
+        private void DisposeAmbientTransaction()
+        {
+            _ambientTransaction.Dispose();
+            _ambientTransaction = null;
+        }
 
         public ChildTransaction CreateChildTransaction()
         {
-            // opposite to what old code things, I don't think we need
-            // to have a list of child transactions since we never use them.
+            // The opposite to what old code things,
+            // I don't think we need to have a list of child transactions since we never use them.
             return new ChildTransaction(this);
         }
 
-        #endregion
-
-        #region IDisposable Members
-
-        public virtual void Dispose()
-        {
-            _Resources.Select(r => r as IDisposable)
-                .Where(r => r != null)
-                .ForEach(r => r.Dispose());
-
-            _Resources.Clear();
-            _SyncInfo.Clear();
-
-            if (_AmbientTransaction != null)
-            {
-                DisposeAmbientTx();
-            }
-        }
-
-        #endregion
-
-        #region ITransaction Members
-
-        /// <summary>
-        /// <see cref="ITransaction.Begin"/>.
-        /// </summary>
         public virtual void Begin()
         {
             AssertState(TransactionStatus.NoTransaction);
+
             Status = TransactionStatus.Active;
 
             Logger.TryLogFail(InnerBegin)
-                .Exception(e =>
-                {
-                    _CanCommit = false;
-                    throw new TransactionException("Could not begin transaction.", e);
-                })
-                .Success(() => _CanCommit = true);
+                  .Exception(ex =>
+                             {
+                                 _canCommit = false;
 
-            foreach (var r in _Resources)
+                                 throw new TransactionException("Could not begin transaction.", ex);
+                             })
+                  .Success(() => _canCommit = true);
+
+            foreach (var r in _resources)
             {
                 try
                 {
                     r.Start();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     SetRollbackOnly();
-                    throw new CommitResourceException("Transaction could not commit because of a failed resource.",
-                                                      e, r);
+
+                    throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                 }
             }
         }
 
-        /// <summary>
-        /// Succeed the transaction, persisting the
-        ///             modifications
-        /// </summary>
         public virtual void Commit()
         {
-            if (!_CanCommit)
+            if (!_canCommit)
             {
                 throw new TransactionException("Rollback only was set.");
             }
 
             AssertState(TransactionStatus.Active);
-            Status = TransactionStatus.Committed;
 
             var commitFailed = false;
 
             try
             {
-                _SyncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
+                _synchronizationObjects.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
-                foreach (var r in _Resources)
+                foreach (var r in _resources)
                 {
                     try
                     {
-                        Logger.DebugFormat("Resource: " + r);
+                        Logger.Debug($"Resource: {r}");
 
                         r.Commit();
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         SetRollbackOnly();
+
                         commitFailed = true;
 
-                        Logger.ErrorFormat("Resource state: " + r);
+                        Logger.Error($"Resource state: {r}");
 
-                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", e, r);
+                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                     }
                 }
 
-                Logger
-                    .TryLogFail(InnerCommit)
-                    .Exception(e =>
-                    {
-                        commitFailed = true;
-                        throw new TransactionException("Could not commit", e);
-                    });
+                Logger.TryLogFail(InnerCommit)
+                      .Exception(ex =>
+                                 {
+                                     commitFailed = true;
+
+                                     throw new TransactionException("Could not commit.", ex);
+                                 });
             }
             finally
             {
                 if (!commitFailed)
                 {
-                    if (_AmbientTransaction != null)
+                    if (_ambientTransaction != null)
                     {
-                        Logger.DebugFormat("Commiting TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                        Logger.Debug($"Committing '{nameof(TransactionScope)}' (Ambient Transaction) for '{Name}'.");
 
-                        _AmbientTransaction.Complete();
-                        DisposeAmbientTx();
+                        _ambientTransaction.Complete();
+
+                        DisposeAmbientTransaction();
                     }
 
-                    _SyncInfo.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
+                    _synchronizationObjects.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
+
+                    Status = TransactionStatus.Committed;
                 }
             }
         }
 
-        /// <summary>
-        /// See <see cref="ITransaction.Rollback"/>.
-        /// </summary>
         public virtual void Rollback()
         {
             AssertState(TransactionStatus.Active);
+
             Status = TransactionStatus.RolledBack;
-            _CanCommit = false;
 
-            var failures = new List<Pair<IResource, Exception>>();
+            _canCommit = false;
 
-            Exception toThrow = null;
+            var failures = new List<(IResource, Exception)>();
 
-            _SyncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
+            Exception exceptionToThrow = null;
 
-            Logger
-                .TryLogFail(InnerRollback)
-                .Exception(e => toThrow = e);
+            _synchronizationObjects.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
+
+            Logger.TryLogFail(InnerRollback)
+                  .Exception(ex => exceptionToThrow = ex);
 
             try
             {
-                _Resources.ForEach(r =>
-                                  Logger.TryLogFail(r.Rollback)
-                                    .Exception(e => failures.Add(r.And(e))));
+                _resources.ForEach(r =>
+                                   Logger.TryLogFail(r.Rollback)
+                                         .Exception(ex => failures.Add((r, ex))));
 
                 if (failures.Count == 0)
                 {
                     return;
                 }
 
-                if (toThrow == null)
+                if (exceptionToThrow == null)
                 {
                     throw new RollbackResourceException(
-                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details",
+                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details.",
                         failures);
                 }
 
-                throw toThrow;
+                throw exceptionToThrow;
             }
             finally
             {
-                if (_AmbientTransaction != null)
+                if (_ambientTransaction != null)
                 {
-                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                    Logger.Debug($"Rolling back '{nameof(TransactionScope)}' (Ambient Transaction) for '{Name}'.");
 
-                    DisposeAmbientTx();
+                    DisposeAmbientTransaction();
                 }
 
-                _SyncInfo.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
+                _synchronizationObjects.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
             }
         }
 
-        /// <summary>
-        /// Signals that this transaction can only be rolledback.
-        ///             This is used when the transaction is not being managed by
-        ///             the callee.
-        /// </summary>
         public virtual void SetRollbackOnly()
         {
-            _CanCommit = false;
-        }
-
-        #endregion
-
-        #region Resources
-
-        /// <summary>
-        /// Register a participant on the transaction.
-        /// </summary>
-        /// <param name="resource"/>
-        public virtual void Enlist(IResource resource)
-        {
-            if (resource == null)
-            {
-                throw new ArgumentNullException("resource");
-            }
-
-            if (_Resources.Contains(resource))
-            {
-                return;
-            }
-
-            if (Status == TransactionStatus.Active)
-            {
-                Logger.TryLogFail(resource.Start).Exception(_ => SetRollbackOnly());
-            }
-
-            _Resources.Add(resource);
+            _canCommit = false;
         }
 
         /// <summary>
-        /// Registers a synchronization object that will be
-        ///             invoked prior and after the transaction completion
-        ///             (commit or rollback)
-        /// </summary>
-        /// <param name="s"/>
-        public virtual void RegisterSynchronization(ISynchronization s)
-        {
-            if (s == null)
-            {
-                throw new ArgumentNullException("s");
-            }
-
-            if (_SyncInfo.Contains(s))
-            {
-                return;
-            }
-
-            _SyncInfo.Add(s);
-        }
-
-        public IEnumerable<IResource> Resources()
-        {
-            foreach (var resource in _Resources.ToList())
-            {
-                yield return resource;
-            }
-        }
-
-        #endregion
-
-        #region utils
-
-        protected void AssertState(TransactionStatus status)
-        {
-            AssertState(status, null);
-        }
-
-        protected void AssertState(TransactionStatus status, string msg)
-        {
-            if (status != Status)
-            {
-                if (!string.IsNullOrEmpty(msg))
-                {
-                    throw new TransactionException(msg);
-                }
-
-                throw new TransactionException(string.Format("State failure; should have been {0} but was {1}",
-                                                             status, Status));
-            }
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Implementors set <see cref="Status"/>.
+        /// Implementors set <see cref="Status" />.
         /// </summary>
         protected abstract void InnerBegin();
 
@@ -378,17 +267,67 @@ namespace Castle.Services.Transaction
         /// </summary>
         protected abstract void InnerRollback();
 
-        private void DisposeAmbientTx()
+        public virtual void Enlist(IResource resource)
         {
-            _AmbientTransaction.Dispose();
-            _AmbientTransaction = null;
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (_resources.Contains(resource))
+            {
+                return;
+            }
+
+            if (Status == TransactionStatus.Active)
+            {
+                Logger.TryLogFail(resource.Start)
+                      .Exception(_ => SetRollbackOnly());
+            }
+
+            _resources.Add(resource);
         }
 
-        public void CreateAmbientTransaction()
+        public virtual void RegisterSynchronization(ISynchronization synchronization)
         {
-            _AmbientTransaction = new TransactionScope();
+            if (synchronization == null)
+            {
+                throw new ArgumentNullException(nameof(synchronization));
+            }
 
-            Logger.DebugFormat("Created a TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+            if (_synchronizationObjects.Contains(synchronization))
+            {
+                return;
+            }
+
+            _synchronizationObjects.Add(synchronization);
+        }
+
+        public IEnumerable<IResource> GetResources()
+        {
+            foreach (var resource in _resources.ToList())
+            {
+                yield return resource;
+            }
+        }
+
+        protected void AssertState(TransactionStatus status)
+        {
+            AssertState(status, null);
+        }
+
+        protected void AssertState(TransactionStatus status, string message)
+        {
+            if (status != Status)
+            {
+                if (!string.IsNullOrEmpty(message))
+                {
+                    throw new TransactionException(message);
+                }
+
+                throw new TransactionException(
+                    $"State failure: expected '{status}', but was '{Status}'.");
+            }
         }
     }
 }

@@ -20,41 +20,39 @@ using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction.IO
 {
-    ///<summary>
-    /// Adapter base class for the file and directory adapters.
-    ///</summary>
+    /// <summary>
+    /// Adapter base class for the directory and file adapters.
+    /// </summary>
     public abstract class TransactionAdapterBase
     {
-        private readonly bool _AllowOutsideSpecifiedFolder;
-        private readonly string _SpecifiedFolder;
+        private readonly bool _allowOutsideSpecifiedDirectory;
+        private readonly string _specifiedDirectory;
 
-        protected TransactionAdapterBase(bool constrainToSpecifiedDir,
-                                string specifiedDir)
+        protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
+                                         string specifiedDirectory)
         {
-            if (constrainToSpecifiedDir && specifiedDir == null)
+            if (constrainToSpecifiedDirectory)
             {
-                throw new ArgumentNullException("specifiedDir");
+                if (string.IsNullOrEmpty(specifiedDirectory))
+                {
+                    throw new ArgumentException($"'{nameof(specifiedDirectory)}' cannot be null or empty.", nameof(specifiedDirectory));
+                }
             }
 
-            if (constrainToSpecifiedDir && specifiedDir == string.Empty)
-            {
-                throw new ArgumentException("The specifified directory was empty.");
-            }
-
-            _AllowOutsideSpecifiedFolder = !constrainToSpecifiedDir;
-            _SpecifiedFolder = specifiedDir;
+            _allowOutsideSpecifiedDirectory = !constrainToSpecifiedDirectory;
+            _specifiedDirectory = specifiedDirectory;
         }
 
         public ILogger Logger { get; set; } = NullLogger.Instance;
 
         /// <summary>
-        /// Gets the transaction manager, if there is one, or sets it.
+        /// Gets the transaction manager if there is one, or sets it.
         /// </summary>
         public ITransactionManager TransactionManager { get; set; }
 
-        ///<summary>
-        /// Gets/sets whether to use transactions.
-        ///</summary>
+        /// <summary>
+        /// Gets or sets whether to use transactions.
+        /// </summary>
         public bool UseTransactions { get; set; } = true;
 
         public bool OnlyJoinExisting { get; set; }
@@ -68,23 +66,26 @@ namespace Castle.Services.Transaction.IO
                 return false;
             }
 
-            if (this.TransactionManager != null && this.TransactionManager.CurrentTransaction != null)
+            if (TransactionManager is ITransactionManager transactionManager &&
+                transactionManager.CurrentTransaction is ITransaction currentTransaction)
             {
-                foreach (var resource in this.TransactionManager.CurrentTransaction.Resources())
+                foreach (var resource in currentTransaction.GetResources())
                 {
                     if (!(resource is FileResourceAdapter))
                     {
                         continue;
                     }
 
-                    transaction = (resource as FileResourceAdapter).Transaction;
+                    transaction = ((FileResourceAdapter) resource).Transaction;
+
                     return true;
                 }
 
                 if (!OnlyJoinExisting)
                 {
-                    transaction = new FileTransaction("Autocreated File Transaction");
-                    this.TransactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
+                    transaction = new FileTransaction("autocreated_file_transaction");
+                    currentTransaction.Enlist(new FileResourceAdapter(transaction));
+
                     return true;
                 }
             }
@@ -92,47 +93,47 @@ namespace Castle.Services.Transaction.IO
             return false;
         }
 
-        protected internal bool IsInAllowedDir(string path)
+        protected internal bool IsInAllowedDirectory(string path)
         {
-            if (_AllowOutsideSpecifiedFolder)
+            if (_allowOutsideSpecifiedDirectory)
             {
                 return true;
             }
 
             var tentativePath = PathInfo.Parse(path);
 
-            // if the given non-root is empty, we are looking at a relative path
+            // If the given non-root is empty, we are looking at a relative path.
             if (string.IsNullOrEmpty(tentativePath.Root))
             {
                 return true;
             }
 
-            var specifiedPath = PathInfo.Parse(_SpecifiedFolder);
+            var specifiedPath = PathInfo.Parse(_specifiedDirectory);
 
-            // they must be on the same drive.
-            if (!string.IsNullOrEmpty(tentativePath.DriveLetter)
-                && specifiedPath.DriveLetter != tentativePath.DriveLetter)
+            // They must be on the same drive.
+            if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
+                specifiedPath.DriveLetter != tentativePath.DriveLetter)
             {
                 return false;
             }
 
-            // we do not allow access to directories outside of the specified directory.
+            // We do not allow access to directories outside of the specified directory.
             return specifiedPath.IsParentOf(tentativePath);
         }
 
         protected void AssertAllowed(string path)
         {
-            if (_AllowOutsideSpecifiedFolder)
+            if (_allowOutsideSpecifiedDirectory)
             {
                 return;
             }
 
             var fullPath = Path.GetFullPath(path);
 
-            if (!IsInAllowedDir(fullPath))
+            if (!IsInAllowedDirectory(fullPath))
             {
                 throw new UnauthorizedAccessException(
-                    string.Format("Authorization required for handling path \"{0}\" (passed as \"{1}\")", fullPath, path));
+                    $"Authorization required for handling path '{fullPath}' (passed as '{path}').");
             }
         }
     }

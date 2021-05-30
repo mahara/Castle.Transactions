@@ -21,29 +21,39 @@ using NUnit.Framework;
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    [Transactional]
-    public class AClass : ISomething
+    public interface ITransactionManagerService
     {
-        public AClass(IDirectoryAdapter da, IFileAdapter fa)
+        IDirectoryAdapter DA { get; }
+        IFileAdapter FA { get; }
+
+        void A(ITransaction transaction);
+        void B(ITransaction transaction);
+    }
+
+    [Transactional]
+    public class TransactionManagerService : ITransactionManagerService
+    {
+        public TransactionManagerService(IDirectoryAdapter da, IFileAdapter fa)
         {
-            Da = da;
-            Fa = fa;
+            DA = da;
+            FA = fa;
         }
 
-        public IDirectoryAdapter Da { get; }
+        public IDirectoryAdapter DA { get; }
 
-        public IFileAdapter Fa { get; }
+        public IFileAdapter FA { get; }
 
         [Transaction]
-        public void A(ITransaction tx)
+        public void A(ITransaction transaction)
         {
-            Assert.That(tx, Is.Null);
+            Assert.That(transaction, Is.Null);
         }
 
-        [Transaction, InjectTransaction]
-        public void B(ITransaction tx)
+        [Transaction]
+        [InjectTransaction]
+        public void B(ITransaction transaction)
         {
-            Assert.That(tx, Is.Not.Null);
+            Assert.That(transaction, Is.Not.Null);
         }
     }
 }
