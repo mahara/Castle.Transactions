@@ -23,28 +23,25 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Castle.Services.Transaction
 {
-    ///<summary>
+    /// <summary>
     /// A safe file handle on the transaction resource.
-    ///</summary>
-
+    /// </summary>
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        /// <summary>
-        /// Default c'tor
-        /// </summary>
-        public SafeTransactionHandle() : base(true)
+        public SafeTransactionHandle() :
+            base(true)
         {
         }
 
-        ///<summary>
-        /// c'tor taking a pointer to a transaction.
-        ///</summary>
-        ///<param name="handle">The transactional handle.</param>
+        /// <summary>
+        /// Constructor for taking a pointer to a transaction.
+        /// </summary>
+        /// <param name="handle">The transactional handle.</param>
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        public SafeTransactionHandle(IntPtr handle)
-            : base(true)
+        public SafeTransactionHandle(IntPtr handle) :
+            base(true)
         {
             base.handle = handle;
         }
@@ -59,13 +56,12 @@ namespace Castle.Services.Transaction
             return IsInvalid || IsClosed;
         }
 
-        /* BOOL WINAPI CloseHandle(
+        /*
+         * BOOL WINAPI CloseHandle(
          *      __in  HANDLE hObject
          * );
          */
         [DllImport("kernel32.dll")]
-        //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        //[SuppressUnmanagedCodeSecurity]
         private static extern bool CloseHandle(IntPtr handle);
     }
 }

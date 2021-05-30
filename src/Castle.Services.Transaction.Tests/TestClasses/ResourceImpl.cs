@@ -20,51 +20,49 @@ namespace Castle.Services.Transaction.Tests
 {
     public class ResourceImpl : IResource, IDisposable
     {
-        public bool wasDisposed;
+        public bool WasDisposed;
 
         public bool Started { get; private set; }
 
-        public bool Rolledback { get; private set; }
-
         public bool Committed { get; private set; }
 
-        #region IResource Members
+        public bool Rolledback { get; private set; }
+
+        public void Dispose()
+        {
+            WasDisposed = true;
+
+            GC.SuppressFinalize(this);
+        }
 
         public virtual void Start()
         {
             if (Started)
             {
-                throw new ApplicationException("Start called before");
+                throw new ApplicationException("Start called before.");
             }
 
             Started = true;
-        }
-
-        public virtual void Rollback()
-        {
-            if (Rolledback)
-            {
-                throw new ApplicationException("Rollback called before");
-            }
-
-            Rolledback = true;
         }
 
         public virtual void Commit()
         {
             if (Committed)
             {
-                throw new ApplicationException("Commit called before");
+                throw new ApplicationException("Commit called before.");
             }
 
             Committed = true;
         }
 
-        #endregion
-
-        public void Dispose()
+        public virtual void Rollback()
         {
-            wasDisposed = true;
+            if (Rolledback)
+            {
+                throw new ApplicationException("Rollback called before.");
+            }
+
+            Rolledback = true;
         }
     }
 }

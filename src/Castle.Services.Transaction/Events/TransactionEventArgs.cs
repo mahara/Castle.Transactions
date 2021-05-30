@@ -23,9 +23,9 @@ namespace Castle.Services.Transaction
     /// </summary>
     public class TransactionEventArgs : EventArgs
     {
-        public TransactionEventArgs(ITransaction tx)
+        public TransactionEventArgs(ITransaction transaction)
         {
-            Transaction = tx;
+            Transaction = transaction;
         }
 
         public ITransaction Transaction { get; }

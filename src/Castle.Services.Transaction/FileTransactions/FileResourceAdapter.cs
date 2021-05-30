@@ -18,57 +18,41 @@ using System;
 
 namespace Castle.Services.Transaction
 {
-    ///<summary>
+    /// <summary>
     /// A resource adapter for a file transaction.
-    ///</summary>
+    /// </summary>
     public class FileResourceAdapter : IResource, IDisposable
     {
-
-        ///<summary>
-        /// c'tor
-        ///</summary>
-        ///<param name="transaction"></param>
         public FileResourceAdapter(IFileTransaction transaction)
         {
             Transaction = transaction;
         }
 
+        public void Dispose()
+        {
+            Transaction.Dispose();
+
+            GC.SuppressFinalize(this);
+        }
+
         /// <summary>
-        /// Gets the transaction this resouce adapter is an
-        /// adapter for.
+        /// Gets the transaction this resouce adapter is an adapter for.
         /// </summary>
         public IFileTransaction Transaction { get; }
 
-        /// <summary>
-        /// Implementors should start the
-        ///             transaction on the underlying resource
-        /// </summary>
         public void Start()
         {
             Transaction.Begin();
         }
 
-        /// <summary>
-        /// Implementors should commit the
-        ///             transaction on the underlying resource
-        /// </summary>
         public void Commit()
         {
             Transaction.Commit();
         }
 
-        /// <summary>
-        /// Implementors should rollback the
-        ///             transaction on the underlying resource
-        /// </summary>
         public void Rollback()
         {
             Transaction.Rollback();
-        }
-
-        public void Dispose()
-        {
-            Transaction.Dispose();
         }
     }
 }

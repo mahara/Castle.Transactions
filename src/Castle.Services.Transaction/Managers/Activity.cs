@@ -22,19 +22,24 @@ namespace Castle.Services.Transaction
     [Serializable]
     public class Activity : MarshalByRefObject
     {
-        private Guid id = Guid.NewGuid();
-        private readonly Stack<ITransaction> _TransactionStack = new Stack<ITransaction>(2);
+        private static readonly int _transactionStackInitialCapacity = 8;
 
-        public ITransaction CurrentTransaction => _TransactionStack.Count == 0 ? null : _TransactionStack.Peek();
+        private readonly Guid _id = Guid.NewGuid();
+        private readonly Stack<ITransaction> _transactionStack = new(_transactionStackInitialCapacity);
+
+        public ITransaction CurrentTransaction =>
+            _transactionStack.Count > 0 ?
+            _transactionStack.Peek() :
+            null;
 
         public void Push(ITransaction transaction)
         {
-            _TransactionStack.Push(transaction);
+            _transactionStack.Push(transaction);
         }
 
         public ITransaction Pop()
         {
-            return _TransactionStack.Pop();
+            return _transactionStack.Pop();
         }
 
         public override bool Equals(object obj)
@@ -49,12 +54,12 @@ namespace Castle.Services.Transaction
                 return false;
             }
 
-            return Equals(id, activity.id);
+            return Equals(_id, activity._id);
         }
 
         public override int GetHashCode()
         {
-            return id.GetHashCode();
+            return HashCode.Combine(_id);
         }
     }
 }
