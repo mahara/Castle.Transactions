@@ -23,73 +23,103 @@ using Castle.Services.Transaction.IO;
 namespace Castle.Facilities.AutoTx
 {
     /// <summary>
-    /// Augments the kernel to handle transactional components
+    /// Augments the kernel to handle transactional components.
     /// </summary>
     public class AutoTxFacility : AbstractFacility
     {
+        //public const string TransactionInterceptor_ComponentName = "transaction.interceptor";
+        //public const string TransactionMetaInfoStore_ComponentName = "transaction.metainfostore";
+        //public const string DirectoryAdapterPathMapper_ComponentName = "directory.adapter.pathmapper";
+        //public const string DirectoryAdapter_ComponentName = "directory.adapter";
+        //public const string FileAdapter_ComponentName = "file.adapter";
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
         public AutoTxFacility()
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="allowAccessOutsideRootFolder"><see cref="AllowAccessOutsideRootFolder"/></param>
-        /// <param name="rootFolder"></param>
-        public AutoTxFacility(bool allowAccessOutsideRootFolder,
-                                   string rootFolder)
+        public AutoTxFacility(bool allowAccessOutsideRootDirectory,
+                              string rootDirectory)
         {
-            AllowAccessOutsideRootFolder = allowAccessOutsideRootFolder;
-            RootFolder = rootFolder;
+            AllowAccessOutsideRootDirectory = allowAccessOutsideRootDirectory;
+            RootDirectory = rootDirectory;
+        }
+
+        protected override void Dispose()
+        {
+            Kernel.ComponentRegistered -= Kernel_ComponentRegistered;
+
+            base.Dispose();
         }
 
         /// <summary>
-        /// This triggers a new file adapter / directory adapter to be created.
+        /// Gets or sets a value indicating whether to allow access outside root directory property.
         /// </summary>
-        public bool AllowAccessOutsideRootFolder { get; set; } = true;
+        /// <remarks>
+        /// This will trigger a new directory/file adapter to be created.
+        /// </remarks>
+        public bool AllowAccessOutsideRootDirectory { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the root folder for file transactions.
+        /// Gets or sets the root directory for file transactions.
         /// </summary>
-        public string RootFolder { get; set; }
+        public string RootDirectory { get; set; }
 
         /// <summary>
-        /// Registers the interceptor component, the metainfo store and
-        /// adds a contributor to the ModelBuilder
+        /// Registers the <see cref="TransactionInterceptor" />,
+        /// the <see cref="TransactionMetaInfoStore" />,
+        /// and adds a contributor to the ModelBuilder.
         /// </summary>
         protected override void Init()
         {
             AssertHasDirectories();
 
+            //
+            //  NOTE:   Naming the following components using Named() method,
+            //          especially TransactionInterceptor,
+            //          will cause property dependencies of a resolved instance
+            //          not being injected in NHibernateFacility.
+            //
             Kernel.Register(
-                Component.For<TransactionInterceptor>(), //.Named("transaction.interceptor"),
-                Component.For<TransactionMetaInfoStore>().Named("transaction.MetaInfoStore"),
-                Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mappath")
-                );
+                //Component.For<TransactionInterceptor>()
+                //         .Named(TransactionInterceptor_ComponentName),
+                Component.For<TransactionInterceptor>(),
+                //Component.For<TransactionMetaInfoStore>()
+                //         .Named(TransactionMetaInfoStore_ComponentName),
+                Component.For<TransactionMetaInfoStore>(),
+                //Component.For<IPathMapper>()
+                //         .ImplementedBy<PathMapper>()
+                //         .Named(DirectoryAdapterPathMapper_ComponentName));
+                Component.For<IPathMapper>()
+                         .ImplementedBy<PathMapper>());
 
             RegisterAdapters();
 
             Kernel.ComponentModelBuilder.AddContributor(new TransactionComponentInspector());
-
         }
 
         private void RegisterAdapters()
         {
             var directoryAdapter = new DirectoryAdapter(
-                Kernel.Resolve<IMapPath>(),
-                !AllowAccessOutsideRootFolder,
-                RootFolder);
+                Kernel.Resolve<IPathMapper>(),
+                !AllowAccessOutsideRootDirectory,
+                RootDirectory);
 
-            Kernel.Register(Component.For<IDirectoryAdapter>().Named("directory.adapter").Instance(directoryAdapter));
+            Kernel.Register(
+                //Component.For<IDirectoryAdapter>()
+                //         .Named(DirectoryAdapter_ComponentName)
+                //         .Instance(directoryAdapter));
+                Component.For<IDirectoryAdapter>()
+                         .Instance(directoryAdapter));
 
             var fileAdapter = new FileAdapter(
-                !AllowAccessOutsideRootFolder,
-                RootFolder);
-            Kernel.Register(Component.For<IFileAdapter>().Named("file.adapter").Instance(fileAdapter));
+                !AllowAccessOutsideRootDirectory,
+                RootDirectory);
+            Kernel.Register(
+                //Component.For<IFileAdapter>()
+                //         .Named(FileAdapter_ComponentName)
+                //         .Instance(fileAdapter));
+                Component.For<IFileAdapter>()
+                         .Instance(fileAdapter));
 
             if (Kernel.HasComponent(typeof(ITransactionManager)))
             {
@@ -101,32 +131,23 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private void Kernel_ComponentRegistered(string key, Castle.MicroKernel.IHandler handler)
+        private void Kernel_ComponentRegistered(string key, MicroKernel.IHandler handler)
         {
             foreach (var service in handler.ComponentModel.Services)
             {
                 if (service.IsAssignableFrom(typeof(ITransactionManager)))
                 {
-                    var transactionManager = this.Kernel.Resolve<ITransactionManager>();
+                    var manager = Kernel.Resolve<ITransactionManager>();
 
-                    ((DirectoryAdapter) this.Kernel.Resolve<IDirectoryAdapter>()).TransactionManager = transactionManager;
-                    ((FileAdapter) this.Kernel.Resolve<IFileAdapter>()).TransactionManager = transactionManager;
+                    ((DirectoryAdapter) Kernel.Resolve<IDirectoryAdapter>()).TransactionManager = manager;
+                    ((FileAdapter) Kernel.Resolve<IFileAdapter>()).TransactionManager = manager;
                 }
             }
         }
 
-        /// <summary>
-        /// Disposes the facilitiy.
-        /// </summary>
-        protected override void Dispose()
-        {
-            Kernel.ComponentRegistered -= Kernel_ComponentRegistered;
-            base.Dispose();
-        }
-
         private void AssertHasDirectories()
         {
-            if (!AllowAccessOutsideRootFolder && RootFolder == null)
+            if (!AllowAccessOutsideRootDirectory && RootDirectory == null)
             {
                 throw new FacilityException("You have to specify a root directory.");
             }

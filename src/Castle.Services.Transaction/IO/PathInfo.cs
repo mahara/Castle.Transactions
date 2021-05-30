@@ -22,11 +22,12 @@ namespace Castle.Services.Transaction.IO
 {
     /// <summary>
     /// Path data holder.
-    /// Invariant: no fields nor properties are null after c'tor.
+    /// Invariant: no fields nor properties are null after constructor.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1815:Override equals and operator equals on value types", Justification = "CA1815")]
     public struct PathInfo
     {
-        private const string _StrRegex =
+        private const string RegexPattern =
             @"(?<root>
  (?<UNC_prefix> \\\\\?\\ (?<UNC_literal>UNC\\)?  )?
  (?<options>
@@ -42,9 +43,9 @@ namespace Castle.Services.Transaction.IO
     )\\
   )
   |(?<device>
-   (?<dev_prefix>\\\\\.\\)
-   ((?<dev_name>[\w\-]+)
-    |(?<dev_guid>\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\})
+   (?<device_prefix>\\\\\.\\)
+   ((?<device_name>[\w\-]+)
+    |(?<device_guid>\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\})
     )\\
   )
   |/
@@ -53,14 +54,14 @@ namespace Castle.Services.Transaction.IO
 )?
 (?<nonrootpath>
  (?!\\)
- (?<rel_drive>\w{1,3}:)?
- (?<folders_files>.+))?";
+ (?<relative_drive>\w{1,3}:)?
+ (?<directory_file>.+))?";
 
-        private static readonly Regex _Regex;
+        private static readonly Regex _regex;
 
         static PathInfo()
         {
-            _Regex = new Regex(_StrRegex,
+            _regex = new Regex(RegexPattern,
                                RegexOptions.Compiled |
                                RegexOptions.IgnorePatternWhitespace |
                                RegexOptions.IgnoreCase |
@@ -71,54 +72,70 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
-            var matches = _Regex.Matches(path);
+            var matches = _regex.Matches(path);
 
-            string m(string s)
+            string Match(string groupName)
             {
-                return GetMatch(matches, s);
+                return GetMatch(matches, groupName);
             }
-            // this might be possible to improve using raw indicies (ints) instead.
+
+            // This might be possible to improve using raw indices (integers) instead.
             return new PathInfo(
-                m("root"),
-                m("UNC_prefix"),
-                m("UNC_literal"),
-                m("options"),
-                m("drive"),
-                m("drive_letter"),
-                m("server"),
-                m("ipv4"),
-                m("ipv6"),
-                m("server_name"),
-                m("device"),
-                m("dev_prefix"),
-                m("dev_name"),
-                m("dev_guid"),
-                m("nonrootpath"),
-                m("rel_drive"),
-                m("folders_files")
-                );
+                Match("root"),
+                Match("UNC_prefix"),
+                Match("UNC_literal"),
+                Match("options"),
+                Match("drive"),
+                Match("drive_letter"),
+                Match("server"),
+                Match("ipv4"),
+                Match("ipv6"),
+                Match("server_name"),
+                Match("device"),
+                Match("device_prefix"),
+                Match("device_name"),
+                Match("device_guid"),
+                Match("nonrootpath"),
+                Match("relative_drive"),
+                Match("directory_file"));
         }
 
-        private static string GetMatch(MatchCollection matches,
-                                       string groupIndex)
+        private static string GetMatch(MatchCollection matches, string groupName)
         {
-            var matchC = matches.Count;
+            var matchesCount = matches.Count;
 
-            for (var i = 0; i < matchC; i++)
+            for (var i = 0; i < matchesCount; i++)
             {
-                if (matches[i].Groups[groupIndex].Success)
+                var matchGroup = matches[i].Groups[groupName];
+                if (matchGroup.Success)
                 {
-                    return matches[i].Groups[groupIndex].Value;
+                    return matchGroup.Value;
                 }
             }
 
             return string.Empty;
         }
 
-        private PathInfo(string root, string uncPrefix, string uncLiteral, string options, string drive, string driveLetter, string server, string iPv4, string iPv6, string serverName, string device, string devicePrefix, string deviceName, string deviceGuid, string nonRootPath, string relDrive, string folderAndFiles)
+        private PathInfo(string root,
+                         string uncPrefix,
+                         string uncLiteral,
+                         string options,
+                         string drive,
+                         string driveLetter,
+                         string server,
+                         string ipv4,
+                         string ipv6,
+                         string serverName,
+                         string device,
+                         string devicePrefix,
+                         string deviceName,
+                         string deviceGuid,
+                         string nonRootPath,
+                         string relativeDrive,
+                         string directoryAndFile)
         {
             Root = root;
             UNCPrefix = uncPrefix;
@@ -127,19 +144,20 @@ namespace Castle.Services.Transaction.IO
             Drive = drive;
             DriveLetter = driveLetter;
             Server = server;
-            IPv4 = iPv4;
-            IPv6 = iPv6;
+            IPv4 = ipv4;
+            IPv6 = ipv6;
             ServerName = serverName;
             Device = device;
             DevicePrefix = devicePrefix;
             DeviceName = deviceName;
             DeviceGuid = deviceGuid;
             NonRootPath = nonRootPath;
-            RelDrive = relDrive;
-            FolderAndFiles = folderAndFiles;
+            RelativeDrive = relativeDrive;
+            DirectoryAndFile = directoryAndFile;
         }
 
         /// <summary>
+        /// Returns part of the string that is in itself uniquely from the currently executing CLR.
         /// Examples of return values:
         /// <list>
         /// <item>\\?\UNC\C:\</item>
@@ -147,42 +165,30 @@ namespace Castle.Services.Transaction.IO
         /// <item>\\192.168.0.2\</item>
         /// <item>C:\</item>
         /// </list>
-        ///
-        /// Definition: Returns part of the string that is in itself uniquely from the currently
-        /// executing CLR.
         /// </summary>
         public string Root { get; }
 
         /// <summary>
-        /// Examples of return values:
-        /// <list>
-        /// <item></item>
-        /// </list>
         /// </summary>
         public string UNCPrefix { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string UNCLiteral { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string Options { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string Drive { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string DriveLetter { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string Server { get; }
 
@@ -192,32 +198,27 @@ namespace Castle.Services.Transaction.IO
         public string IPv4 { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string IPv6 { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string ServerName { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string Device { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string DevicePrefix { get; }
 
         /// <summary>
-        ///
         /// </summary>
         public string DeviceName { get; }
 
         /// <summary>
-        /// Gets the device GUID in the form
+        /// Gets the device GUID in the form of
         /// <code>{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}</code>
         /// i.e. 8-4-4-4-12 hex digits with curly brackets.
         /// </summary>
@@ -225,23 +226,22 @@ namespace Castle.Services.Transaction.IO
 
         /// <summary>
         /// Gets a the part of the path that starts when the root ends.
-        /// The root in turn is any UNC-prefix plus device, drive, server or ip-prefix.
-        /// This string may not start with neither of '\' or '/'.
+        /// The root in turn is any UNC-prefix plus device, drive, server or IP-prefix.
+        /// This string may not start with either '\' or '/'.
         /// </summary>
         public string NonRootPath { get; }
 
         /// <summary>
-        ///
         /// </summary>
-        public string RelDrive { get; }
+        public string RelativeDrive { get; }
 
         /// <summary>
-        /// The only time when this differs from <see cref="NonRootPath"/>
+        /// The only time when this differs from <see cref="NonRootPath" />
         /// is when a path like this is used:
-        /// <code>C:../parent/a.txt</code>, otherwise, for all paths,
-        /// this property equals <see cref="NonRootPath"/>.
+        /// <code>C:../parent/a.txt</code>
+        /// Otherwise, for all paths, this property equals <see cref="NonRootPath" />.
         /// </summary>
-        public string FolderAndFiles { get; }
+        public string DirectoryAndFile { get; }
 
         public PathType Type
         {
@@ -277,15 +277,14 @@ namespace Castle.Services.Transaction.IO
         }
 
         /// <summary>
-        /// Returns whether <see cref="Root"/> is not an empty string.
+        /// Returns whether <see cref="Root" /> is not an empty string.
         /// </summary>
         public bool IsRooted => Root != string.Empty;
 
         /// <summary>
-        /// Returns whether the current PathInfo is a valid parent of the child path info
-        /// passed as argument.
+        /// Returns whether the current <see cref="PathInfo" /> is a valid parent of the child path info passed as argument.
         /// </summary>
-        /// <param name="child">The path info to verify</param>
+        /// <param name="child">The path info to verify.</param>
         /// <returns>Whether it is true that the current path info is a parent of child.</returns>
         /// <exception cref="NotSupportedException">If this instance of path info and child aren't rooted.</exception>
         public bool IsParentOf(PathInfo child)
@@ -295,41 +294,51 @@ namespace Castle.Services.Transaction.IO
                 throw new NotSupportedException("Non-rooted paths are not supported.");
             }
 
-            var OK = child.FolderAndFiles.StartsWith(FolderAndFiles);
+            var result = child.DirectoryAndFile.StartsWith(DirectoryAndFile, StringComparison.OrdinalIgnoreCase);
 
             switch (Type)
             {
                 case PathType.Device:
-                    OK &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
+                    result &= string.Equals(child.DeviceName, DeviceName, StringComparison.OrdinalIgnoreCase);
+
                     break;
+
                 case PathType.Server:
-                    OK &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
+                    result &= string.Equals(child.ServerName, ServerName, StringComparison.OrdinalIgnoreCase);
+
                     break;
+
                 case PathType.IPv4:
-                    OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
+                    result &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
+
                     break;
+
                 case PathType.IPv6:
-                    OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
+                    result &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
+
                     break;
-                case PathType.Relative:
-                    throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
+
                 case PathType.Drive:
-                    OK &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
+                    result &= string.Equals(child.DriveLetter, DriveLetter, StringComparison.OrdinalIgnoreCase);
+
                     break;
+
+                case PathType.Relative:
+                    throw new InvalidOperationException("Since root isn't empty, we should never get relative paths.");
             }
 
-            return OK;
+            return result;
         }
 
         /// <summary>
-        /// Removes the path info passes as a parameter from the current root. Only works for two rooted paths with same root.
-        /// Does NOT cover all edge cases, please verify its intended results yourself.
-        /// <example>
-        ///
-        /// </example>
+        /// Removes the path info passes as a parameter from the current root.
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// Only works for two rooted paths with same root.
+        /// Does NOT cover all edge cases, please verify its intended results yourself.
+        /// </remarks>
         public string RemoveParameterFromRoot(PathInfo other)
         {
             if (Root != other.Root)
@@ -337,18 +346,19 @@ namespace Castle.Services.Transaction.IO
                 throw new InvalidOperationException("Roots of this and other don't match.");
             }
 
-            if (other.FolderAndFiles.Length > FolderAndFiles.Length)
+            if (other.DirectoryAndFile.Length > DirectoryAndFile.Length)
             {
                 throw new InvalidOperationException(
-                    "The folders and files part of the second parameter must be shorter than that path you wish to subtract from.");
+                    "The directory and file part of the second parameter must be shorter than that path you wish to subtract from.");
             }
 
-            if (other.FolderAndFiles == FolderAndFiles)
+            if (other.DirectoryAndFile == DirectoryAndFile)
             {
                 return string.Empty;
             }
 
-            return FolderAndFiles.Substring(other.FolderAndFiles.Length).TrimStart(Path.GetDirectorySeparatorChars());
+            return DirectoryAndFile.Substring(other.DirectoryAndFile.Length)
+                                   .TrimStart(Path.DirectorySeparatorChars);
         }
     }
 }

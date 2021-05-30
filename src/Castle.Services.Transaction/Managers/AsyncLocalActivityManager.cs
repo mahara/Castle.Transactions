@@ -15,19 +15,19 @@
 #endregion
 
 using System;
-using System.Runtime.Remoting.Messaging;
+using System.Threading;
 
 namespace Castle.Services.Transaction
 {
-    public class CallContextActivityManager : MarshalByRefObject, IActivityManager
+    public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        private const string Name = "Castle.Services.Transaction.Activity";
-
         private readonly object _lock = new();
 
-        public CallContextActivityManager()
+        private readonly AsyncLocal<Activity> _data = new();
+
+        public AsyncLocalActivityManager()
         {
-            CallContext.SetData(Name, null);
+            _data.Value = null;
         }
 
         public Activity CurrentActivity
@@ -36,15 +36,15 @@ namespace Castle.Services.Transaction
             {
                 Activity activity;
 
-                if ((activity = (Activity) CallContext.GetData(Name)) is null)
+                if ((activity = _data.Value) is null)
                 {
                     lock (_lock)
                     {
-                        if ((activity = (Activity) CallContext.GetData(Name)) is null)
+                        if ((activity = _data.Value) is null)
                         {
                             activity = new Activity();
 
-                            CallContext.SetData(Name, activity);
+                            _data.Value = activity;
                         }
                     }
                 }
