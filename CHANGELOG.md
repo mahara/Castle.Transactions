@@ -1,12 +1,12 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
-## Unreleased (5.1.0) (2021-05-xx)
+## Unreleased (5.1.0) (202x-xx-xx)
 
 ### All
 
 Improvements:
-- Updated Castle.Core to version 4.4.1
-- Updated Castle.Windsor to version 5.1.1
+- Updated Castle.Core version to 4.4.1
+- Updated Castle.Windsor version to 5.1.1
 
 
 ## 5.0.0 (2021-05-30)
@@ -18,8 +18,8 @@ Improvements:
 
 Breaking Changes:
 - Removed .NET Framework 3.5, .NET Framework 4.0, and .NET Framework 4.0 Client Profile supports
-- Upgraded Castle.Core to version 4.4.0
-- Upgraded Castle.Windsor to version 5.0.0
+- Upgraded Castle.Core version to 4.4.0
+- Upgraded Castle.Windsor version to 5.0.0
 
 
 ## 3.3.0 (2016-05-22)
@@ -27,8 +27,8 @@ Breaking Changes:
 ### All
 
 Breaking Changes:
-- Upgraded Castle.Core to version 3.3.0
-- Upgraded Castle.Windsor to version 3.3.0
+- Upgraded Castle.Core version to 3.3.0
+- Upgraded Castle.Windsor version to 3.3.0
 
 
 
