@@ -1,7 +1,13 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
 
-## 5.1.0 (2021-05-xx)
+## 5.1.0 (2022-02-xx)
+
+### All
+
+Improvements:
+- Updated **`Castle.Core`** version to 4.4.1.
+- Updated **`Castle.Windsor`** version to 5.1.1.
 
 
 ## 5.0.0 (2021-05-30)
