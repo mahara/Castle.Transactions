@@ -1,55 +1,55 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http:www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http:www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
+
 namespace Castle.Facilities.AutoTx
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Reflection;
 	using Core;
 	using Core.Configuration;
+
 	using MicroKernel;
 	using MicroKernel.Facilities;
 	using MicroKernel.ModelBuilder.Inspectors;
+
 	using Services.Transaction;
 
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
+
 	/// <summary>
-	/// Tries to obtain transaction configuration based on 
-	/// the component configuration or (if not available) check
-	/// for the attributes.
+	/// Tries to obtain transaction configuration based on the component configuration,
+	/// or (if not available) check for the attributes.
 	/// </summary>
 	public class TransactionComponentInspector : MethodMetaInspector
 	{
-		private static readonly String TransactionNodeName = "transaction";
-		private TransactionMetaInfoStore metaStore;
+		private static readonly string TransactionNodeName = "transaction";
+
+		private TransactionMetaInfoStore _metaStore;
 
 		/// <summary>
-		/// Tries to obtain transaction configuration based on 
-		/// the component configuration or (if not available) check
-		/// for the attributes.
+		/// Tries to obtain transaction configuration based on the component configuration
+		/// or (if not available) check for the attributes.
 		/// </summary>
 		/// <param name="kernel">The kernel.</param>
 		/// <param name="model">The model.</param>
 		public override void ProcessModel(IKernel kernel, ComponentModel model)
 		{
-			if (metaStore == null)
+			if (_metaStore == null)
 			{
-				metaStore = kernel.Resolve<TransactionMetaInfoStore>();
+				_metaStore = kernel.Resolve<TransactionMetaInfoStore>();
 			}
 
 			if (IsMarkedWithTransactional(model.Configuration))
@@ -63,9 +63,9 @@ namespace Castle.Facilities.AutoTx
 				ConfigureBasedOnAttributes(model);
 			}
 
-			Validate(model, metaStore);
+			Validate(model, _metaStore);
 
-			AddTransactionInterceptorIfIsTransactional(model, metaStore);
+			AddTransactionInterceptorIfIsTransactional(model, _metaStore);
 		}
 
 		/// <summary>
@@ -76,30 +76,29 @@ namespace Castle.Facilities.AutoTx
 		{
 			if (model.Implementation.IsDefined(typeof(TransactionalAttribute), true))
 			{
-				metaStore.CreateMetaFromType(model.Implementation);
+				_metaStore.CreateMetaFromType(model.Implementation);
 			}
 		}
 
 		/// <summary>
-		/// Obtains the name of the 
-		/// node (overrides MethodMetaInspector.ObtainNodeName)
+		/// Obtains the name of the node (overrides MethodMetaInspector.ObtainNodeName)
 		/// </summary>
 		/// <returns>the node name on the configuration</returns>
-		protected override String ObtainNodeName()
+		protected override string ObtainNodeName()
 		{
 			return TransactionNodeName;
 		}
 
 		/// <summary>
-		/// Processes the meta information available on
-		/// the component configuration. (overrides MethodMetaInspector.ProcessMeta)
+		/// Processes the meta information available on the component configuration.
+		/// (overrides MethodMetaInspector.ProcessMeta)
 		/// </summary>
 		/// <param name="model">The model.</param>
 		/// <param name="methods">The methods.</param>
 		/// <param name="metaModel">The meta model.</param>
 		protected override void ProcessMeta(ComponentModel model, IList<MethodInfo> methods, MethodMetaModel metaModel)
 		{
-			metaStore.CreateMetaFromConfig(model.Implementation, methods, metaModel.ConfigNode);
+			_metaStore.CreateMetaFromConfig(model.Implementation, methods, metaModel.ConfigNode);
 		}
 
 		/// <summary>
@@ -110,19 +109,20 @@ namespace Castle.Facilities.AutoTx
 		private void Validate(ComponentModel model, TransactionMetaInfoStore store)
 		{
 			TransactionMetaInfo meta;
+
 			var problematicMethods = new List<string>();
 
 			foreach (var service in model.Services)
 			{
 				if (service == null
-				    || service.IsInterface
-				    || (meta = store.GetMetaFor(model.Implementation)) == null
-				    || (problematicMethods = (
-				                             	from method in meta.Methods
-				                             	where !method.IsVirtual
-				                             	select method.Name
-				                             ).ToList())
-				       	.Count == 0)
+					|| service.IsInterface
+					|| (meta = store.GetMetaFor(model.Implementation)) == null
+					|| (problematicMethods = (
+												 from method in meta.Methods
+												 where !method.IsVirtual
+												 select method.Name
+											 ).ToList())
+						   .Count == 0)
 				{
 					return;
 				}
@@ -131,8 +131,8 @@ namespace Castle.Facilities.AutoTx
 			throw new FacilityException(
 				string.Format(
 					"The class {0} wants to use transaction interception, " +
-					"however the methods must be marked as virtual in order to do so. Please correct " +
-					"the following methods: {1}",
+					"however the methods must be marked as virtual in order to do so. " +
+					"Please correct the following methods: {1}",
 					model.Implementation.FullName,
 					string.Join(", ", problematicMethods.ToArray())));
 		}
@@ -146,7 +146,7 @@ namespace Castle.Facilities.AutoTx
 		/// </returns>
 		private bool IsMarkedWithTransactional(IConfiguration configuration)
 		{
-			return (configuration != null && "true" == configuration.Attributes["isTransactional"]);
+			return configuration != null && "true" == configuration.Attributes["isTransactional"];
 		}
 
 		/// <summary>
@@ -156,15 +156,16 @@ namespace Castle.Facilities.AutoTx
 		/// <param name="model">The model.</param>
 		private void AssertThereNoTransactionOnConfig(ComponentModel model)
 		{
-			IConfiguration configuration = model.Configuration;
+			var configuration = model.Configuration;
 
 			if (configuration != null && configuration.Children[TransactionNodeName] != null)
 			{
-				String message = String.Format("The class {0} has configured transaction in a child node but has not " +
-											   "specified istransaction=\"true\" on the component node.",
-											   model.Implementation.FullName);
 
-				throw new FacilityException(message);
+				throw new FacilityException(
+					string.Format(
+						"The class {0} has configured transaction in a child node " +
+						"but has not specified istransaction=\"true\" on the component node.",
+						model.Implementation.FullName));
 			}
 		}
 
@@ -174,9 +175,9 @@ namespace Castle.Facilities.AutoTx
 		/// <param name="model">The model.</param>
 		/// <param name="store">The meta information store.</param>
 		private void AddTransactionInterceptorIfIsTransactional(ComponentModel model,
-																	   TransactionMetaInfoStore store)
+																TransactionMetaInfoStore store)
 		{
-			TransactionMetaInfo meta = store.GetMetaFor(model.Implementation);
+			var meta = store.GetMetaFor(model.Implementation);
 
 			if (meta == null)
 			{
@@ -184,7 +185,7 @@ namespace Castle.Facilities.AutoTx
 			}
 
 			model.Dependencies.Add(
-				new DependencyModel(this.ObtainNodeName(), typeof(TransactionInterceptor), false));
+				new DependencyModel(ObtainNodeName(), typeof(TransactionInterceptor), false));
 
 			model.Interceptors.AddFirst(new InterceptorReference(typeof(TransactionInterceptor)));
 		}

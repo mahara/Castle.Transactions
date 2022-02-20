@@ -1,49 +1,51 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction.Tests
 {
+	using IO;
+
+	using NUnit.Framework;
+
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
-	using IO;
-	using NUnit.Framework;
 
 	[TestFixture]
 	public class FileTransactions_Directory_Tests
 	{
 		#region Setup/Teardown
 
-		private string dllPath;
-		private readonly List<string> infosCreated = new List<string>();
-		private static volatile object serializer = new object();
+		private static volatile object _serializer = new object();
+
+		private readonly List<string> _infosCreated = new List<string>();
+		private string _dllPath;
 
 		[SetUp]
 		public void CleanOutListEtc()
 		{
-			Monitor.Enter(serializer);
-			infosCreated.Clear();
+			Monitor.Enter(_serializer);
+			_infosCreated.Clear();
 		}
 
 		[TearDown]
 		public void RemoveAllCreatedFiles()
 		{
-			foreach (string filePath in infosCreated)
+			foreach (var filePath in _infosCreated)
 			{
 				if (File.Exists(filePath))
 					File.Delete(filePath);
@@ -54,14 +56,14 @@ namespace Castle.Services.Transaction.Tests
 			if (Directory.Exists("testing"))
 				Directory.Delete("testing", true);
 
-			Monitor.Exit(serializer);
+			Monitor.Exit(_serializer);
 		}
 
 		[SetUp]
 		public void Setup()
 		{
-			dllPath = Environment.CurrentDirectory;
-			dllPath.Combine("..\\..\\Kernel");
+			_dllPath = Environment.CurrentDirectory;
+			_dllPath.Combine("..\\..\\Kernel");
 		}
 
 		#endregion
@@ -69,13 +71,13 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void NoCommit_MeansNoDirectory()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
-			string directoryPath = "testing";
+			var directoryPath = "testing";
 			Assert.That(Directory.Exists(directoryPath), Is.False);
 
 			using (var tx = new FileTransaction())
@@ -90,16 +92,16 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void NonExistentDir()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var t = new FileTransaction())
 			{
 				t.Begin();
-				var dir = (t as IDirectoryAdapter);
+				var dir = t as IDirectoryAdapter;
 				Assert.IsFalse(dir.Exists("/hahaha"));
 				Assert.IsFalse(dir.Exists("another_non_existent"));
 				dir.Create("existing");
@@ -112,11 +114,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test, Description("We are not in a distributed transaction if there is no transaction scope.")]
 		public void NotUsingTransactionScope_IsNotDistributed_AboveNegated()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var tx = new FileTransaction("Not distributed transaction"))
 			{
@@ -129,11 +131,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void ExistingDirWithTrailingBackslash()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			// From http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
 			// An attempt to open a search with a trailing backslash always fails.
@@ -151,13 +153,13 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CreatingFolder_InTransaction_AndCommitting_MeansExistsAfter()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
-			string directoryPath = "testing";
+			var directoryPath = "testing";
 			Assert.That(Directory.Exists(directoryPath), Is.False);
 
 			using (var tx = new FileTransaction())
@@ -175,11 +177,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CanCreate_AndFind_Directory_WithinTx()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var tx = new FileTransaction("s"))
 			{
@@ -194,13 +196,13 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CanCreateDirectory_NLengths_DownInNonExistentDirectory()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
-			string directoryPath = "testing/apa/apa2";
+			var directoryPath = "testing/apa/apa2";
 			Assert.That(Directory.Exists(directoryPath), Is.False);
 
 			using (var t = new FileTransaction())
@@ -216,14 +218,14 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CanDelete_NonRecursively_EmptyDir()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			// 1. create dir
-			string dir = dllPath.CombineAssert("testing");
+			var dir = _dllPath.CombineAssert("testing");
 
 			// 2. test it
 			using (var t = new FileTransaction("Can delete empty directory"))
@@ -238,14 +240,14 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CanDelete_Recursively()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			// 1. Create directory
-			string pr = dllPath.Combine("testing");
+			var pr = _dllPath.Combine("testing");
 			Directory.CreateDirectory(pr);
 			Directory.CreateDirectory(pr.Combine("one"));
 			Directory.CreateDirectory(pr.Combine("two"));
@@ -268,15 +270,15 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CanNotDelete_NonRecursively_NonEmptyDir()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			// 1. create dir and file
-			string dir = dllPath.CombineAssert("testing");
-			string file = dir.Combine("file");
+			var dir = _dllPath.CombineAssert("testing");
+			var file = dir.Combine("file");
 			File.WriteAllText(file, "hello");
 
 			// 2. test it

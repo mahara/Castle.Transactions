@@ -1,18 +1,17 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction.IO
@@ -23,11 +22,11 @@ namespace Castle.Services.Transaction.IO
 
 	/// <summary>
 	/// Path data holder.
-	/// Invariant: no fields nor properties are null after c'tor.
+	/// Invariant: no fields nor properties are null after constructor.
 	/// </summary>
 	public struct PathInfo
 	{
-		private const string _StrRegex =
+		private const string RegexString =
 			@"(?<root>
  (?<UNC_prefix> \\\\\?\\ (?<UNC_literal>UNC\\)?  )?
  (?<options>
@@ -57,40 +56,40 @@ namespace Castle.Services.Transaction.IO
  (?<rel_drive>\w{1,3}:)?
  (?<folders_files>.+))?";
 
-		private static Regex _Regex;
+		private static Regex _regex;
 
 		static PathInfo()
 		{
-			_Regex = new Regex(_StrRegex,
-			                   RegexOptions.Compiled |
-			                   RegexOptions.IgnorePatternWhitespace |
-			                   RegexOptions.IgnoreCase |
-			                   RegexOptions.Multiline);
+			_regex = new Regex(RegexString,
+							   RegexOptions.Compiled |
+							   RegexOptions.IgnorePatternWhitespace |
+							   RegexOptions.IgnoreCase |
+							   RegexOptions.Multiline);
 		}
 
-		private string _Root,
-		               _UNCPrefix,
-		               _UNCLiteral,
-		               _Options,
-		               _Drive,
-		               _DriveLetter,
-		               _Server,
-		               _IPv4,
-		               _IPv6,
-		               _ServerName,
-		               _Device,
-		               _DevicePrefix,
-		               _DeviceName,
-		               _DeviceGuid,
-		               _NonRootPath,
-		               _RelDrive,
-		               _FolderAndFiles;
+		private string _root,
+					   _UNCPrefix,
+					   _UNCLiteral,
+					   _options,
+					   _drive,
+					   _driveLetter,
+					   _server,
+					   _IPv4,
+					   _IPv6,
+					   _serverName,
+					   _device,
+					   _devicePrefix,
+					   _deviceName,
+					   _deviceGuid,
+					   _nonRootPath,
+					   _relDrive,
+					   _folderAndFiles;
 
 		public static PathInfo Parse(string path)
 		{
 			if (path == null) throw new ArgumentNullException("path");
 
-			var matches = _Regex.Matches(path);
+			var matches = _regex.Matches(path);
 
 			Func<string, string> m = s => GetMatch(matches, s);
 			// this might be possible to improve using raw indicies (ints) instead.
@@ -116,11 +115,11 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		private static string GetMatch(MatchCollection matches,
-		                               string groupIndex)
+									   string groupIndex)
 		{
-			var matchC = matches.Count;
+			var matchesCount = matches.Count;
 
-			for (int i = 0; i < matchC; i++)
+			for (var i = 0; i < matchesCount; i++)
 			{
 				if (matches[i].Groups[groupIndex].Success)
 					return matches[i].Groups[groupIndex].Value;
@@ -131,23 +130,23 @@ namespace Castle.Services.Transaction.IO
 
 		private PathInfo(string root, string uncPrefix, string uncLiteral, string options, string drive, string driveLetter, string server, string iPv4, string iPv6, string serverName, string device, string devicePrefix, string deviceName, string deviceGuid, string nonRootPath, string relDrive, string folderAndFiles)
 		{
-			_Root = root;
+			_root = root;
 			_UNCPrefix = uncPrefix;
 			_UNCLiteral = uncLiteral;
-			_Options = options;
-			_Drive = drive;
-			_DriveLetter = driveLetter;
-			_Server = server;
+			_options = options;
+			_drive = drive;
+			_driveLetter = driveLetter;
+			_server = server;
 			_IPv4 = iPv4;
 			_IPv6 = iPv6;
-			_ServerName = serverName;
-			_Device = device;
-			_DevicePrefix = devicePrefix;
-			_DeviceName = deviceName;
-			_DeviceGuid = deviceGuid;
-			_NonRootPath = nonRootPath;
-			_RelDrive = relDrive;
-			_FolderAndFiles = folderAndFiles;
+			_serverName = serverName;
+			_device = device;
+			_devicePrefix = devicePrefix;
+			_deviceName = deviceName;
+			_deviceGuid = deviceGuid;
+			_nonRootPath = nonRootPath;
+			_relDrive = relDrive;
+			_folderAndFiles = folderAndFiles;
 		}
 
 		/// <summary>
@@ -158,13 +157,13 @@ namespace Castle.Services.Transaction.IO
 		/// <item>\\192.168.0.2\</item>
 		/// <item>C:\</item>
 		/// </list>
-		/// 
-		/// Definition: Returns part of the string that is in itself uniquely from the currently 
+		///
+		/// Definition: Returns part of the string that is in itself uniquely from the currently
 		/// executing CLR.
 		/// </summary>
 		public string Root
 		{
-			get { return _Root; }
+			get { return _root; }
 		}
 
 		/// <summary>
@@ -179,7 +178,7 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string UNCLiteral
 		{
@@ -187,35 +186,35 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string Options
 		{
-			get { return _Options; }
+			get { return _options; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string Drive
 		{
-			get { return _Drive; }
+			get { return _drive; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string DriveLetter
 		{
-			get { return _DriveLetter; }
+			get { return _driveLetter; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string Server
 		{
-			get { return _Server; }
+			get { return _server; }
 		}
 
 		/// <summary>
@@ -227,7 +226,7 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string IPv6
 		{
@@ -235,35 +234,35 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string ServerName
 		{
-			get { return _ServerName; }
+			get { return _serverName; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string Device
 		{
-			get { return _Device; }
+			get { return _device; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string DevicePrefix
 		{
-			get { return _DevicePrefix; }
+			get { return _devicePrefix; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string DeviceName
 		{
-			get { return _DeviceName; }
+			get { return _deviceName; }
 		}
 
 		/// <summary>
@@ -273,7 +272,7 @@ namespace Castle.Services.Transaction.IO
 		/// </summary>
 		public string DeviceGuid
 		{
-			get { return _DeviceGuid; }
+			get { return _deviceGuid; }
 		}
 
 		/// <summary>
@@ -283,26 +282,26 @@ namespace Castle.Services.Transaction.IO
 		/// </summary>
 		public string NonRootPath
 		{
-			get { return _NonRootPath; }
+			get { return _nonRootPath; }
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string RelDrive
 		{
-			get { return _RelDrive; }
+			get { return _relDrive; }
 		}
 
 		/// <summary>
-		/// The only time when this differs from <see cref="NonRootPath"/>
+		/// The only time when this differs from <see cref="NonRootPath" />
 		/// is when a path like this is used:
 		/// <code>C:../parent/a.txt</code>, otherwise, for all paths,
-		/// this property equals <see cref="NonRootPath"/>.
+		/// this property equals <see cref="NonRootPath" />.
 		/// </summary>
 		public string FolderAndFiles
 		{
-			get { return _FolderAndFiles; }
+			get { return _folderAndFiles; }
 		}
 
 		public PathType Type
@@ -324,11 +323,11 @@ namespace Castle.Services.Transaction.IO
 		}
 
 		/// <summary>
-		/// Returns whether <see cref="Root"/> is not an empty string.
+		/// Returns whether <see cref="Root" /> is not an empty string.
 		/// </summary>
 		public bool IsRooted
 		{
-			get { return _Root != string.Empty; }
+			get { return _root != string.Empty; }
 		}
 
 		/// <summary>
@@ -357,7 +356,7 @@ namespace Castle.Services.Transaction.IO
 					OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
 					break;
 				case PathType.IPv6:
-					OK &= (IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6)));
+					OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
 					break;
 				case PathType.Relative:
 					throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
@@ -373,7 +372,7 @@ namespace Castle.Services.Transaction.IO
 		/// Removes the path info passes as a parameter from the current root. Only works for two rooted paths with same root.
 		/// Does NOT cover all edge cases, please verify its intended results yourself.
 		/// <example>
-		/// 
+		///
 		/// </example>
 		/// </summary>
 		/// <param name="other"></param>
@@ -382,7 +381,7 @@ namespace Castle.Services.Transaction.IO
 		{
 			if (Root != other.Root)
 				throw new InvalidOperationException("Roots of this and other don't match.");
-			
+
 			if (other.FolderAndFiles.Length > FolderAndFiles.Length)
 				throw new InvalidOperationException(
 					"The folders and files part of the second parameter must be shorter than that path you wish to subtract from.");

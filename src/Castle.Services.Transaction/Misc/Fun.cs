@@ -1,29 +1,28 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-
 	using Castle.Core.Logging;
 
 	using Core;
+
+	using System;
+	using System.Collections.Generic;
+	using System.Threading;
 
 	/// <summary>
 	/// Utility class for whatever is needed to make the code better.
@@ -31,23 +30,24 @@ namespace Castle.Services.Transaction
 	internal static class Fun
 	{
 		public static void Fire<TEventArgs>(this EventHandler<TEventArgs> handler,
-		                                    object sender, TEventArgs args)
+											object sender,
+											TEventArgs args)
 			where TEventArgs : EventArgs
 		{
 			if (handler == null) return;
 			handler(sender, args);
 		}
 
-		public static void AtomRead(this ReaderWriterLockSlim sem, Action a)
+		public static void AtomicRead(this ReaderWriterLockSlim sem, Action a)
 		{
-			AtomRead(sem, a, false);
+			AtomicRead(sem, a, false);
 		}
 
-		public static void AtomRead(this ReaderWriterLockSlim sem, Action a, bool upgradable)
+		public static void AtomicRead(this ReaderWriterLockSlim sem, Action a, bool upgradable)
 		{
 			if (sem == null) throw new ArgumentNullException("sem");
 			if (a == null) throw new ArgumentNullException("a");
-			
+
 			if (!upgradable) sem.EnterReadLock();
 			else sem.EnterUpgradeableReadLock();
 
@@ -62,7 +62,7 @@ namespace Castle.Services.Transaction
 			}
 		}
 
-		public static T AtomRead<T>(this ReaderWriterLockSlim sem, Func<T> f)
+		public static T AtomicRead<T>(this ReaderWriterLockSlim sem, Func<T> f)
 		{
 			if (sem == null) throw new ArgumentNullException("sem");
 			if (f == null) throw new ArgumentNullException("f");
@@ -79,7 +79,7 @@ namespace Castle.Services.Transaction
 			}
 		}
 
-		public static void AtomWrite(this ReaderWriterLockSlim sem, Action a)
+		public static void AtomicWrite(this ReaderWriterLockSlim sem, Action a)
 		{
 			if (sem == null) throw new ArgumentNullException("sem");
 			if (a == null) throw new ArgumentNullException("a");
@@ -124,7 +124,7 @@ namespace Castle.Services.Transaction
 			}
 		}
 
-		public static Pair<T,T2> And<T, T2>(this T first, T2 second)
+		public static Pair<T, T2> And<T, T2>(this T first, T2 second)
 		{
 			return new Pair<T, T2>(first, second);
 		}
@@ -137,30 +137,30 @@ namespace Castle.Services.Transaction
 	{
 		public static Error OK = new Error(true, null);
 
-		private readonly Exception _Ex;
-		private readonly bool _Success;
+		private readonly Exception _exception;
+		private readonly bool _success;
 
-		public Error(bool success, Exception ex)
+		public Error(bool success, Exception exception)
 		{
-			_Success = success;
-			_Ex = success ? null : ex;
+			_success = success;
+			_exception = success ? null : exception;
 		}
 
 		/// <summary>
-		/// Takes a lambda what to do if the result failed. Returns the result so 
+		/// Takes a lambda what to do if the result failed. Returns the result so
 		/// that it can be managed in whatevery way is needed.
 		/// </summary>
-		/// <param name="a"></param>
+		/// <param name="action"></param>
 		/// <returns></returns>
-		public Error Exception(Action<Exception> a)
+		public Error Exception(Action<Exception> action)
 		{
-			if (!_Success) a(_Ex);
+			if (!_success) action(_exception);
 			return this;
 		}
 
-		public Error Success(Action a)
+		public Error Success(Action action)
 		{
-			if (_Success) a();
+			if (_success) action();
 			return this;
 		}
 	}
@@ -171,32 +171,32 @@ namespace Castle.Services.Transaction
 	/// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
 	internal struct Error<T>
 	{
-		private readonly Exception _Ex;
-		private readonly bool _Success;
-		private readonly T _Param;
+		private readonly Exception _exception;
+		private readonly bool _success;
+		private readonly T _parameter;
 
-		public Error(bool success, Exception ex, T param)
+		public Error(bool success, Exception exception, T parameter)
 		{
-			_Success = success;
-			_Param = param;
-			_Ex = success ? null : ex;
+			_success = success;
+			_parameter = parameter;
+			_exception = success ? null : exception;
 		}
 
 		/// <summary>
-		/// Takes a lambda what to do if the result failed. Returns the result so 
+		/// Takes a lambda what to do if the result failed. Returns the result so
 		/// that it can be managed in whatevery way is needed.
 		/// </summary>
-		/// <param name="a"></param>
+		/// <param name="action"></param>
 		/// <returns></returns>
-		public Error<T> Exception(Action<Exception> a)
+		public Error<T> Exception(Action<Exception> action)
 		{
-			if (!_Success) a(_Ex);
+			if (!_success) action(_exception);
 			return this;
 		}
 
-		public Error<T> Success(Action<T> a)
+		public Error<T> Success(Action<T> action)
 		{
-			if (_Success) a(_Param);
+			if (_success) action(_parameter);
 			return this;
 		}
 	}

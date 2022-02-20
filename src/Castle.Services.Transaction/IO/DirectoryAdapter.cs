@@ -1,18 +1,17 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction.IO
@@ -21,33 +20,34 @@ namespace Castle.Services.Transaction.IO
 	using System.IO;
 
 	/// <summary>
-	/// Adapter which wraps the functionality in <see cref="File"/>
+	/// Adapter which wraps the functionality in <see cref="File" />
 	/// together with native kernel transactions.
 	/// </summary>
 	public sealed class DirectoryAdapter : TransactionAdapterBase, IDirectoryAdapter
 	{
-		private readonly IMapPath _PathFinder;
+		private readonly IMapPath _pathFinder;
 
-		///<summary>
-		/// c'tor
-		///</summary>
-		///<param name="pathFinder"></param>
-		///<param name="constrainToSpecifiedDir"></param>
-		///<param name="specifiedDir"></param>
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="pathFinder"></param>
+		/// <param name="constrainToSpecifiedDir"></param>
+		/// <param name="specifiedDir"></param>
 		public DirectoryAdapter(IMapPath pathFinder, bool constrainToSpecifiedDir, string specifiedDir)
 			: base(constrainToSpecifiedDir, specifiedDir)
 		{
-			if (pathFinder == null) 
+			if (pathFinder == null)
 				throw new ArgumentNullException("pathFinder");
 
-			_PathFinder = pathFinder;
+			_pathFinder = pathFinder;
 		}
 
-		/// <summary>Creates a directory at the path given.
-		/// Contrary to the Win32 API, doesn't throw if the directory already
-		/// exists, but instead returns true. The 'safe' value to get returned 
-		/// for be interopable with other path/dirutil implementations would
-		/// hence be false (i.e. that the directory didn't already exist).
+		/// <summary>
+		/// Creates a directory at the path given.
+		/// Contrary to the Win32 API, it doesn't throw if the directory already exists,
+		/// but instead returns true. The 'safe' value to get returned
+		/// for be interoperable with other path/dirutil implementations would hence be false
+		/// (i.e. that the directory didn't already exist).
 		/// </summary>
 		///<param name="path">The path to create the directory at.</param>
 		/// <remarks>True if the directory already existed, False otherwise.</remarks>
@@ -59,14 +59,16 @@ namespace Castle.Services.Transaction.IO
 			IFileTransaction tx;
 			if (HasTransaction(out tx))
 			{
-				return ((IDirectoryAdapter)tx).Create(path);
+				return ((IDirectoryAdapter) tx).Create(path);
 			}
 #endif
 			if (Directory.Exists(path))
 			{
 				return true;
 			}
+
 			Directory.CreateDirectory(path);
+
 			return false;
 		}
 
@@ -81,7 +83,9 @@ namespace Castle.Services.Transaction.IO
 #if !MONO
 			IFileTransaction tx;
 			if (HasTransaction(out tx))
+			{
 				return ((IDirectoryAdapter) tx).Exists(path);
+			}
 #endif
 
 			return Directory.Exists(path);
@@ -102,6 +106,7 @@ namespace Castle.Services.Transaction.IO
 				return;
 			}
 #endif
+
 			Directory.Delete(path);
 		}
 
@@ -111,8 +116,7 @@ namespace Castle.Services.Transaction.IO
 		/// <param name="path">The path to the folder to delete.</param>
 		/// <param name="recursively">
 		/// Whether to delete recursively or not.
-		/// When recursive, we delete all subfolders and files in the given
-		/// directory as well.
+		/// When recursive, we delete all subfolders and files in the given directory as well.
 		/// </param>
 		public bool Delete(string path, bool recursively)
 		{
@@ -124,7 +128,9 @@ namespace Castle.Services.Transaction.IO
 				return tx.Delete(path, recursively);
 			}
 #endif
+
 			Directory.Delete(path, recursively);
+
 			return true;
 		}
 
@@ -139,29 +145,30 @@ namespace Castle.Services.Transaction.IO
 #if !MONO
 			IFileTransaction tx;
 			if (HasTransaction(out tx))
-				return (tx).GetFullPath(path);
+				return tx.GetFullPath(path);
 #endif
+
 			return Path.GetFullPath(path);
 		}
 
-		///<summary>
-		/// Gets the MapPath of the path. 
-		/// 
-		/// This will be relative to the root web directory if we're in a 
+		/// <summary>
+		/// Gets the MapPath of the path.
+		///
+		/// This will be relative to the root web directory if we're in a
 		/// web site and otherwise to the executing assembly.
-		///</summary>
-		///<param name="path"></param>
-		///<returns></returns>
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		public string MapPath(string path)
 		{
-			return _PathFinder.MapPath(path);
+			return _pathFinder.MapPath(path);
 		}
 
-		///<summary>
+		/// <summary>
 		/// TODO: Moves the directory from the original path to the new path.
-		///</summary>
-		///<param name="originalPath">Path from</param>
-		///<param name="newPath">Path to</param>
+		/// </summary>
+		/// <param name="originalPath">The path from.</param>
+		/// <param name="newPath">The path to.</param>
 		public void Move(string originalPath, string newPath)
 		{
 			AssertAllowed(originalPath);
@@ -169,15 +176,14 @@ namespace Castle.Services.Transaction.IO
 
 			throw new NotImplementedException("This hasn't been completely implemented with the >255 character paths. Please help out and send a patch.");
 
-//#if !MONO
-//			IFileTransaction tx;
-//			if (HasTransaction(out tx))
-//			{
-//				(tx as IDirectoryAdapter).Move(originalPath, newPath);
-//				return;
-//			}
-//#endif
-			
+			//#if !MONO
+			//			IFileTransaction tx;
+			//			if (HasTransaction(out tx))
+			//			{
+			//				(tx as IDirectoryAdapter).Move(originalPath, newPath);
+			//				return;
+			//			}
+			//#endif
 
 			//Directory.Move(originalPath, newPath);
 		}

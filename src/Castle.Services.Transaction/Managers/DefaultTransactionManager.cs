@@ -1,30 +1,30 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
+
 namespace Castle.Services.Transaction
 {
-	using System;
-
 	using Castle.Core.Logging;
+
+	using System;
 
 	public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
 	{
-		private ILogger _Logger = NullLogger.Instance;
-	
-		private IActivityManager _ActivityManager;
+		private ILogger _logger = NullLogger.Instance;
+
+		private IActivityManager _activityManager;
 
 		public event EventHandler<TransactionEventArgs> TransactionCreated;
 		public event EventHandler<TransactionEventArgs> TransactionRolledBack;
@@ -34,14 +34,14 @@ namespace Castle.Services.Transaction
 		public event EventHandler<TransactionEventArgs> TransactionDisposed;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultTransactionManager"/> class.
+		/// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
 		/// </summary>
 		public DefaultTransactionManager() : this(new CallContextActivityManager())
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultTransactionManager"/> class.
+		/// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
 		/// </summary>
 		/// <exception cref="ArgumentNullException">activityManager is null</exception>
 		/// <param name="activityManager">The activity manager.</param>
@@ -49,18 +49,18 @@ namespace Castle.Services.Transaction
 		{
 			if (activityManager == null) throw new ArgumentNullException("activityManager");
 
-			this._ActivityManager = activityManager;
-			
-			if (this._Logger.IsDebugEnabled)
+			_activityManager = activityManager;
+
+			if (_logger.IsDebugEnabled)
 			{
-				this._Logger.Debug("DefaultTransactionManager created.");
+				_logger.Debug("DefaultTransactionManager created.");
 			}
 		}
 
 		public ILogger Logger
 		{
-			get { return this._Logger; }
-			set { this._Logger = value; }
+			get { return _logger; }
+			set { _logger = value; }
 		}
 
 		/// <summary>
@@ -70,31 +70,31 @@ namespace Castle.Services.Transaction
 		/// <value>The activity manager.</value>
 		public IActivityManager ActivityManager
 		{
-			get { return this._ActivityManager; }
+			get { return _activityManager; }
 			set
 			{
 				if (value == null) throw new ArgumentNullException("value");
-				this._ActivityManager = value;
+				_activityManager = value;
 			}
 		}
 
 		/// <summary>
-		/// <see cref="ITransactionManager.CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)"/>.
+		/// <see cref="ITransactionManager.CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)" />.
 		/// </summary>
 		public ITransaction CreateTransaction(TransactionMode txMode, IsolationMode isolationMode)
 		{
 			return CreateTransaction(txMode, isolationMode, false, false);
 		}
 
-        public ITransaction CreateTransaction(TransactionMode txMode, IsolationMode iMode, bool isAmbient, bool isReadOnly)
+		public ITransaction CreateTransaction(TransactionMode txMode, IsolationMode iMode, bool isAmbient, bool isReadOnly)
 		{
 			txMode = ObtainDefaultTransactionMode(txMode);
 
 			AssertModeSupported(txMode);
 
 			if (CurrentTransaction == null &&
-			    (txMode == TransactionMode.Supported ||
-			     txMode == TransactionMode.NotSupported))
+				(txMode == TransactionMode.Supported ||
+				 txMode == TransactionMode.NotSupported))
 			{
 				return null;
 			}
@@ -105,9 +105,9 @@ namespace Castle.Services.Transaction
 			{
 				if (txMode == TransactionMode.Requires || txMode == TransactionMode.Supported)
 				{
-					transaction = ((TransactionBase)CurrentTransaction).CreateChildTransaction();
+					transaction = ((TransactionBase) CurrentTransaction).CreateChildTransaction();
 
-					this._Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.", transaction.Name, txMode);
+					_logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.", transaction.Name, txMode);
 				}
 			}
 
@@ -124,10 +124,10 @@ namespace Castle.Services.Transaction
 #endif
 				}
 
-				this._Logger.DebugFormat("Transaction \"{0}\" created. ", transaction.Name);
+				_logger.DebugFormat("Transaction \"{0}\" created. ", transaction.Name);
 			}
 
-			this._ActivityManager.CurrentActivity.Push(transaction);
+			_activityManager.CurrentActivity.Push(transaction);
 
 			if (transaction.IsChildTransaction)
 				ChildTransactionCreated.Fire(this, new TransactionEventArgs(transaction));
@@ -137,10 +137,10 @@ namespace Castle.Services.Transaction
 			return transaction;
 		}
 
-        private TransactionBase InstantiateTransaction(TransactionMode mode, IsolationMode isolationMode, bool ambient, bool readOnly)
+		private TransactionBase InstantiateTransaction(TransactionMode mode, IsolationMode isolationMode, bool ambient, bool readOnly)
 		{
 			var t = new TalkactiveTransaction(mode, isolationMode, ambient, readOnly);
-        	t.Logger = this.Logger.CreateChildLogger("TalkactiveTransaction");
+			t.Logger = Logger.CreateChildLogger("TalkactiveTransaction");
 
 			t.TransactionCompleted += CompletedHandler;
 			t.TransactionRolledBack += RolledBackHandler;
@@ -169,26 +169,25 @@ namespace Castle.Services.Transaction
 			var ctx = CurrentTransaction;
 
 			if (mode == TransactionMode.NotSupported &&
-			    ctx != null &&
-			    ctx.Status == TransactionStatus.Active)
+				ctx != null &&
+				ctx.Status == TransactionStatus.Active)
 			{
 				var message = "There is a transaction active and the transaction mode " +
-				              "explicit says that no transaction is supported for this context";
+							  "explicit says that no transaction is supported for this context";
 
-				this._Logger.Error(message);
+				_logger.Error(message);
 
 				throw new TransactionModeUnsupportedException(message);
 			}
 		}
 
 		/// <summary>
-		/// Gets the default transaction mode, i.e. the mode which is the current mode when
-		/// <see cref="TransactionMode.Unspecified"/> is passed to <see cref="CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)"/>.
+		/// Gets the default transaction mode, i.e. the mode which is the current mode
+		/// when <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)" />.
 		/// </summary>
 		/// <param name="mode">The mode which was passed.</param>
 		/// <returns>
-		/// Requires &lt;- mode = Unspecified
-		/// mode &lt;- otherwise
+		/// Requires &lt;- mode = Unspecified mode &lt;- otherwise.
 		/// </returns>
 		protected virtual TransactionMode ObtainDefaultTransactionMode(TransactionMode mode)
 		{
@@ -196,31 +195,31 @@ namespace Castle.Services.Transaction
 		}
 
 		/// <summary>
-		/// <see cref="ITransactionManager.CurrentTransaction"/>
+		/// <see cref="ITransactionManager.CurrentTransaction" />
 		/// </summary>
-		/// <remarks>Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity"/>.</remarks>
+		/// <remarks>Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.</remarks>
 		public ITransaction CurrentTransaction
 		{
-			get { return this._ActivityManager.CurrentActivity.CurrentTransaction; }
+			get { return _activityManager.CurrentActivity.CurrentTransaction; }
 		}
 
 		/// <summary>
-		/// <see cref="ITransactionManager.Dispose"/>.
+		/// <see cref="ITransactionManager.Dispose" />.
 		/// </summary>
 		/// <param name="transaction"></param>
 		public virtual void Dispose(ITransaction transaction)
 		{
 			if (transaction == null) throw new ArgumentNullException("transaction", "Tried to dispose a null transaction");
 
-			this._Logger.DebugFormat("Trying to dispose transaction {0}.", transaction.Name);
+			_logger.DebugFormat("Trying to dispose transaction {0}.", transaction.Name);
 
 			if (CurrentTransaction != transaction)
 			{
 				throw new ArgumentException("Tried to dispose a transaction that is not on the current active transaction",
-				                            "transaction");
+											"transaction");
 			}
 
-			this._ActivityManager.CurrentActivity.Pop();
+			_activityManager.CurrentActivity.Pop();
 
 			if (transaction is IDisposable)
 			{
@@ -236,11 +235,11 @@ namespace Castle.Services.Transaction
 
 			TransactionDisposed.Fire(this, new TransactionEventArgs(transaction));
 
-			this._Logger.DebugFormat("Transaction {0} disposed successfully", transaction.Name);
+			_logger.DebugFormat("Transaction {0} disposed successfully", transaction.Name);
 		}
 
 		/// <summary>
-		/// <see cref="MarshalByRefObject.InitializeLifetimeService"/>.
+		/// <see cref="MarshalByRefObject.InitializeLifetimeService" />.
 		/// </summary>
 		/// <returns>always null</returns>
 		public override object InitializeLifetimeService()

@@ -1,140 +1,145 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
+
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
 	using NUnit.Framework;
+
+	using System;
 
 	[TestFixture]
 	public class TransactionManagerTests
 	{
-		private DefaultTransactionManager tm;
+		private DefaultTransactionManager _transactionManager;
 
 		[SetUp]
 		public void Init()
 		{
-			tm = new DefaultTransactionManager(new TransientActivityManager());
+			_transactionManager = new DefaultTransactionManager(new TransientActivityManager());
 		}
 
 		[Test]
 		public void SynchronizationsAndCommit()
 		{
-			ITransaction transaction = 
-				tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+																	IsolationMode.Unspecified);
 
 			transaction.Begin();
-	
-			SynchronizationImpl sync = new SynchronizationImpl();
 
-			transaction.RegisterSynchronization( sync );
+			var sync = new SynchronizationImpl();
 
-			Assert.AreEqual( DateTime.MinValue, sync.Before );
-			Assert.AreEqual( DateTime.MinValue, sync.After );
+			transaction.RegisterSynchronization(sync);
+
+			Assert.AreEqual(DateTime.MinValue, sync.Before);
+			Assert.AreEqual(DateTime.MinValue, sync.After);
 
 			transaction.Commit();
 
-			Assert.IsTrue( sync.Before > DateTime.MinValue );
-			Assert.IsTrue( sync.After > DateTime.MinValue );
+			Assert.IsTrue(sync.Before > DateTime.MinValue);
+			Assert.IsTrue(sync.After > DateTime.MinValue);
 		}
 
 		[Test]
 		public void SynchronizationsAndRollback_RegistredAfter_CommitOrRollBack_AreStarted()
 		{
-			var t = 
-				tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+																	IsolationMode.Unspecified);
 
-			t.Begin();
-	
+			transaction.Begin();
+
 			var sync = new SynchronizationImpl();
 
-			t.RegisterSynchronization( sync );
+			transaction.RegisterSynchronization(sync);
 
-			Assert.AreEqual( DateTime.MinValue, sync.Before );
-			Assert.AreEqual( DateTime.MinValue, sync.After );
+			Assert.AreEqual(DateTime.MinValue, sync.Before);
+			Assert.AreEqual(DateTime.MinValue, sync.After);
 
-			t.Rollback();
+			transaction.Rollback();
 
-			Assert.IsTrue( sync.Before > DateTime.MinValue );
-			Assert.IsTrue( sync.After > DateTime.MinValue );
+			Assert.IsTrue(sync.Before > DateTime.MinValue);
+			Assert.IsTrue(sync.After > DateTime.MinValue);
 		}
 
 		[Test]
 		public void DontStartResource_IfTransactionIsNotActive_WhenEnlisting()
 		{
-			var t = tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
-			var r = new ResourceImpl();
-			t.Enlist(r);
-			Assert.That(r.Started, Is.False);
-			t.Begin();
-			Assert.That(r.Started, Is.True);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+																	IsolationMode.Unspecified);
+
+			var resource = new ResourceImpl();
+
+			transaction.Enlist(resource);
+			Assert.That(resource.Started, Is.False);
+
+			transaction.Begin();
+			Assert.That(resource.Started, Is.True);
 		}
 
 		[Test]
 		public void ResourcesAndCommit()
 		{
-			ITransaction transaction = 
-				tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
-	
-			ResourceImpl resource = new ResourceImpl();
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+																	IsolationMode.Unspecified);
 
-			transaction.Enlist( resource );
+			var resource = new ResourceImpl();
 
-			Assert.IsFalse( resource.Started );
-			Assert.IsFalse( resource.Committed );
-			Assert.IsFalse( resource.Rolledback );
+			transaction.Enlist(resource);
+
+			Assert.IsFalse(resource.Started);
+			Assert.IsFalse(resource.Committed);
+			Assert.IsFalse(resource.Rolledback);
 
 			transaction.Begin();
 
-			Assert.IsTrue( resource.Started );
-			Assert.IsFalse( resource.Committed );
-			Assert.IsFalse( resource.Rolledback );
+			Assert.IsTrue(resource.Started);
+			Assert.IsFalse(resource.Committed);
+			Assert.IsFalse(resource.Rolledback);
 
 			transaction.Commit();
 
-			Assert.IsTrue( resource.Started );
-			Assert.IsTrue( resource.Committed );
-			Assert.IsFalse( resource.Rolledback );
+			Assert.IsTrue(resource.Started);
+			Assert.IsTrue(resource.Committed);
+			Assert.IsFalse(resource.Rolledback);
 		}
 
 		[Test]
 		public void ResourcesAndRollback()
 		{
-			ITransaction transaction = 
-				tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
-	
-			ResourceImpl resource = new ResourceImpl();
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+																	IsolationMode.Unspecified);
 
-			transaction.Enlist( resource );
+			var resource = new ResourceImpl();
 
-			Assert.IsFalse( resource.Started );
-			Assert.IsFalse( resource.Committed );
-			Assert.IsFalse( resource.Rolledback );
+			transaction.Enlist(resource);
+
+			Assert.IsFalse(resource.Started);
+			Assert.IsFalse(resource.Committed);
+			Assert.IsFalse(resource.Rolledback);
 
 			transaction.Begin();
 
-			Assert.IsTrue( resource.Started );
-			Assert.IsFalse( resource.Committed );
-			Assert.IsFalse( resource.Rolledback );
+			Assert.IsTrue(resource.Started);
+			Assert.IsFalse(resource.Committed);
+			Assert.IsFalse(resource.Rolledback);
 
 			transaction.Rollback();
 
-			Assert.IsTrue( resource.Started );
-			Assert.IsTrue( resource.Rolledback );
-			Assert.IsFalse( resource.Committed );
+			Assert.IsTrue(resource.Started);
+			Assert.IsTrue(resource.Rolledback);
+			Assert.IsFalse(resource.Committed);
 		}
 
 		[Test]
@@ -142,8 +147,8 @@ namespace Castle.Services.Transaction.Tests
 		{
 			void Method()
 			{
-				var transaction = this.tm.CreateTransaction(
-					TransactionMode.Requires, IsolationMode.Unspecified);
+				var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																		IsolationMode.Unspecified);
 
 				transaction.Begin();
 				transaction.Begin();
@@ -157,8 +162,8 @@ namespace Castle.Services.Transaction.Tests
 		{
 			void Method()
 			{
-				var transaction = this.tm.CreateTransaction(
-					TransactionMode.Requires, IsolationMode.Unspecified);
+				var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																		IsolationMode.Unspecified);
 
 				transaction.Begin();
 				transaction.Rollback();
@@ -172,14 +177,17 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionCreatedEvent()
 		{
-			bool transactionCreatedEventTriggered = false;
+			var transactionCreatedEventTriggered = false;
 
-			tm.TransactionCreated += delegate { transactionCreatedEventTriggered = true; };
+			_transactionManager.TransactionCreated += delegate
+			{
+				transactionCreatedEventTriggered = true;
+			};
 
 			Assert.IsFalse(transactionCreatedEventTriggered);
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
 			Assert.IsTrue(transactionCreatedEventTriggered);
 		}
@@ -187,12 +195,15 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionDisposedEvent()
 		{
-			bool transactionDisposedEventTriggered = false;
+			var transactionDisposedEventTriggered = false;
 
-			tm.TransactionDisposed += delegate { transactionDisposedEventTriggered = true; };
+			_transactionManager.TransactionDisposed += delegate
+			{
+				transactionDisposedEventTriggered = true;
+			};
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
 			Assert.IsFalse(transactionDisposedEventTriggered);
 
@@ -204,7 +215,7 @@ namespace Castle.Services.Transaction.Tests
 
 			Assert.IsFalse(transactionDisposedEventTriggered);
 
-			tm.Dispose(transaction);
+			_transactionManager.Dispose(transaction);
 
 			Assert.IsTrue(transactionDisposedEventTriggered);
 		}
@@ -212,18 +223,27 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionCommittedEvent()
 		{
-			bool transactionCommittedEventTriggered = false;
-			bool transactionRolledBackEventTriggered = false;
-			bool transactionFailedEventTriggered = false;
+			var transactionCommittedEventTriggered = false;
+			var transactionRolledBackEventTriggered = false;
+			var transactionFailedEventTriggered = false;
 
-			tm.TransactionCompleted += delegate { transactionCommittedEventTriggered = true; };
-			tm.TransactionRolledBack += delegate { transactionRolledBackEventTriggered = true; };
-			tm.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
+			_transactionManager.TransactionCompleted += delegate
+			{
+				transactionCommittedEventTriggered = true;
+			};
+			_transactionManager.TransactionRolledBack += delegate
+			{
+				transactionRolledBackEventTriggered = true;
+			};
+			_transactionManager.TransactionFailed += delegate
+			{
+				transactionFailedEventTriggered = true;
+			};
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
-			ResourceImpl resource = new ResourceImpl();
+			var resource = new ResourceImpl();
 
 			transaction.Enlist(resource);
 
@@ -247,18 +267,27 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionRolledBackEvent()
 		{
-			bool transactionCommittedEventTriggered = false;
-			bool transactionRolledBackEventTriggered = false;
-			bool transactionFailedEventTriggered = false;
+			var transactionCommittedEventTriggered = false;
+			var transactionRolledBackEventTriggered = false;
+			var transactionFailedEventTriggered = false;
 
-			tm.TransactionCompleted += delegate { transactionCommittedEventTriggered = true; };
-			tm.TransactionRolledBack += delegate { transactionRolledBackEventTriggered = true; };
-			tm.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
+			_transactionManager.TransactionCompleted += delegate
+			{
+				transactionCommittedEventTriggered = true;
+			};
+			_transactionManager.TransactionRolledBack += delegate
+			{
+				transactionRolledBackEventTriggered = true;
+			};
+			_transactionManager.TransactionFailed += delegate
+			{
+				transactionFailedEventTriggered = true;
+			};
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
-			ResourceImpl resource = new ResourceImpl();
+			var resource = new ResourceImpl();
 
 			transaction.Enlist(resource);
 
@@ -282,16 +311,25 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionFailedOnCommitEvent()
 		{
-			bool transactionCommittedEventTriggered = false;
-			bool transactionRolledBackEventTriggered = false;
-			bool transactionFailedEventTriggered = false;
+			var transactionCommittedEventTriggered = false;
+			var transactionRolledBackEventTriggered = false;
+			var transactionFailedEventTriggered = false;
 
-			tm.TransactionCompleted += delegate { transactionCommittedEventTriggered = true; };
-			tm.TransactionRolledBack += delegate { transactionRolledBackEventTriggered = true; };
-			tm.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
+			_transactionManager.TransactionCompleted += delegate
+			{
+				transactionCommittedEventTriggered = true;
+			};
+			_transactionManager.TransactionRolledBack += delegate
+			{
+				transactionRolledBackEventTriggered = true;
+			};
+			_transactionManager.TransactionFailed += delegate
+			{
+				transactionFailedEventTriggered = true;
+			};
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
 			ResourceImpl resource = new ThrowsExceptionResourceImpl(true, false);
 
@@ -329,16 +367,25 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionFailedOnRollbackEvent()
 		{
-			bool transactionCommittedEventTriggered = false;
-			bool transactionRolledBackEventTriggered = false;
-			bool transactionFailedEventTriggered = false;
+			var transactionCommittedEventTriggered = false;
+			var transactionRolledBackEventTriggered = false;
+			var transactionFailedEventTriggered = false;
 
-			tm.TransactionCompleted += delegate { transactionCommittedEventTriggered = true; };
-			tm.TransactionRolledBack += delegate { transactionRolledBackEventTriggered = true; };
-			tm.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
+			_transactionManager.TransactionCompleted += delegate
+			{
+				transactionCommittedEventTriggered = true;
+			};
+			_transactionManager.TransactionRolledBack += delegate
+			{
+				transactionRolledBackEventTriggered = true;
+			};
+			_transactionManager.TransactionFailed += delegate
+			{
+				transactionFailedEventTriggered = true;
+			};
 
-			ITransaction transaction = tm.CreateTransaction(
-				TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
 			ResourceImpl resource = new ThrowsExceptionResourceImpl(false, true);
 
@@ -376,28 +423,31 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void TransactionResources_AreDisposed()
 		{
-			var t = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+			var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
+																	IsolationMode.Unspecified);
 
 			var resource = new ResourceImpl();
 
-			t.Enlist(resource);
+			transaction.Enlist(resource);
 
-			t.Begin();
+			transaction.Begin();
 			Assert.That(resource.Started);
 
 			// lalala
 
-			t.Rollback();
-			tm.Dispose(t);
+			transaction.Rollback();
+			_transactionManager.Dispose(transaction);
 
-			Assert.IsTrue(resource.wasDisposed);
+			Assert.IsTrue(resource.WasDisposed);
 		}
 
 		[Test]
 		public void ChildTransactions_AreAmbient()
 		{
-			var t = tm.CreateTransaction(TransactionMode.Unspecified, IsolationMode.Unspecified);
-			var c = tm.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+			var t = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+														  IsolationMode.Unspecified);
+			var c = _transactionManager.CreateTransaction(TransactionMode.Requires,
+														  IsolationMode.Unspecified);
 			Assert.That(c.IsChildTransaction);
 			Assert.That(c.IsAmbient);
 		}

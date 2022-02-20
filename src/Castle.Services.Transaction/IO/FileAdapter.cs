@@ -1,18 +1,17 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction.IO
@@ -22,47 +21,46 @@ namespace Castle.Services.Transaction.IO
 	using System.Text;
 
 	/// <summary>
-	/// Adapter class for the file transactions
-	/// which implement the same interface.
-	/// 
-	/// This adapter chooses intelligently whether there's an ambient
-	/// transaction, and if there is, joins it.
+	/// Adapter class for the file transactions which implement the same interface.
+	///
+	/// This adapter chooses intelligently whether there's an ambient transaction,
+	/// and if there is, joins it.
 	/// </summary>
 	public sealed class FileAdapter : TransactionAdapterBase, IFileAdapter
 	{
-		///<summary>
-		/// c'tor
-		///</summary>
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public FileAdapter() : this(false, null)
 		{
 		}
 
-		///<summary>
-		/// c'tor
-		///</summary>
-		///<param name="constrainToSpecifiedDir"></param>
-		///<param name="specifiedDir"></param>
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="constrainToSpecifiedDir"></param>
+		/// <param name="specifiedDir"></param>
 		public FileAdapter(bool constrainToSpecifiedDir, string specifiedDir) : base(constrainToSpecifiedDir, specifiedDir)
 		{
-			if (this.Logger.IsDebugEnabled)
+			if (Logger.IsDebugEnabled)
 			{
 				if (constrainToSpecifiedDir)
 				{
-					this.Logger.Debug(string.Format("FileAdapter c'tor, constraining to dir: {0}", specifiedDir));
+					Logger.Debug(string.Format("FileAdapter constructor, constraining to dir: {0}", specifiedDir));
 				}
 				else
 				{
-					this.Logger.Debug("FileAdapter c'tor, no directory constraint.");
+					Logger.Debug("FileAdapter constructor, no directory constraint.");
 				}
 			}
 		}
 
-		///<summary>
+		/// <summary>
 		/// Creates a new file from the given path for ReadWrite,
 		/// different depending on whether we're in a transaction or not.
-		///</summary>
-		///<param name="path">Path to create file at.</param>
-		///<returns>A filestream for the path.</returns>
+		/// </summary>
+		/// <param name="path">Path to create file at.</param>
+		/// <returns>A filestream for the path.</returns>
 		public FileStream Create(string path)
 		{
 			AssertAllowed(path);
@@ -71,14 +69,15 @@ namespace Castle.Services.Transaction.IO
 			if (HasTransaction(out tx))
 				return (tx as IFileAdapter).Create(path);
 #endif
+
 			return File.Create(path);
 		}
 
-		///<summary>
+		/// <summary>
 		/// Returns whether the specified file exists or not.
-		///</summary>
-		///<param name="filePath">The file path.</param>
-		///<returns></returns>
+		/// </summary>
+		/// <param name="filePath">The file path.</param>
+		/// <returns></returns>
 		public bool Exists(string filePath)
 		{
 			AssertAllowed(filePath);
@@ -87,6 +86,7 @@ namespace Castle.Services.Transaction.IO
 			if (HasTransaction(out tx))
 				return (tx as IFileAdapter).Exists(filePath);
 #endif
+
 			return File.Exists(filePath);
 		}
 
@@ -98,8 +98,8 @@ namespace Castle.Services.Transaction.IO
 			if (HasTransaction(out tx))
 				return tx.ReadAllText(path, encoding);
 #endif
+
 			return File.ReadAllText(path, encoding);
-			
 		}
 
 		public void Move(string originalFilePath, string newFilePath)
@@ -123,6 +123,7 @@ namespace Castle.Services.Transaction.IO
 				return;
 			}
 #endif
+
 			File.WriteAllText(path, contents);
 		}
 
@@ -137,6 +138,7 @@ namespace Castle.Services.Transaction.IO
 				return;
 			}
 #endif
+
 			File.Delete(filePath);
 		}
 
@@ -148,22 +150,24 @@ namespace Castle.Services.Transaction.IO
 			if (HasTransaction(out tx))
 				return tx.Open(filePath, mode);
 #endif
+
 			return File.Open(filePath, mode);
 		}
 
 		public int WriteStream(string toFilePath, Stream fromStream)
 		{
-			int offset = 0;
+			var offset = 0;
 			using (var fs = Create(toFilePath))
 			{
-				var buf = new byte[4096];
+				var buffer = new byte[4096];
 				int read;
-				while ((read = fromStream.Read(buf, 0, buf.Length)) != 0)
+				while ((read = fromStream.Read(buffer, 0, buffer.Length)) != 0)
 				{
-					fs.Write(buf, 0, read);
+					fs.Write(buffer, 0, read);
 					offset += read;
 				}
 			}
+
 			return offset;
 		}
 	}

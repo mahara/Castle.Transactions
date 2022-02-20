@@ -1,18 +1,17 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction
@@ -27,15 +26,14 @@ namespace Castle.Services.Transaction
 	public interface ITransaction
 	{
 		/// <summary>
-		/// Starts the transaction. Implementors
-		/// should activate the apropriate resources
-		/// in order to start the underlying transaction
+		/// Starts the transaction.
+		/// Implementors should activate the apropriate resources
+		/// in order to start the underlying transaction.
 		/// </summary>
 		void Begin();
 
 		/// <summary>
-		/// Succeed the transaction, persisting the
-		/// modifications
+		/// Succeed the transaction, persisting the modifications.
 		/// </summary>
 		void Commit();
 
@@ -49,7 +47,8 @@ namespace Castle.Services.Transaction
 		/// </item>
 		/// <item>
 		/// Post:
-		///	<list><item>InnerRollback will be called for inheritors, then</item>
+		///	<list>
+		///	<item>InnerRollback will be called for inheritors, then</item>
 		/// <item>All resources will have Rollback called, then</item>
 		/// <item>All sync infos will have AfterCompletion called.</item>
 		/// </list>
@@ -58,17 +57,16 @@ namespace Castle.Services.Transaction
 		/// </summary>
 		/// <remarks>
 		/// If you are interfacing the transaction through an inversion of control engine
-		/// and in particylar AutoTx, calling this method is not recommended. Instead use
-		/// <see cref="SetRollbackOnly"/>.
+		/// and in particular AutoTx, calling this method is not recommended.
+		/// Use <see cref="SetRollbackOnly" /> instead.
 		/// </remarks>
 		/// <exception cref="RollbackResourceException">If any resource(s) failed.</exception>
 		/// <exception cref="TransactionException">If the transaction status was not active.</exception>
 		void Rollback();
 
 		/// <summary>
-		/// Signals that this transaction can only be rolledback. 
-		/// This is used when the transaction is not being managed by
-		/// the callee.
+		/// Signals that this transaction can only be rolledback.
+		/// This is used when the transaction is not being managed by the callee.
 		/// </summary>
 		void SetRollbackOnly();
 
@@ -76,7 +74,7 @@ namespace Castle.Services.Transaction
 		/// Returns the current transaction status.
 		/// </summary>
 		TransactionStatus Status { get; }
-		
+
 		/// <summary>
 		/// Register a participant on the transaction.
 		/// </summary>
@@ -84,9 +82,8 @@ namespace Castle.Services.Transaction
 		void Enlist(IResource resource);
 
 		/// <summary>
-		/// Registers a synchronization object that will be 
-		/// invoked prior and after the transaction completion
-		/// (commit or rollback)
+		/// Registers a synchronization object that will be invoked
+		/// prior and after the transaction completion (commit or rollback).
 		/// </summary>
 		/// <param name="synchronization"></param>
 		/// <exception cref="ArgumentNullException">If the parameter is null.</exception>
@@ -119,9 +116,9 @@ namespace Castle.Services.Transaction
 
 		/// <summary>
 		/// Gets whether the transaction "found an" ambient transaction to run in.
-		/// This is true if the tx is running in the DTC or a TransactionScope, but 
-		/// doesn't imply a distributed transaction (as TransactionScopes automatically choose the least
-		/// performance invasive option)
+		/// This is true if the tx is running in the DTC or a TransactionScope,
+		/// but doesn't imply a distributed transaction
+		/// (as TransactionScopes automatically choose the least performance invasive option).
 		/// </summary>
 		bool IsAmbient { get; }
 
@@ -137,9 +134,9 @@ namespace Castle.Services.Transaction
 		/// <returns></returns>
 		IEnumerable<IResource> Resources();
 
-        /// <summary>
-        /// Returns true for a read only transaction, false otherwise.
-        /// </summary>
-        bool IsReadOnly { get; }
+		/// <summary>
+		/// Returns true for a read only transaction, false otherwise.
+		/// </summary>
+		bool IsReadOnly { get; }
 	}
 }

@@ -31,7 +31,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <IncludeSource>false</IncludeSource>
     <CurrentYear>$([System.DateTime]::Now.ToString("yyyy"))</CurrentYear>
-    <Copyright>Copyright 2004-$(CurrentYear) Castle Project - http://www.castleproject.org/</Copyright>
+    <Copyright>Copyright 2004-$(CurrentYear) Castle Project - https://www.castleproject.org/</Copyright>
     <ContentTargetFolders>.</ContentTargetFolders>
   </PropertyGroup>
 
@@ -48,7 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(SolutionDir)docs\images\services_transactions-logo.png" Pack="true" PackagePath=""/>
+    <None Include="$(SolutionDir)docs\images\services_transactions-logo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

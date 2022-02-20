@@ -1,29 +1,31 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
 
 namespace Castle.Services.Transaction.Tests
 {
+	using IO;
+
+	using NUnit.Framework;
+
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
 	using System.Transactions;
-	using IO;
-	using NUnit.Framework;
+
 	using Path = IO.Path;
 	using TransactionException = Transaction.TransactionException;
 	using TransactionStatus = Transaction.TransactionStatus;
@@ -33,22 +35,23 @@ namespace Castle.Services.Transaction.Tests
 	{
 		#region Setup/Teardown
 
-		private string dllPath;
-		private string testFixturePath;
-		private readonly List<string> infosCreated = new List<string>();
-		private static volatile object serializer = new object();
+		private static volatile object _serializer = new object();
+
+		private readonly List<string> _infosCreated = new List<string>();
+		private string _dllPath;
+		private string _testFixturePath;
 
 		[SetUp]
 		public void CleanOutListEtc()
 		{
-			Monitor.Enter(serializer);
-			infosCreated.Clear();
+			Monitor.Enter(_serializer);
+			_infosCreated.Clear();
 		}
 
 		[TearDown]
 		public void RemoveAllCreatedFiles()
 		{
-			foreach (string filePath in infosCreated)
+			foreach (var filePath in _infosCreated)
 			{
 				if (File.Exists(filePath))
 					File.Delete(filePath);
@@ -59,14 +62,14 @@ namespace Castle.Services.Transaction.Tests
 			if (Directory.Exists("testing"))
 				Directory.Delete("testing", true);
 
-			Monitor.Exit(serializer);
+			Monitor.Exit(_serializer);
 		}
 
 		[SetUp]
 		public void Setup()
 		{
-			dllPath = Environment.CurrentDirectory;
-			testFixturePath = dllPath.Combine("..\\..\\Kernel");
+			_dllPath = Environment.CurrentDirectory;
+			_testFixturePath = _dllPath.Combine("..\\..\\Kernel");
 		}
 
 		private class R : IResource
@@ -90,11 +93,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void CannotCommitAfterSettingRollbackOnly()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var tx = new FileTransaction())
 			{
@@ -108,11 +111,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void FailingResource_TxStillRolledBack()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var tx = new FileTransaction())
 			{
@@ -134,7 +137,7 @@ namespace Castle.Services.Transaction.Tests
 				catch (RollbackResourceException rex)
 				{
 					// good.
-					Assert.That(rex.FailedResources[0].First, Is.InstanceOf(typeof (R)));
+					Assert.That(rex.FailedResources[0].First, Is.InstanceOf(typeof(R)));
 				}
 			}
 		}
@@ -150,8 +153,8 @@ namespace Castle.Services.Transaction.Tests
 		{
 			using (var tx = new FileTransaction())
 			{
-				Assert.Throws(typeof (TransactionException), () => (tx as IDirectoryAdapter).Create("lol"),
-				              "The transaction hasn't begun, throws.");
+				Assert.Throws(typeof(TransactionException), () => (tx as IDirectoryAdapter).Create("lol"),
+							  "The transaction hasn't begun, throws.");
 			}
 		}
 
@@ -161,14 +164,14 @@ namespace Castle.Services.Transaction.Tests
 
 		[Test]
 		public void Using_TransactionScope_IsDistributed_AlsoTestingStatusWhenRolledBack()
-        {
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+		{
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
-            using (new TransactionScope())
+			using (new TransactionScope())
 			{
 				using (var tx = new FileTransaction())
 				{
@@ -186,11 +189,11 @@ namespace Castle.Services.Transaction.Tests
 		[Test]
 		public void Using_NormalStates()
 		{
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported");
-                return;
-            }
+			if (Environment.OSVersion.Version.Major < 6)
+			{
+				Assert.Ignore("TxF not supported");
+				return;
+			}
 
 			using (var tx = new FileTransaction())
 			{
@@ -209,16 +212,16 @@ namespace Castle.Services.Transaction.Tests
 		[Test, Ignore("Not completely implemented.")]
 		public void CanMoveDirectory()
 		{
-			string dir1 = dllPath.CombineAssert("a");
-			string dir2 = dllPath.Combine("b");
+			var dir1 = _dllPath.CombineAssert("a");
+			var dir2 = _dllPath.Combine("b");
 
 			Assert.That(Directory.Exists(dir2), Is.False);
 			Assert.That(File.Exists(dir2), Is.False, "Lingering files should not be allowed to disrupt the testing.");
 
 
-			string aFile = dir1.Combine("file");
+			var aFile = dir1.Combine("file");
 			File.WriteAllText(aFile, "I should also be moved.");
-			infosCreated.Add(aFile);
+			_infosCreated.Add(aFile);
 
 			using (var t = new FileTransaction("moving tx"))
 			{
@@ -229,7 +232,7 @@ namespace Castle.Services.Transaction.Tests
 
 				t.Commit();
 				Assert.That(Directory.Exists(dir2), "Now after committing it should.");
-				infosCreated.Add(dir2);
+				_infosCreated.Add(dir2);
 
 				Assert.That(File.Exists(dir2.Combine(Path.GetFileName(aFile))), "And so should the file in the directory.");
 			}

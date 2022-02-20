@@ -1,19 +1,19 @@
 #region License
-//  Copyright 2004-2010 Castle Project - http://www.castleproject.org/
-//  
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//  
-//      http://www.apache.org/licenses/LICENSE-2.0
-//  
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-// 
+// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #endregion
+
 namespace Castle.Services.Transaction
 {
 	using System;
@@ -23,25 +23,23 @@ namespace Castle.Services.Transaction
 	{
 		private const string Key = "Castle.Services.Transaction.TLSActivity";
 
-		private object lockObj = new object();
-		private static LocalDataStoreSlot dataSlot;
+		private object _lockObj = new object();
+		private static LocalDataStoreSlot _dataSlot;
 
 		static TLSActivityManager()
 		{
-			dataSlot = Thread.AllocateNamedDataSlot(Key);
+			_dataSlot = Thread.AllocateNamedDataSlot(Key);
 		}
 
 		#region MarshalByRefObject
 
-		///<summary>
+		/// <summary>
 		///Obtains a lifetime service object to control the lifetime policy for this instance.
 		///</summary>
-		///
-		///<returns>
+		/// <returns>
 		///An object of type <see cref="T:System.Runtime.Remoting.Lifetime.ILease"></see> used to control the lifetime policy for this instance. This is the current lifetime service object for this instance if one exists; otherwise, a new lifetime service object initialized to the value of the <see cref="P:System.Runtime.Remoting.Lifetime.LifetimeServices.LeaseManagerPollTime"></see> property.
-		///</returns>
-		///
-		///<exception cref="T:System.Security.SecurityException">The immediate caller does not have infrastructure permission. </exception><filterpriority>2</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="RemotingConfiguration, Infrastructure" /></PermissionSet>
+		/// </returns>
+		/// <exception cref="T:System.Security.SecurityException">The immediate caller does not have infrastructure permission. </exception><filterpriority>2</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="RemotingConfiguration, Infrastructure" /></PermissionSet>
 		public override object InitializeLifetimeService()
 		{
 			return null;
@@ -57,14 +55,14 @@ namespace Castle.Services.Transaction
 		{
 			get
 			{
-				lock (lockObj)
+				lock (_lockObj)
 				{
-					Activity activity = (Activity) Thread.GetData(dataSlot);
+					var activity = (Activity) Thread.GetData(_dataSlot);
 
 					if (activity == null)
 					{
 						activity = new Activity();
-						Thread.SetData(dataSlot, activity);
+						Thread.SetData(_dataSlot, activity);
 					}
 
 					return activity;
