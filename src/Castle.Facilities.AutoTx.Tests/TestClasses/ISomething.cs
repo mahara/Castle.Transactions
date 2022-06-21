@@ -16,14 +16,14 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using Services.Transaction;
-	using Services.Transaction.IO;
+    using Services.Transaction;
+    using Services.Transaction.IO;
 
-	public interface ISomething
-	{
-		void A(ITransaction tx);
-		void B(ITransaction tx);
-		IDirectoryAdapter DA { get; }
-		IFileAdapter FA { get; }
-	}
+    public interface ISomething
+    {
+        void A(ITransaction tx);
+        void B(ITransaction tx);
+        IDirectoryAdapter DA { get; }
+        IFileAdapter FA { get; }
+    }
 }

@@ -16,81 +16,81 @@
 
 namespace Castle.Services.Transaction
 {
-	using System;
+    using System;
 
-	public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
-	{
-		private bool _isAmbient;
-		private bool _isReadOnly;
+    public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
+    {
+        private bool _isAmbient;
+        private bool _isReadOnly;
 
-		public event EventHandler<TransactionEventArgs> TransactionCompleted;
-		public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
-		public event EventHandler<TransactionEventArgs> TransactionRolledBack;
+        public event EventHandler<TransactionEventArgs> TransactionCompleted;
+        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
+        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
 
-		public TalkactiveTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly) :
-			base(null, transactionMode, isolationMode)
-		{
-			_isAmbient = isAmbient;
-			_isReadOnly = isReadOnly;
-		}
+        public TalkactiveTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly) :
+            base(null, transactionMode, isolationMode)
+        {
+            _isAmbient = isAmbient;
+            _isReadOnly = isReadOnly;
+        }
 
-		public override bool IsAmbient
-		{
-			get { return _isAmbient; }
-			protected set { _isAmbient = value; }
-		}
+        public override bool IsAmbient
+        {
+            get => _isAmbient;
+            protected set => _isAmbient = value;
+        }
 
-		public override bool IsReadOnly
-		{
-			get { return _isReadOnly; }
-			protected set { _isReadOnly = value; }
-		}
+        public override bool IsReadOnly
+        {
+            get => _isReadOnly;
+            protected set => _isReadOnly = value;
+        }
 
-		public override void Begin()
-		{
-			try
-			{
-				base.Begin();
-			}
-			catch (TransactionException e)
-			{
-				Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
-				throw;
-			}
-		}
+        public override void Begin()
+        {
+            try
+            {
+                base.Begin();
+            }
+            catch (TransactionException e)
+            {
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                throw;
+            }
+        }
 
-		protected override void InnerBegin() { }
+        protected override void InnerBegin() { }
 
-		public override void Commit()
-		{
-			try
-			{
-				base.Commit();
-				Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
-			}
-			catch (TransactionException e)
-			{
-				Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
-				throw;
-			}
-		}
+        public override void Commit()
+        {
+            try
+            {
+                base.Commit();
+                Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
+            }
+            catch (TransactionException e)
+            {
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                throw;
+            }
+        }
 
-		protected override void InnerCommit() { }
+        protected override void InnerCommit() { }
 
-		public override void Rollback()
-		{
-			try
-			{
-				base.Rollback();
-				Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
-			}
-			catch (TransactionException e)
-			{
-				Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
-				throw;
-			}
-		}
+        public override void Rollback()
+        {
+            try
+            {
+                base.Rollback();
+                Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
+            }
+            catch (TransactionException e)
+            {
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                throw;
+            }
+        }
 
-		protected override void InnerRollback() { }
-	}
+        protected override void InnerRollback() { }
+    }
 }

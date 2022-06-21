@@ -16,47 +16,47 @@
 
 namespace Castle.Services.Transaction
 {
-	using Microsoft.Win32.SafeHandles;
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
 
-	using System;
-	using System.Runtime.InteropServices;
-	using System.Security.Permissions;
+    using Microsoft.Win32.SafeHandles;
 
-	[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-	internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
-	{
-		internal SafeFindHandle()
-			: base(true)
-		{
-		}
+    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+    internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        internal SafeFindHandle()
+            : base(true)
+        {
+        }
 
-		public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
-			: base(ownsHandle)
-		{
-			SetHandle(preExistingHandle);
-		}
+        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
+            : base(ownsHandle)
+        {
+            SetHandle(preExistingHandle);
+        }
 
-		protected override bool ReleaseHandle()
-		{
-			if (!(IsInvalid || IsClosed))
-			{
-				return FindClose(this);
-			}
+        protected override bool ReleaseHandle()
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                return FindClose(this);
+            }
 
-			return IsInvalid || IsClosed;
-		}
+            return IsInvalid || IsClosed;
+        }
 
-		protected override void Dispose(bool disposing)
-		{
-			if (!(IsInvalid || IsClosed))
-			{
-				FindClose(this);
-			}
+        protected override void Dispose(bool disposing)
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                FindClose(this);
+            }
 
-			base.Dispose(disposing);
-		}
+            base.Dispose(disposing);
+        }
 
-		[DllImport("kernel32.dll", SetLastError = true)]
-		private static extern bool FindClose(SafeHandle hFindFile);
-	}
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FindClose(SafeHandle hFindFile);
+    }
 }

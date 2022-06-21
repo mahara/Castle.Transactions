@@ -16,65 +16,77 @@
 
 namespace Castle.Services.Transaction.IO
 {
-	using System;
+    using System;
 
-	/// <summary>
-	/// An implementation of the MapPath which seems to be working well with both testfixtures and online.
-	/// Consumed by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
-	/// </summary>
-	public class MapPathImpl : IMapPath
-	{
-		private readonly Func<string, string> _function;
+    /// <summary>
+    /// An implementation of the MapPath which seems to be working well with both testfixtures and online.
+    /// Consumed by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
+    /// </summary>
+    public class MapPathImpl : IMapPath
+    {
+        private readonly Func<string, string> _function;
 
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public MapPathImpl()
-		{
-		}
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public MapPathImpl()
+        {
+        }
 
-		/// <summary>
-		/// Function may be null.
-		/// </summary>
-		/// <param name="function"></param>
-		public MapPathImpl(Func<string, string> function)
-		{
-			_function = function;
-		}
+        /// <summary>
+        /// Function may be null.
+        /// </summary>
+        /// <param name="function"></param>
+        public MapPathImpl(Func<string, string> function)
+        {
+            _function = function;
+        }
 
-		/// <summary>
-		/// Gets the absolute path given a string formatted as a map path,
-		/// for example:
-		/// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
-		/// would all be valid map paths.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		public string MapPath(string path)
-		{
-			if (Path.IsRooted(path))
-				return Path.GetFullPath(path);
+        /// <summary>
+        /// Gets the absolute path given a string formatted as a map path,
+        /// for example:
+        /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
+        /// would all be valid map paths.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string MapPath(string path)
+        {
+            if (Path.IsRooted(path))
+            {
+                return Path.GetFullPath(path);
+            }
 
-			if (_function != null)
-				return _function(path);
+            if (_function != null)
+            {
+                return _function(path);
+            }
 
-			path = Path.NormDirSepChars(path);
+            path = Path.NormDirSepChars(path);
 
-			if (path == string.Empty)
-				return AppDomain.CurrentDomain.BaseDirectory;
+            if (path == string.Empty)
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
 
-			if (path[0] == '~')
-				path = path.Substring(1);
+            if (path[0] == '~')
+            {
+                path = path.Substring(1);
+            }
 
-			if (path == string.Empty)
-				return AppDomain.CurrentDomain.BaseDirectory;
+            if (path == string.Empty)
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
 
-			if (Path.DirectorySeparatorChar == path[0])
-				path = path.Substring(1);
+            if (Path.DirectorySeparatorChar == path[0])
+            {
+                path = path.Substring(1);
+            }
 
-			return path == string.Empty ?
-						   AppDomain.CurrentDomain.BaseDirectory :
-						   Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
-		}
-	}
+            return path == string.Empty ?
+                           AppDomain.CurrentDomain.BaseDirectory :
+                           Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
+        }
+    }
 }

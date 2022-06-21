@@ -16,14 +16,14 @@
 
 namespace Castle.Services.Transaction
 {
-	using IO;
+    using System;
 
-	using System;
+    using IO;
 
-	/// <summary>
-	/// An interface for a transaction acting on a file.
-	/// </summary>
-	public interface IFileTransaction : IFileAdapter, IDirectoryAdapter, ITransaction, IDisposable
-	{
-	}
+    /// <summary>
+    /// An interface for a transaction acting on a file.
+    /// </summary>
+    public interface IFileTransaction : IFileAdapter, IDirectoryAdapter, ITransaction, IDisposable
+    {
+    }
 }

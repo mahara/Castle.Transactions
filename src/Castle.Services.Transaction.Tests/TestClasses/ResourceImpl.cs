@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,59 +16,55 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
+    using System;
 
-	public class ResourceImpl : IResource, IDisposable
-	{
-		public bool WasDisposed;
+    public class ResourceImpl : IResource, IDisposable
+    {
+        public bool WasDisposed;
 
-		private bool _started;
-		private bool _rolledback;
-		private bool _committed;
+        public bool Started { get; private set; }
 
-		public bool Started
-		{
-			get { return _started; }
-		}
+        public bool Rolledback { get; private set; }
 
-		public bool Rolledback
-		{
-			get { return _rolledback; }
-		}
+        public bool Committed { get; private set; }
 
-		public bool Committed
-		{
-			get { return _committed; }
-		}
+        #region IResource Members
 
-		#region IResource Members
+        public virtual void Start()
+        {
+            if (Started)
+            {
+                throw new ApplicationException("Start called before.");
+            }
 
-		public virtual void Start()
-		{
-			if (_started) throw new ApplicationException("Start called before");
+            Started = true;
+        }
 
-			_started = true;
-		}
+        public virtual void Rollback()
+        {
+            if (Rolledback)
+            {
+                throw new ApplicationException("Rollback called before.");
+            }
 
-		public virtual void Rollback()
-		{
-			if (_rolledback) throw new ApplicationException("Rollback called before");
+            Rolledback = true;
+        }
 
-			_rolledback = true;
-		}
+        public virtual void Commit()
+        {
+            if (Committed)
+            {
+                throw new ApplicationException("Commit called before.");
+            }
 
-		public virtual void Commit()
-		{
-			if (_committed) throw new ApplicationException("Commit called before");
+            Committed = true;
+        }
 
-			_committed = true;
-		}
+        #endregion
 
-		#endregion
-
-		public void Dispose()
-		{
-			WasDisposed = true;
-		}
-	}
+        public void Dispose()
+        {
+            WasDisposed = true;
+        }
+    }
 }

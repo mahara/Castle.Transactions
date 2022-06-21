@@ -16,13 +16,13 @@
 
 namespace Castle.Services.Transaction
 {
-	using System;
+    using System;
 
-	/// <summary>
-	/// Indicates that the target class wants to use the transactional services.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-	public sealed class TransactionalAttribute : System.Attribute
-	{
-	}
+    /// <summary>
+    /// Indicates that the target class wants to use the transactional services.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class TransactionalAttribute : System.Attribute
+    {
+    }
 }

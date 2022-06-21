@@ -16,10 +16,10 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	public interface ICustomerService
-	{
-		void Insert(string name, string address);
+    public interface ICustomerService
+    {
+        void Insert(string name, string address);
 
-		void Delete(int id);
-	}
+        void Delete(int id);
+    }
 }

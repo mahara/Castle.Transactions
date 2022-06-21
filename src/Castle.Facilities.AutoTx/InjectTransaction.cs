@@ -16,13 +16,13 @@
 
 namespace Castle.Facilities.AutoTx
 {
-	using System;
+    using System;
 
-	/// <summary>
-	/// Tells the kernel to give the transaction instace to the method as a parameter.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Method)]
-	public sealed class InjectTransactionAttribute : Attribute
-	{
-	}
+    /// <summary>
+    /// Tells the kernel to give the transaction instace to the method as a parameter.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class InjectTransactionAttribute : Attribute
+    {
+    }
 }

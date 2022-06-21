@@ -16,17 +16,17 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using Castle.Services.Transaction.IO;
+    using Castle.Services.Transaction.IO;
 
-	using NUnit.Framework;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class FileAdapterTests
-	{
-		[Test]
-		public void CtorUseTransactions()
-		{
-			Assert.That(new FileAdapter().UseTransactions);
-		}
-	}
+    [TestFixture]
+    public class FileAdapterTests
+    {
+        [Test]
+        public void CtorUseTransactions()
+        {
+            Assert.That(new FileAdapter().UseTransactions);
+        }
+    }
 }

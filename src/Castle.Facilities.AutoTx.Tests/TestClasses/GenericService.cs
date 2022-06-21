@@ -16,33 +16,33 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using Services.Transaction;
+    using System;
 
-	using System;
+    using Services.Transaction;
 
-	[Transactional]
-	public class GenericService<T>
-	{
-		[Transaction]
-		public virtual void Bar<K>()
-		{
-		}
+    [Transactional]
+    public class GenericService<T>
+    {
+        [Transaction]
+        public virtual void Bar<K>()
+        {
+        }
 
-		[Transaction]
-		public virtual void Foo()
-		{
-		}
+        [Transaction]
+        public virtual void Foo()
+        {
+        }
 
-		[Transaction]
-		public virtual void Throw()
-		{
-			throw new Exception(typeof(T).FullName);
-		}
+        [Transaction]
+        public virtual void Throw()
+        {
+            throw new Exception(typeof(T).FullName);
+        }
 
-		[Transaction]
-		public virtual void Throw<K>()
-		{
-			throw new Exception(typeof(T).FullName);
-		}
-	}
+        [Transaction]
+        public virtual void Throw<K>()
+        {
+            throw new Exception(typeof(T).FullName);
+        }
+    }
 }

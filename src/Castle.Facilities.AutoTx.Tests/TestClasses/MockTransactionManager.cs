@@ -16,43 +16,30 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using Services.Transaction;
+    using Services.Transaction;
 
-	/// <summary>
-	/// Summary description for MockTransactionManager.
-	/// </summary>
-	public class MockTransactionManager : DefaultTransactionManager
-	{
-		private int _committedCount;
-		private int _rolledBackCount;
-		private int _transactions;
+    /// <summary>
+    /// Summary description for MockTransactionManager.
+    /// </summary>
+    public class MockTransactionManager : DefaultTransactionManager
+    {
+        public MockTransactionManager()
+        {
+            SetupStatistics();
+        }
 
-		public MockTransactionManager()
-		{
-			SetupStatistics();
-		}
+        public int TransactionCount { get; private set; }
 
-		public int TransactionCount
-		{
-			get { return _transactions; }
-		}
+        public int CommittedCount { get; private set; }
 
-		public int CommittedCount
-		{
-			get { return _committedCount; }
-		}
+        public int RolledBackCount { get; private set; }
 
-		public int RolledBackCount
-		{
-			get { return _rolledBackCount; }
-		}
-
-		private void SetupStatistics()
-		{
-			TransactionCreated += (sender, ev) => { _transactions++; };
-			ChildTransactionCreated += (sender, ev) => { _transactions++; };
-			TransactionCompleted += (sender, ev) => { _committedCount++; };
-			TransactionRolledBack += (sender, ev) => { _rolledBackCount++; };
-		}
-	}
+        private void SetupStatistics()
+        {
+            TransactionCreated += (sender, ev) => { TransactionCount++; };
+            ChildTransactionCreated += (sender, ev) => { TransactionCount++; };
+            TransactionCompleted += (sender, ev) => { CommittedCount++; };
+            TransactionRolledBack += (sender, ev) => { RolledBackCount++; };
+        }
+    }
 }

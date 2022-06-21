@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,87 +16,89 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using MicroKernel.Facilities;
+    using System;
+    using System.Linq;
 
-	using NUnit.Framework;
+    using MicroKernel.Facilities;
 
-	using System;
-	using System.Linq;
+    using NUnit.Framework;
 
-	using Windsor;
+    using Windsor;
 
-	[TestFixture]
-	public class ConfiguredComponentsTests
-	{
-		[Test]
-		public void IsTransactionalMissing()
-		{
-			void Method()
-			{
-				new WindsorContainer("IsTransactionalMissing.xml");
-			}
+    [TestFixture]
+    public class ConfiguredComponentsTests
+    {
+        [Test]
+        public void IsTransactionalMissing()
+        {
+            void Method()
+            {
+                new WindsorContainer("IsTransactionalMissing.xml");
+            }
 
-			Assert.That(Method, Throws.TypeOf<FacilityException>()
-									  .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
-		}
+            Assert.That(Method,
+                        Throws.TypeOf<FacilityException>()
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
+        }
 
-		[Test]
-		public void HasIsTransactionalButNothingIsConfigured()
-		{
-			var container = new WindsorContainer("HasIsTransactionalButNothingIsConfigured.xml");
+        [Test]
+        public void HasIsTransactionalButNothingIsConfigured()
+        {
+            var container = new WindsorContainer("HasIsTransactionalButNothingIsConfigured.xml");
 
-			var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-			var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-			Assert.IsNull(meta);
-		}
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
+            Assert.IsNull(meta);
+        }
 
-		[Test]
-		public void HasConfiguration()
-		{
-			var container = new WindsorContainer("HasConfiguration.xml");
+        [Test]
+        public void HasConfiguration()
+        {
+            var container = new WindsorContainer("HasConfiguration.xml");
 
-			var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-			var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-			Assert.IsNotNull(meta);
-			Assert.AreEqual(3, meta.Methods.Count());
-		}
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
+            Assert.IsNotNull(meta);
+            Assert.AreEqual(3, meta.Methods.Count());
+        }
 
-		[Test]
-		public void HasInvalidMethod()
-		{
-			void Method()
-			{
-				new WindsorContainer("HasInvalidMethod.xml");
-			}
+        [Test]
+        public void HasInvalidMethod()
+        {
+            void Method()
+            {
+                new WindsorContainer("HasInvalidMethod.xml");
+            }
 
-			Assert.That(Method, Throws.TypeOf<Exception>()
-									  .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
-		}
+            Assert.That(Method,
+                        Throws.TypeOf<Exception>()
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
+        }
 
-		[Test]
-		public void ValidConfigForInheritedMethods()
-		{
-			var container = new WindsorContainer("ValidConfigForInheritedMethods.xml");
+        [Test]
+        public void ValidConfigForInheritedMethods()
+        {
+            var container = new WindsorContainer("ValidConfigForInheritedMethods.xml");
 
-			var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-			var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp2));
-			Assert.IsNotNull(meta);
-			Assert.AreEqual(4, meta.Methods.Count());
-		}
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp2));
+            Assert.IsNotNull(meta);
+            Assert.AreEqual(4, meta.Methods.Count());
+        }
 
-		[Test]
-		public void ConfigForServiceWithInterface()
-		{
-			var container = new WindsorContainer("ConfigForServiceWithInterface.xml");
+        [Test]
+        public void ConfigForServiceWithInterface()
+        {
+            var container = new WindsorContainer("ConfigForServiceWithInterface.xml");
 
-			var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-			var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp3));
-			Assert.IsNotNull(meta);
-			Assert.AreEqual(2, meta.Methods.Count());
-		}
-	}
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp3));
+            Assert.IsNotNull(meta);
+            Assert.AreEqual(2, meta.Methods.Count());
+        }
+    }
 }

@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,35 +16,28 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
+    using System;
 
-	public class SynchronizationImpl : ISynchronization
-	{
-		private DateTime _after = DateTime.MinValue;
-		private DateTime _before = DateTime.MinValue;
+    public class SynchronizationImpl : ISynchronization
+    {
+        public SynchronizationImpl()
+        {
+        }
 
-		public SynchronizationImpl()
-		{
-		}
+        public DateTime After { get; private set; } =
+            DateTime.MinValue;
 
-		public DateTime After
-		{
-			get { return _after; }
-		}
+        public DateTime Before { get; private set; } =
+            DateTime.MinValue;
 
-		public DateTime Before
-		{
-			get { return _before; }
-		}
+        public void AfterCompletion()
+        {
+            After = DateTime.Now;
+        }
 
-		public void AfterCompletion()
-		{
-			_after = DateTime.Now;
-		}
-
-		public void BeforeCompletion()
-		{
-			_before = DateTime.Now;
-		}
-	}
+        public void BeforeCompletion()
+        {
+            Before = DateTime.Now;
+        }
+    }
 }

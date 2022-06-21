@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,18 +16,18 @@
 
 namespace Castle.Services.Transaction.IO
 {
-	using System;
-	using System.Net;
-	using System.Text.RegularExpressions;
+    using System;
+    using System.Net;
+    using System.Text.RegularExpressions;
 
-	/// <summary>
-	/// Path data holder.
-	/// Invariant: no fields nor properties are null after constructor.
-	/// </summary>
-	public struct PathInfo
-	{
-		private const string RegexString =
-			@"(?<root>
+    /// <summary>
+    /// Path data holder.
+    /// Invariant: no fields nor properties are null after constructor.
+    /// </summary>
+    public struct PathInfo
+    {
+        private const string RegexString =
+            @"(?<root>
  (?<UNC_prefix> \\\\\?\\ (?<UNC_literal>UNC\\)?  )?
  (?<options>
   (?:
@@ -56,339 +56,300 @@ namespace Castle.Services.Transaction.IO
  (?<rel_drive>\w{1,3}:)?
  (?<folders_files>.+))?";
 
-		private static Regex _regex;
+        private static readonly Regex _regex;
 
-		static PathInfo()
-		{
-			_regex = new Regex(RegexString,
-							   RegexOptions.Compiled |
-							   RegexOptions.IgnorePatternWhitespace |
-							   RegexOptions.IgnoreCase |
-							   RegexOptions.Multiline);
-		}
+        static PathInfo()
+        {
+            _regex = new Regex(RegexString,
+                               RegexOptions.Compiled |
+                               RegexOptions.IgnorePatternWhitespace |
+                               RegexOptions.IgnoreCase |
+                               RegexOptions.Multiline);
+        }
 
-		private string _root,
-					   _UNCPrefix,
-					   _UNCLiteral,
-					   _options,
-					   _drive,
-					   _driveLetter,
-					   _server,
-					   _IPv4,
-					   _IPv6,
-					   _serverName,
-					   _device,
-					   _devicePrefix,
-					   _deviceName,
-					   _deviceGuid,
-					   _nonRootPath,
-					   _relDrive,
-					   _folderAndFiles;
+        public static PathInfo Parse(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
 
-		public static PathInfo Parse(string path)
-		{
-			if (path == null) throw new ArgumentNullException("path");
+            var matches = _regex.Matches(path);
 
-			var matches = _regex.Matches(path);
+            string m(string s)
+            {
+                return GetMatch(matches, s);
+            }
+            // this might be possible to improve using raw indicies (ints) instead.
+            return new PathInfo(
+                m("root"),
+                m("UNC_prefix"),
+                m("UNC_literal"),
+                m("options"),
+                m("drive"),
+                m("drive_letter"),
+                m("server"),
+                m("ipv4"),
+                m("ipv6"),
+                m("server_name"),
+                m("device"),
+                m("dev_prefix"),
+                m("dev_name"),
+                m("dev_guid"),
+                m("nonrootpath"),
+                m("rel_drive"),
+                m("folders_files")
+                );
+        }
 
-			Func<string, string> m = s => GetMatch(matches, s);
-			// this might be possible to improve using raw indicies (ints) instead.
-			return new PathInfo(
-				m("root"),
-				m("UNC_prefix"),
-				m("UNC_literal"),
-				m("options"),
-				m("drive"),
-				m("drive_letter"),
-				m("server"),
-				m("ipv4"),
-				m("ipv6"),
-				m("server_name"),
-				m("device"),
-				m("dev_prefix"),
-				m("dev_name"),
-				m("dev_guid"),
-				m("nonrootpath"),
-				m("rel_drive"),
-				m("folders_files")
-				);
-		}
+        private static string GetMatch(MatchCollection matches,
+                                       string groupIndex)
+        {
+            var matchesCount = matches.Count;
 
-		private static string GetMatch(MatchCollection matches,
-									   string groupIndex)
-		{
-			var matchesCount = matches.Count;
+            for (var i = 0; i < matchesCount; i++)
+            {
+                if (matches[i].Groups[groupIndex].Success)
+                {
+                    return matches[i].Groups[groupIndex].Value;
+                }
+            }
 
-			for (var i = 0; i < matchesCount; i++)
-			{
-				if (matches[i].Groups[groupIndex].Success)
-					return matches[i].Groups[groupIndex].Value;
-			}
+            return string.Empty;
+        }
 
-			return string.Empty;
-		}
+        private PathInfo(string root, string uncPrefix, string uncLiteral, string options, string drive, string driveLetter, string server, string iPv4, string iPv6, string serverName, string device, string devicePrefix, string deviceName, string deviceGuid, string nonRootPath, string relDrive, string folderAndFiles)
+        {
+            Root = root;
+            UNCPrefix = uncPrefix;
+            UNCLiteral = uncLiteral;
+            Options = options;
+            Drive = drive;
+            DriveLetter = driveLetter;
+            Server = server;
+            IPv4 = iPv4;
+            IPv6 = iPv6;
+            ServerName = serverName;
+            Device = device;
+            DevicePrefix = devicePrefix;
+            DeviceName = deviceName;
+            DeviceGuid = deviceGuid;
+            NonRootPath = nonRootPath;
+            RelDrive = relDrive;
+            FolderAndFiles = folderAndFiles;
+        }
 
-		private PathInfo(string root, string uncPrefix, string uncLiteral, string options, string drive, string driveLetter, string server, string iPv4, string iPv6, string serverName, string device, string devicePrefix, string deviceName, string deviceGuid, string nonRootPath, string relDrive, string folderAndFiles)
-		{
-			_root = root;
-			_UNCPrefix = uncPrefix;
-			_UNCLiteral = uncLiteral;
-			_options = options;
-			_drive = drive;
-			_driveLetter = driveLetter;
-			_server = server;
-			_IPv4 = iPv4;
-			_IPv6 = iPv6;
-			_serverName = serverName;
-			_device = device;
-			_devicePrefix = devicePrefix;
-			_deviceName = deviceName;
-			_deviceGuid = deviceGuid;
-			_nonRootPath = nonRootPath;
-			_relDrive = relDrive;
-			_folderAndFiles = folderAndFiles;
-		}
+        /// <summary>
+        /// Examples of return values:
+        /// <list>
+        /// <item>\\?\UNC\C:\</item>
+        /// <item>\\?\UNC\servername\</item>
+        /// <item>\\192.168.0.2\</item>
+        /// <item>C:\</item>
+        /// </list>
+        ///
+        /// Definition: Returns part of the string that is in itself uniquely from the currently
+        /// executing CLR.
+        /// </summary>
+        public string Root { get; }
 
-		/// <summary>
-		/// Examples of return values:
-		/// <list>
-		/// <item>\\?\UNC\C:\</item>
-		/// <item>\\?\UNC\servername\</item>
-		/// <item>\\192.168.0.2\</item>
-		/// <item>C:\</item>
-		/// </list>
-		///
-		/// Definition: Returns part of the string that is in itself uniquely from the currently
-		/// executing CLR.
-		/// </summary>
-		public string Root
-		{
-			get { return _root; }
-		}
+        /// <summary>
+        /// Examples of return values:
+        /// <list>
+        /// <item></item>
+        /// </list>
+        /// </summary>
+        public string UNCPrefix { get; }
 
-		/// <summary>
-		/// Examples of return values:
-		/// <list>
-		/// <item></item>
-		/// </list>
-		/// </summary>
-		public string UNCPrefix
-		{
-			get { return _UNCPrefix; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string UNCLiteral { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string UNCLiteral
-		{
-			get { return _UNCLiteral; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string Options { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string Options
-		{
-			get { return _options; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string Drive { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string Drive
-		{
-			get { return _drive; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string DriveLetter { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string DriveLetter
-		{
-			get { return _driveLetter; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string Server { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string Server
-		{
-			get { return _server; }
-		}
+        /// <summary>
+        /// Gets the 0.0.0.0-based IP-address if any.
+        /// </summary>
+        public string IPv4 { get; }
 
-		/// <summary>
-		/// Gets the 0.0.0.0-based IP-address if any.
-		/// </summary>
-		public string IPv4
-		{
-			get { return _IPv4; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string IPv6 { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string IPv6
-		{
-			get { return _IPv6; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string ServerName { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string ServerName
-		{
-			get { return _serverName; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string Device { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string Device
-		{
-			get { return _device; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string DevicePrefix { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string DevicePrefix
-		{
-			get { return _devicePrefix; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string DeviceName { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string DeviceName
-		{
-			get { return _deviceName; }
-		}
+        /// <summary>
+        /// Gets the device GUID in the form
+        /// <code>{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}</code>
+        /// i.e. 8-4-4-4-12 hex digits with curly brackets.
+        /// </summary>
+        public string DeviceGuid { get; }
 
-		/// <summary>
-		/// Gets the device GUID in the form
-		/// <code>{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}</code>
-		/// i.e. 8-4-4-4-12 hex digits with curly brackets.
-		/// </summary>
-		public string DeviceGuid
-		{
-			get { return _deviceGuid; }
-		}
+        /// <summary>
+        /// Gets a the part of the path that starts when the root ends.
+        /// The root in turn is any UNC-prefix plus device, drive, server or ip-prefix.
+        /// This string may not start with neither of '\' or '/'.
+        /// </summary>
+        public string NonRootPath { get; }
 
-		/// <summary>
-		/// Gets a the part of the path that starts when the root ends.
-		/// The root in turn is any UNC-prefix plus device, drive, server or ip-prefix.
-		/// This string may not start with neither of '\' or '/'.
-		/// </summary>
-		public string NonRootPath
-		{
-			get { return _nonRootPath; }
-		}
+        /// <summary>
+        ///
+        /// </summary>
+        public string RelDrive { get; }
 
-		/// <summary>
-		///
-		/// </summary>
-		public string RelDrive
-		{
-			get { return _relDrive; }
-		}
+        /// <summary>
+        /// The only time when this differs from <see cref="NonRootPath" />
+        /// is when a path like this is used:
+        /// <code>C:../parent/a.txt</code>, otherwise, for all paths,
+        /// this property equals <see cref="NonRootPath" />.
+        /// </summary>
+        public string FolderAndFiles { get; }
 
-		/// <summary>
-		/// The only time when this differs from <see cref="NonRootPath" />
-		/// is when a path like this is used:
-		/// <code>C:../parent/a.txt</code>, otherwise, for all paths,
-		/// this property equals <see cref="NonRootPath" />.
-		/// </summary>
-		public string FolderAndFiles
-		{
-			get { return _folderAndFiles; }
-		}
+        public PathType Type
+        {
+            get
+            {
+                if (Device != string.Empty)
+                {
+                    return PathType.Device;
+                }
 
-		public PathType Type
-		{
-			get
-			{
-				if (Device != string.Empty)
-					return PathType.Device;
-				if (ServerName != string.Empty)
-					return PathType.Server;
-				if (IPv4 != string.Empty)
-					return PathType.IPv4;
-				if (IPv6 != string.Empty)
-					return PathType.IPv6;
-				if (Drive != string.Empty)
-					return PathType.Drive;
-				return PathType.Relative;
-			}
-		}
+                if (ServerName != string.Empty)
+                {
+                    return PathType.Server;
+                }
 
-		/// <summary>
-		/// Returns whether <see cref="Root" /> is not an empty string.
-		/// </summary>
-		public bool IsRooted
-		{
-			get { return _root != string.Empty; }
-		}
+                if (IPv4 != string.Empty)
+                {
+                    return PathType.IPv4;
+                }
 
-		/// <summary>
-		/// Returns whether the current PathInfo is a valid parent of the child path info
-		/// passed as argument.
-		/// </summary>
-		/// <param name="child">The path info to verify</param>
-		/// <returns>Whether it is true that the current path info is a parent of child.</returns>
-		/// <exception cref="NotSupportedException">If this instance of path info and child aren't rooted.</exception>
-		public bool IsParentOf(PathInfo child)
-		{
-			if (Root == string.Empty || child.Root == string.Empty)
-				throw new NotSupportedException("Non-rooted paths are not supported.");
+                if (IPv6 != string.Empty)
+                {
+                    return PathType.IPv6;
+                }
 
-			var OK = child.FolderAndFiles.StartsWith(FolderAndFiles);
+                if (Drive != string.Empty)
+                {
+                    return PathType.Drive;
+                }
 
-			switch (Type)
-			{
-				case PathType.Device:
-					OK &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
-					break;
-				case PathType.Server:
-					OK &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
-					break;
-				case PathType.IPv4:
-					OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
-					break;
-				case PathType.IPv6:
-					OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
-					break;
-				case PathType.Relative:
-					throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
-				case PathType.Drive:
-					OK &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
-					break;
-			}
+                return PathType.Relative;
+            }
+        }
 
-			return OK;
-		}
+        /// <summary>
+        /// Returns whether <see cref="Root" /> is not an empty string.
+        /// </summary>
+        public bool IsRooted =>
+            Root != string.Empty;
 
-		/// <summary>
-		/// Removes the path info passes as a parameter from the current root. Only works for two rooted paths with same root.
-		/// Does NOT cover all edge cases, please verify its intended results yourself.
-		/// <example>
-		///
-		/// </example>
-		/// </summary>
-		/// <param name="other"></param>
-		/// <returns></returns>
-		public string RemoveParameterFromRoot(PathInfo other)
-		{
-			if (Root != other.Root)
-				throw new InvalidOperationException("Roots of this and other don't match.");
+        /// <summary>
+        /// Returns whether the current PathInfo is a valid parent of the child path info
+        /// passed as argument.
+        /// </summary>
+        /// <param name="child">The path info to verify</param>
+        /// <returns>Whether it is true that the current path info is a parent of child.</returns>
+        /// <exception cref="NotSupportedException">If this instance of path info and child aren't rooted.</exception>
+        public bool IsParentOf(PathInfo child)
+        {
+            if (Root == string.Empty || child.Root == string.Empty)
+            {
+                throw new NotSupportedException("Non-rooted paths are not supported.");
+            }
 
-			if (other.FolderAndFiles.Length > FolderAndFiles.Length)
-				throw new InvalidOperationException(
-					"The folders and files part of the second parameter must be shorter than that path you wish to subtract from.");
+            var OK = child.FolderAndFiles.StartsWith(FolderAndFiles);
 
-			if (other.FolderAndFiles == FolderAndFiles) return string.Empty;
+            switch (Type)
+            {
+                case PathType.Device:
+                    OK &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
+                    break;
+                case PathType.Server:
+                    OK &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
+                    break;
+                case PathType.IPv4:
+                    OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
+                    break;
+                case PathType.IPv6:
+                    OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
+                    break;
+                case PathType.Relative:
+                    throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
+                case PathType.Drive:
+                    OK &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
+                    break;
+            }
 
-			return FolderAndFiles.Substring(other.FolderAndFiles.Length).TrimStart(Path.GetDirectorySeparatorChars());
-		}
-	}
+            return OK;
+        }
+
+        /// <summary>
+        /// Removes the path info passes as a parameter from the current root. Only works for two rooted paths with same root.
+        /// Does NOT cover all edge cases, please verify its intended results yourself.
+        /// <example>
+        ///
+        /// </example>
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public string RemoveParameterFromRoot(PathInfo other)
+        {
+            if (Root != other.Root)
+            {
+                throw new InvalidOperationException("Roots of this and other don't match.");
+            }
+
+            if (other.FolderAndFiles.Length > FolderAndFiles.Length)
+            {
+                throw new InvalidOperationException(
+                    "The folders and files part of the second parameter must be shorter than that path you wish to subtract from.");
+            }
+
+            if (other.FolderAndFiles == FolderAndFiles)
+            {
+                return string.Empty;
+            }
+
+            return FolderAndFiles.Substring(other.FolderAndFiles.Length).TrimStart(Path.GetDirectorySeparatorChars());
+        }
+    }
 }

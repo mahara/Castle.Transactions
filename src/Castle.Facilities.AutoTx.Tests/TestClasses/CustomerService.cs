@@ -16,66 +16,66 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using MicroKernel;
+    using System;
 
-	using NUnit.Framework;
+    using MicroKernel;
 
-	using Services.Transaction;
+    using NUnit.Framework;
 
-	using System;
+    using Services.Transaction;
 
-	/// <summary>
-	/// Summary description for CustomerService.
-	/// </summary>
-	[Transactional]
-	public class CustomerService
-	{
-		private readonly IKernel _kernel;
+    /// <summary>
+    /// Summary description for CustomerService.
+    /// </summary>
+    [Transactional]
+    public class CustomerService
+    {
+        private readonly IKernel _kernel;
 
-		public CustomerService(IKernel kernel)
-		{
-			_kernel = kernel;
-		}
+        public CustomerService(IKernel kernel)
+        {
+            _kernel = kernel;
+        }
 
-		[Transaction(TransactionMode.Requires)]
-		public virtual void Insert(string name, string address)
-		{
-		}
+        [Transaction(TransactionMode.Requires)]
+        public virtual void Insert(string name, string address)
+        {
+        }
 
-		[Transaction(TransactionMode.Requires)]
-		public virtual void Delete(int id)
-		{
-			throw new ApplicationException("Whopps. Problems!");
-		}
+        [Transaction(TransactionMode.Requires)]
+        public virtual void Delete(int id)
+        {
+            throw new ApplicationException("Whopps. Problems!");
+        }
 
-		[Transaction]
-		public virtual void Update(int id)
-		{
-			var tm = _kernel.Resolve<ITransactionManager>();
+        [Transaction]
+        public virtual void Update(int id)
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
 
-			Assert.IsNotNull(tm.CurrentTransaction);
-			Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+            Assert.IsNotNull(tm.CurrentTransaction);
+            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
 
-			tm.CurrentTransaction.SetRollbackOnly();
+            tm.CurrentTransaction.SetRollbackOnly();
 
-			Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
-		}
+            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+        }
 
-		[Transaction(TransactionMode.Requires)]
-		public virtual void DoSomethingNotMarkedAsReadOnly()
-		{
-			var tm = _kernel.Resolve<ITransactionManager>();
-			Assert.IsNotNull(tm.CurrentTransaction);
-			Assert.IsFalse(tm.CurrentTransaction.IsReadOnly);
-		}
+        [Transaction(TransactionMode.Requires)]
+        public virtual void DoSomethingNotMarkedAsReadOnly()
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
+            Assert.IsNotNull(tm.CurrentTransaction);
+            Assert.IsFalse(tm.CurrentTransaction.IsReadOnly);
+        }
 
 
-		[Transaction(TransactionMode.Requires, ReadOnly = true)]
-		public virtual void DoSomethingReadOnly()
-		{
-			var tm = _kernel.Resolve<ITransactionManager>();
-			Assert.IsNotNull(tm.CurrentTransaction);
-			Assert.IsTrue(tm.CurrentTransaction.IsReadOnly);
-		}
-	}
+        [Transaction(TransactionMode.Requires, ReadOnly = true)]
+        public virtual void DoSomethingReadOnly()
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
+            Assert.IsNotNull(tm.CurrentTransaction);
+            Assert.IsTrue(tm.CurrentTransaction.IsReadOnly);
+        }
+    }
 }

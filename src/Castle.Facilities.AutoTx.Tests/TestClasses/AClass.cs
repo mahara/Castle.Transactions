@@ -16,43 +16,34 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using NUnit.Framework;
+    using NUnit.Framework;
 
-	using Services.Transaction;
-	using Services.Transaction.IO;
+    using Services.Transaction;
+    using Services.Transaction.IO;
 
-	[Transactional]
-	public class AClass : ISomething
-	{
-		private readonly IDirectoryAdapter _da;
-		private readonly IFileAdapter _fa;
+    [Transactional]
+    public class AClass : ISomething
+    {
+        public AClass(IDirectoryAdapter da, IFileAdapter fa)
+        {
+            DA = da;
+            FA = fa;
+        }
 
-		public AClass(IDirectoryAdapter da, IFileAdapter fa)
-		{
-			_da = da;
-			_fa = fa;
-		}
+        public IDirectoryAdapter DA { get; }
 
-		public IDirectoryAdapter DA
-		{
-			get { return _da; }
-		}
+        public IFileAdapter FA { get; }
 
-		public IFileAdapter FA
-		{
-			get { return _fa; }
-		}
+        [Transaction]
+        public void A(ITransaction tx)
+        {
+            Assert.That(tx, Is.Null);
+        }
 
-		[Transaction]
-		public void A(ITransaction tx)
-		{
-			Assert.That(tx, Is.Null);
-		}
-
-		[Transaction, InjectTransaction]
-		public void B(ITransaction tx)
-		{
-			Assert.That(tx, Is.Not.Null);
-		}
-	}
+        [Transaction, InjectTransaction]
+        public void B(ITransaction tx)
+        {
+            Assert.That(tx, Is.Not.Null);
+        }
+    }
 }

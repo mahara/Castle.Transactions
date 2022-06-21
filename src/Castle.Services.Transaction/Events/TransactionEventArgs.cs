@@ -16,23 +16,18 @@
 
 namespace Castle.Services.Transaction
 {
-	using System;
+    using System;
 
-	/// <summary>
-	/// Event args for a transaction event.
-	/// </summary>
-	public class TransactionEventArgs : EventArgs
-	{
-		private readonly ITransaction _transaction;
+    /// <summary>
+    /// Event args for a transaction event.
+    /// </summary>
+    public class TransactionEventArgs : EventArgs
+    {
+        public TransactionEventArgs(ITransaction transaction)
+        {
+            Transaction = transaction;
+        }
 
-		public TransactionEventArgs(ITransaction transaction)
-		{
-			_transaction = transaction;
-		}
-
-		public ITransaction Transaction
-		{
-			get { return _transaction; }
-		}
-	}
+        public ITransaction Transaction { get; }
+    }
 }

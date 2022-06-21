@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,37 +16,37 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
+    using System;
 
-	public class ThrowsExceptionResourceImpl : ResourceImpl
-	{
-		private bool _throwOnCommit = false;
-		private bool _throwOnRollback = false;
+    public class ThrowsExceptionResourceImpl : ResourceImpl
+    {
+        private readonly bool _throwOnCommit = false;
+        private readonly bool _throwOnRollback = false;
 
-		public ThrowsExceptionResourceImpl(bool throwOnCommit, bool throwOnRollback)
-		{
-			_throwOnCommit = throwOnCommit;
-			_throwOnRollback = throwOnRollback;
-		}
+        public ThrowsExceptionResourceImpl(bool throwOnCommit, bool throwOnRollback)
+        {
+            _throwOnCommit = throwOnCommit;
+            _throwOnRollback = throwOnRollback;
+        }
 
-		public override void Rollback()
-		{
-			if (_throwOnRollback)
-			{
-				throw new Exception("Simulated rollback error");
-			}
+        public override void Rollback()
+        {
+            if (_throwOnRollback)
+            {
+                throw new Exception("Simulated rollback error.");
+            }
 
-			base.Rollback();
-		}
+            base.Rollback();
+        }
 
-		public override void Commit()
-		{
-			if (_throwOnCommit)
-			{
-				throw new Exception("Simulated commit error");
-			}
+        public override void Commit()
+        {
+            if (_throwOnCommit)
+            {
+                throw new Exception("Simulated commit error.");
+            }
 
-			base.Commit();
-		}
-	}
+            base.Commit();
+        }
+    }
 }

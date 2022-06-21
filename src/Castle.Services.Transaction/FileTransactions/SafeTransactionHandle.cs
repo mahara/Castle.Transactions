@@ -16,56 +16,56 @@
 
 namespace Castle.Services.Transaction
 {
-	using Microsoft.Win32.SafeHandles;
+    using System;
+    using System.Runtime.ConstrainedExecution;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
 
-	using System;
-	using System.Runtime.ConstrainedExecution;
-	using System.Runtime.InteropServices;
-	using System.Security.Permissions;
+    using Microsoft.Win32.SafeHandles;
 
-	/// <summary>
-	/// A safe file handle on the transaction resource.
-	/// </summary>
+    /// <summary>
+    /// A safe file handle on the transaction resource.
+    /// </summary>
 
-	[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
-	[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
-	public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
-	{
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		public SafeTransactionHandle()
-			: base(true)
-		{
-		}
+    [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
+    [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+    public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public SafeTransactionHandle()
+            : base(true)
+        {
+        }
 
-		/// <summary>
-		/// Constructor for taking a pointer to a transaction.
-		/// </summary>
-		/// <param name="handle">The transactional handle.</param>
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public SafeTransactionHandle(IntPtr handle)
-			: base(true)
-		{
-			base.handle = handle;
-		}
+        /// <summary>
+        /// Constructor for taking a pointer to a transaction.
+        /// </summary>
+        /// <param name="handle">The transactional handle.</param>
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+        public SafeTransactionHandle(IntPtr handle)
+            : base(true)
+        {
+            base.handle = handle;
+        }
 
-		protected override bool ReleaseHandle()
-		{
-			if (!(IsInvalid || IsClosed))
-			{
-				return CloseHandle(handle);
-			}
+        protected override bool ReleaseHandle()
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                return CloseHandle(handle);
+            }
 
-			return IsInvalid || IsClosed;
-		}
+            return IsInvalid || IsClosed;
+        }
 
-		/*
+        /*
 		 * BOOL WINAPI CloseHandle(__in HANDLE hObject);
 		 */
-		[DllImport("kernel32.dll")]
-		//[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		//[SuppressUnmanagedCodeSecurity]
-		private static extern bool CloseHandle(IntPtr handle);
-	}
+        [DllImport("kernel32.dll")]
+        //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+        //[SuppressUnmanagedCodeSecurity]
+        private static extern bool CloseHandle(IntPtr handle);
+    }
 }

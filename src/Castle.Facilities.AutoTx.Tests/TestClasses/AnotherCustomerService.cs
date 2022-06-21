@@ -16,22 +16,22 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-	using Services.Transaction;
+    using System;
 
-	using System;
+    using Services.Transaction;
 
-	[Transactional]
-	public class AnotherCustomerService : ICustomerService
-	{
-		[Transaction(TransactionMode.Requires)]
-		public void Insert(string name, string address)
-		{
-		}
+    [Transactional]
+    public class AnotherCustomerService : ICustomerService
+    {
+        [Transaction(TransactionMode.Requires)]
+        public void Insert(string name, string address)
+        {
+        }
 
-		[Transaction(TransactionMode.Requires)]
-		public void Delete(int id)
-		{
-			throw new ApplicationException("Whopps. Problems!");
-		}
-	}
+        [Transaction(TransactionMode.Requires)]
+        public void Delete(int id)
+        {
+            throw new ApplicationException("Whopps. Problems!");
+        }
+    }
 }

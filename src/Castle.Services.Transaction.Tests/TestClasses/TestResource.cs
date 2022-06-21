@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,37 +16,40 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using System;
+    using System;
 
-	internal class TestResource : ResourceImpl
-	{
-		private readonly Action _s;
-		private readonly Action _c;
-		private readonly Action _r;
+    internal class TestResource : ResourceImpl
+    {
+        private readonly Action _s;
+        private readonly Action _c;
+        private readonly Action _r;
 
-		public TestResource(Action s, Action c, Action r)
-		{
-			_s = s;
-			_c = c;
-			_r = r;
-		}
+        public TestResource(Action s, Action c, Action r)
+        {
+            _s = s;
+            _c = c;
+            _r = r;
+        }
 
-		public override void Start()
-		{
-			base.Start();
-			_s();
-		}
+        public override void Start()
+        {
+            base.Start();
 
-		public override void Commit()
-		{
-			base.Commit();
-			_c();
-		}
+            _s();
+        }
 
-		public override void Rollback()
-		{
-			base.Rollback();
-			_r();
-		}
-	}
+        public override void Commit()
+        {
+            base.Commit();
+
+            _c();
+        }
+
+        public override void Rollback()
+        {
+            base.Rollback();
+
+            _r();
+        }
+    }
 }

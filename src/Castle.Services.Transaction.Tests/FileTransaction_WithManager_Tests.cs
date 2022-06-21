@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,114 +16,122 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using NUnit.Framework;
+    using System;
+    using System.IO;
 
-	using System;
-	using System.IO;
+    using NUnit.Framework;
 
-	[TestFixture]
-	public class FileTransaction_WithManager_Tests
-	{
-		private string _directoryPath;
+    [TestFixture]
+    public class FileTransaction_WithManager_Tests
+    {
+        private string _directoryPath;
 
-		// just if I'm curious and want to see that the file exists with my own eyes :p
-		private bool _deleteAtEnd;
-		private string _filePath;
+        // just if I'm curious and want to see that the file exists with my own eyes :p
+        private bool _deleteAtEnd;
+        private string _filePath;
 
-		private DefaultTransactionManager _transactionManager;
+        private DefaultTransactionManager _transactionManager;
 
-		[SetUp]
-		public void Setup()
-		{
-			_transactionManager = new DefaultTransactionManager(new TransientActivityManager());
+        [SetUp]
+        public void Setup()
+        {
+            _transactionManager = new DefaultTransactionManager(new TransientActivityManager());
 
-			_directoryPath = "../../Transactions/".CombineAssert("tmp");
-			_filePath = _directoryPath.Combine("test.txt");
+            _directoryPath = "../../Transactions/".CombineAssert("tmp");
+            _filePath = _directoryPath.Combine("test.txt");
 
-			if (File.Exists(_filePath))
-				File.Delete(_filePath);
+            if (File.Exists(_filePath))
+            {
+                File.Delete(_filePath);
+            }
 
-			_deleteAtEnd = true;
-		}
+            _deleteAtEnd = true;
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			if (_deleteAtEnd && Directory.Exists(_directoryPath))
-				Directory.Delete(_directoryPath, true);
-		}
+        [TearDown]
+        public void TearDown()
+        {
+            if (_deleteAtEnd && Directory.Exists(_directoryPath))
+            {
+                Directory.Delete(_directoryPath, true);
+            }
+        }
 
-		[Test]
-		public void TransactionResources_AreDisposed()
-		{
-			var t = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			var resource = new ResourceImpl();
-			t.Enlist(resource);
-			t.Begin();
-			// lalala
-			t.Rollback();
-			_transactionManager.Dispose(t);
+        [Test]
+        public void TransactionResources_AreDisposed()
+        {
+            var t = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            var resource = new ResourceImpl();
 
-			Assert.That(resource.WasDisposed);
-		}
+            t.Enlist(resource);
 
-		[Test]
-		public void NestedFileTransaction_CanBeCommitted()
-		{
-			if (Environment.OSVersion.Version.Major < 6)
-			{
-				Assert.Ignore("TxF not supported");
-				return;
-			}
+            t.Begin();
 
-			Assert.That(_transactionManager.CurrentTransaction, Is.Null);
+            // lalala
 
-			var stdTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			stdTx.Begin();
+            t.Rollback();
 
-			Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
-			Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(stdTx));
+            _transactionManager.Dispose(t);
 
-			// invocation.Proceed() in interceptor
+            Assert.That(resource.WasDisposed);
+        }
 
-			var childTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
-			Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
-			Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
-						"Now that we have created a child, it's the current tx.");
+        [Test]
+        public void NestedFileTransaction_CanBeCommitted()
+        {
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported");
+                return;
+            }
 
-			var txF = new FileTransaction();
-			childTx.Enlist(new FileResourceAdapter(txF));
-			childTx.Begin();
+            Assert.That(_transactionManager.CurrentTransaction, Is.Null);
 
-			txF.WriteAllText(_filePath, "Hello world");
+            var stdTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            stdTx.Begin();
 
-			childTx.Commit();
-			stdTx.Commit();
+            Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
+            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(stdTx));
 
-			Assert.That(File.Exists(_filePath));
-			Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo("Hello world"));
+            // invocation.Proceed() in interceptor
 
-			// first we need to dispose the child transaction.
-			_transactionManager.Dispose(childTx);
+            var childTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
+            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
+                        "Now that we have created a child, it's the current tx.");
 
-			// now we can dispose the main transaction.
-			_transactionManager.Dispose(stdTx);
+            var txF = new FileTransaction();
+            childTx.Enlist(new FileResourceAdapter(txF));
+            childTx.Begin();
 
-			Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
-			Assert.That(txF.IsDisposed);
-		}
+            txF.WriteAllText(_filePath, "Hello world");
 
-		[Test]
-		public void UsingNestedTransaction_FileTransactionOnlyVotesToCommit()
-		{
-			// TODO Implement proper exception handling when file transaction is voted to commit
-		}
+            childTx.Commit();
+            stdTx.Commit();
 
-		[Test]
-		public void BugWhenResourceFailsAndTransactionCommits()
-		{
-			var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            Assert.That(File.Exists(_filePath));
+            Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo("Hello world"));
 
-		}
-	}
+            // first we need to dispose the child transaction.
+            _transactionManager.Dispose(childTx);
+
+            // now we can dispose the main transaction.
+            _transactionManager.Dispose(stdTx);
+
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
+            Assert.That(txF.IsDisposed);
+        }
+
+        [Test]
+        public void UsingNestedTransaction_FileTransactionOnlyVotesToCommit()
+        {
+            // TODO Implement proper exception handling when file transaction is voted to commit
+        }
+
+        [Test]
+        public void BugWhenResourceFailsAndTransactionCommits()
+        {
+            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+        }
+    }
 }

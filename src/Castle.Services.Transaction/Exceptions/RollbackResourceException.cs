@@ -16,37 +16,34 @@
 
 namespace Castle.Services.Transaction
 {
-	using Core;
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
 
-	using System;
-	using System.Collections.Generic;
-	using System.Runtime.Serialization;
+    using Core;
 
-	[Serializable]
-	public class RollbackResourceException : TransactionException
-	{
-		private readonly List<Pair<IResource, Exception>> _failedResources = new List<Pair<IResource, Exception>>();
+    [Serializable]
+    public class RollbackResourceException : TransactionException
+    {
+        private readonly List<Pair<IResource, Exception>> _failedResources = new List<Pair<IResource, Exception>>();
 
-		public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources)
-			: base(message, null)
-		{
-			_failedResources.AddRange(failedResources);
-		}
+        public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources)
+            : base(message, null)
+        {
+            _failedResources.AddRange(failedResources);
+        }
 
-		public RollbackResourceException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
+        public RollbackResourceException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
 
-		public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources)
-			: base(info, context)
-		{
-			_failedResources.AddRange(failedResources);
-		}
+        public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources)
+            : base(info, context)
+        {
+            _failedResources.AddRange(failedResources);
+        }
 
-		public IList<Pair<IResource, Exception>> FailedResources
-		{
-			get { return _failedResources; }
-		}
-	}
+        public IList<Pair<IResource, Exception>> FailedResources => _failedResources;
+    }
 }

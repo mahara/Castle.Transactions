@@ -16,21 +16,21 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	using NUnit.Framework;
+    using System.Threading;
 
-	using System.Threading;
+    using NUnit.Framework;
 
-	public class MiscTests
-	{
-		[Test]
-		[Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
-		[Ignore("TODO: .NET Core Migration")]
-		public void CheckSTA()
-		{
-			var state = Thread.CurrentThread.GetApartmentState();
+    public class MiscTests
+    {
+        [Test]
+        [Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
+        [Ignore("TODO: .NET Core Migration")]
+        public void CheckSTA()
+        {
+            var state = Thread.CurrentThread.GetApartmentState();
 
-			// This is somehow appear to be MTA.
-			Assert.IsTrue(state == ApartmentState.STA);
-		}
-	}
+            // This is somehow appear to be MTA.
+            Assert.IsTrue(state == ApartmentState.STA);
+        }
+    }
 }

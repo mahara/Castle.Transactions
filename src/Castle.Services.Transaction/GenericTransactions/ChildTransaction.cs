@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,84 +16,80 @@
 
 namespace Castle.Services.Transaction
 {
-	/// <summary>
-	/// Emulates a standalone transaction,
-	/// but in fact it just propagates a transaction.
-	/// </summary>
-	public sealed class ChildTransaction : TransactionBase
-	{
-		private readonly ITransaction _parent;
+    /// <summary>
+    /// Emulates a standalone transaction,
+    /// but in fact it just propagates a transaction.
+    /// </summary>
+    public sealed class ChildTransaction : TransactionBase
+    {
+        private readonly ITransaction _parent;
 
-		public ChildTransaction(ITransaction parent)
-			: base(string.Format("ChildTransaction to \"{0}\"",
-								 parent.Name),
-				   parent.TransactionMode,
-				   parent.IsolationMode)
-		{
-			_parent = parent;
-		}
+        public ChildTransaction(ITransaction parent)
+            : base(string.Format("ChildTransaction to \"{0}\"",
+                                 parent.Name),
+                   parent.TransactionMode,
+                   parent.IsolationMode)
+        {
+            _parent = parent;
+        }
 
-		public override void Begin()
-		{
-		}
+        public override void Begin()
+        {
+        }
 
-		protected override void InnerBegin()
-		{
-		}
+        protected override void InnerBegin()
+        {
+        }
 
-		protected override void InnerCommit()
-		{
-		}
+        protected override void InnerCommit()
+        {
+        }
 
-		public override void Rollback()
-		{
-			// Vote as rollback
-			_parent.SetRollbackOnly();
-		}
+        public override void Rollback()
+        {
+            // Vote as rollback.
+            _parent.SetRollbackOnly();
+        }
 
-		public override void SetRollbackOnly()
-		{
-			_parent.SetRollbackOnly();
-		}
+        public override void SetRollbackOnly()
+        {
+            _parent.SetRollbackOnly();
+        }
 
-		protected override void InnerRollback()
-		{
-		}
+        protected override void InnerRollback()
+        {
+        }
 
-		public override void Commit()
-		{
-		}
+        public override void Commit()
+        {
+        }
 
-		public override bool IsChildTransaction
-		{
-			get { return true; }
-		}
+        public override bool IsChildTransaction =>
+            true;
 
-		public override void Enlist(IResource resource)
-		{
-			_parent.Enlist(resource);
-		}
+        public override void Enlist(IResource resource)
+        {
+            _parent.Enlist(resource);
+        }
 
-		public override void RegisterSynchronization(ISynchronization s)
-		{
-			_parent.RegisterSynchronization(s);
-		}
+        public override void RegisterSynchronization(ISynchronization s)
+        {
+            _parent.RegisterSynchronization(s);
+        }
 
-		public override bool IsAmbient
-		{
-			get { return true; }
-			protected set { }
-		}
+        public override bool IsAmbient
+        {
+            get => true;
+            protected set { }
+        }
 
-		public override bool IsRollbackOnlySet
-		{
-			get { return _parent.IsRollbackOnlySet; }
-		}
+        public override bool IsRollbackOnlySet =>
+            _parent.IsRollbackOnlySet;
 
-		public override bool IsReadOnly
-		{
-			get { return _parent.IsReadOnly; }
-			protected set { }
-		}
-	}
+        public override bool IsReadOnly
+        {
+            get => _parent.IsReadOnly;
+            protected set { }
+        }
+    }
 }

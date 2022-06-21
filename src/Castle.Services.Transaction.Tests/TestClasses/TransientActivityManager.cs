@@ -16,22 +16,17 @@
 
 namespace Castle.Services.Transaction.Tests
 {
-	public class TransientActivityManager : IActivityManager
-	{
-		private Activity _activity;
+    public class TransientActivityManager : IActivityManager
+    {
+        public TransientActivityManager()
+        {
+            CurrentActivity = new Activity();
+        }
 
-		public TransientActivityManager()
-		{
-			_activity = new Activity();
-		}
-
-		/// <summary>
-		/// Gets the current activity.
-		/// </summary>
-		/// <value>The current activity.</value>
-		public Activity CurrentActivity
-		{
-			get { return _activity; }
-		}
-	}
+        /// <summary>
+        /// Gets the current activity.
+        /// </summary>
+        /// <value>The current activity.</value>
+        public Activity CurrentActivity { get; }
+    }
 }

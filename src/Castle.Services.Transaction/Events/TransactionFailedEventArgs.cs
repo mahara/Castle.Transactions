@@ -16,19 +16,14 @@
 
 namespace Castle.Services.Transaction
 {
-	public sealed class TransactionFailedEventArgs : TransactionEventArgs
-	{
-		private readonly TransactionException _exception;
+    public sealed class TransactionFailedEventArgs : TransactionEventArgs
+    {
+        public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception)
+            : base(transaction)
+        {
+            Exception = exception;
+        }
 
-		public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception)
-			: base(transaction)
-		{
-			_exception = exception;
-		}
-
-		public TransactionException Exception
-		{
-			get { return _exception; }
-		}
-	}
+        public TransactionException Exception { get; }
+    }
 }

@@ -16,52 +16,45 @@
 
 namespace Castle.Services.Transaction
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
 
-	[Serializable]
-	public class Activity : MarshalByRefObject
-	{
-		private readonly Stack<ITransaction> _transactionStack = new Stack<ITransaction>(2);
-		private Guid _id = Guid.NewGuid();
+    [Serializable]
+    public class Activity : MarshalByRefObject
+    {
+        private readonly Stack<ITransaction> _transactionStack = new Stack<ITransaction>(2);
+        private Guid _id = Guid.NewGuid();
 
-		public ITransaction CurrentTransaction
-		{
-			get
-			{
-				return _transactionStack.Count == 0 ? null : _transactionStack.Peek();
-			}
-		}
+        public ITransaction CurrentTransaction => _transactionStack.Count == 0 ? null : _transactionStack.Peek();
 
-		public void Push(ITransaction transaction)
-		{
-			_transactionStack.Push(transaction);
-		}
+        public void Push(ITransaction transaction)
+        {
+            _transactionStack.Push(transaction);
+        }
 
-		public ITransaction Pop()
-		{
-			return _transactionStack.Pop();
-		}
+        public ITransaction Pop()
+        {
+            return _transactionStack.Pop();
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (this == obj)
-			{
-				return true;
-			}
+        public override bool Equals(object obj)
+        {
+            if (this == obj)
+            {
+                return true;
+            }
 
-			var activity = obj as Activity;
-			if (activity == null)
-			{
-				return false;
-			}
+            if (!(obj is Activity activity))
+            {
+                return false;
+            }
 
-			return Equals(_id, activity._id);
-		}
+            return Equals(_id, activity._id);
+        }
 
-		public override int GetHashCode()
-		{
-			return _id.GetHashCode();
-		}
-	}
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
+    }
 }

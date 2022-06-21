@@ -16,24 +16,24 @@
 
 namespace Castle.Services.Transaction
 {
-	using System;
-	using System.Runtime.Serialization;
+    using System;
+    using System.Runtime.Serialization;
 
-	public class TransactionalConflictException : TransactionException
-	{
-		public TransactionalConflictException(string message)
-			: base(message)
-		{
-		}
+    public class TransactionalConflictException : TransactionException
+    {
+        public TransactionalConflictException(string message)
+            : base(message)
+        {
+        }
 
-		public TransactionalConflictException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
+        public TransactionalConflictException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
 
-		public TransactionalConflictException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-	}
+        public TransactionalConflictException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
 }
