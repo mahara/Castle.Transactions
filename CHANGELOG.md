@@ -1,7 +1,12 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
 
-## 5.2.0 (2022-02-xx)
+## 5.2.0 (2022-06-xx)
+
+### All
+
+Improvements:
+- Updated **`Castle.Windsor`** version to 5.1.2.
 
 
 ## 5.1.0 (2022-02-20)
