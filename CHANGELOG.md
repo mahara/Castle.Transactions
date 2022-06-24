@@ -1,6 +1,6 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
-## 5.1.x (202x-xx-xx)
+## 5.2.0 (2022-06-24)
 
 ### All
 
