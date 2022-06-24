@@ -36,7 +36,7 @@ namespace Castle.Facilities.AutoTx
         }
 
         /// <summary>
-        ///
+        /// Constructor.
         /// </summary>
         /// <param name="allowAccessOutsideRootFolder"><see cref="AllowAccessOutsideRootFolder" /></param>
         /// <param name="rootFolder"></param>
@@ -66,7 +66,8 @@ namespace Castle.Facilities.AutoTx
             AssertHasDirectories();
 
             Kernel.Register(
-                Component.For<TransactionInterceptor>().Named("transaction.interceptor"),
+                // Transient components (e.g.: TransactionInterceptor) don't need to be named.
+                Component.For<TransactionInterceptor>(),
                 Component.For<TransactionMetaInfoStore>().Named("transaction.MetaInfoStore"),
                 Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mappath")
                 );
@@ -117,7 +118,7 @@ namespace Castle.Facilities.AutoTx
         }
 
         /// <summary>
-        /// Disposes the facilitiy.
+        /// Disposes the facility.
         /// </summary>
         protected override void Dispose()
         {

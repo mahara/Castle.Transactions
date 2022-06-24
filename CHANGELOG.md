@@ -5,7 +5,11 @@
 ### All
 
 Improvements:
+- Added AsyncLocalActivityManager.
 - Updated Castle.Windsor version to 5.1.2
+
+Breaking Changes:
+- Changed default IActivityManager in DefaultTransactionManager to AsyncLocalActivityManager.
 
 
 ## 5.1.0 (2022-02-20)
@@ -22,7 +26,7 @@ Improvements:
 ### All
 
 Improvements:
-- Added new .NET (Core) project support
+- Upgraded to SDK-style projects.
 
 Breaking Changes:
 - Removed .NET Framework 3.5, .NET Framework 4.0, and .NET Framework 4.0 Client Profile supports

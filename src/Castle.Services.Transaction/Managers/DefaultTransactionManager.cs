@@ -34,7 +34,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
         /// </summary>
-        public DefaultTransactionManager() : this(new CallContextActivityManager())
+        public DefaultTransactionManager() : this(new AsyncLocalActivityManager())
         {
         }
 
@@ -45,7 +45,7 @@ namespace Castle.Services.Transaction
         /// <param name="activityManager">The activity manager.</param>
         public DefaultTransactionManager(IActivityManager activityManager)
         {
-            _activityManager = activityManager ?? throw new ArgumentNullException("activityManager");
+            _activityManager = activityManager ?? throw new ArgumentNullException(nameof(activityManager));
 
             if (Logger.IsDebugEnabled)
             {
@@ -203,7 +203,7 @@ namespace Castle.Services.Transaction
         {
             if (transaction == null)
             {
-                throw new ArgumentNullException("transaction", "Tried to dispose a null transaction");
+                throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction");
             }
 
             Logger.DebugFormat("Trying to dispose transaction {0}.", transaction.Name);
@@ -211,7 +211,7 @@ namespace Castle.Services.Transaction
             if (CurrentTransaction != transaction)
             {
                 throw new ArgumentException("Tried to dispose a transaction that is not on the current active transaction",
-                                            "transaction");
+                                            nameof(transaction));
             }
 
             _activityManager.CurrentActivity.Pop();
