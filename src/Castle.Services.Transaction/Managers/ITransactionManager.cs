@@ -39,7 +39,7 @@ namespace Castle.Services.Transaction
         event EventHandler<TransactionEventArgs> TransactionDisposed;
 
         /// <summary>
-        /// <see cref="CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode,bool,bool)" />.
+        /// <see cref="CreateTransaction(TransactionMode,IsolationMode,bool,bool)" />.
         /// </summary>
         ITransaction CreateTransaction(TransactionMode transactionMode, IsolationMode isolationMode);
 
@@ -71,7 +71,7 @@ namespace Castle.Services.Transaction
 
         /// <summary>
         /// Dispose the transaction passed appropriately, removing it from the list of tracked transactions,
-        /// calling its dispose method and raise the <see cref="ITransactionManager.TransactionDisposed" /> event.
+        /// calling its dispose method and raise the <see cref="TransactionDisposed" /> event.
         /// </summary>
         /// <param name="transaction">The transaction to dispose.</param>
         /// <exception cref="ArgumentNullException">Transaction is null.</exception>

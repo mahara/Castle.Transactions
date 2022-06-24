@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +65,7 @@ namespace Castle.Facilities.AutoTx.Tests
         public virtual void DoSomethingNotMarkedAsReadOnly()
         {
             var tm = _kernel.Resolve<ITransactionManager>();
+
             Assert.IsNotNull(tm.CurrentTransaction);
             Assert.IsFalse(tm.CurrentTransaction.IsReadOnly);
         }
@@ -74,6 +75,7 @@ namespace Castle.Facilities.AutoTx.Tests
         public virtual void DoSomethingReadOnly()
         {
             var tm = _kernel.Resolve<ITransactionManager>();
+
             Assert.IsNotNull(tm.CurrentTransaction);
             Assert.IsTrue(tm.CurrentTransaction.IsReadOnly);
         }

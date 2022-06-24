@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction.Tests
     public class FileAdapterTests
     {
         [Test]
-        public void CtorUseTransactions()
+        public void ConstructorUseTransactions()
         {
             Assert.That(new FileAdapter().UseTransactions);
         }

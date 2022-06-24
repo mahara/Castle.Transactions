@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,15 @@ namespace Castle.Services.Transaction.Tests
         public void CleanOutListEtc()
         {
             Monitor.Enter(_serializer);
+
             _infosCreated.Clear();
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _dllPath = TestContext.CurrentContext.TestDirectory;
+            _testFixturePath = _dllPath.Combine("Kernel");
         }
 
         [TearDown]
@@ -65,13 +73,6 @@ namespace Castle.Services.Transaction.Tests
             }
 
             Monitor.Exit(_serializer);
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            _dllPath = Environment.CurrentDirectory;
-            _testFixturePath = _dllPath.Combine("..\\..\\Kernel");
         }
 
         #endregion
@@ -140,7 +141,7 @@ namespace Castle.Services.Transaction.Tests
             var filePath = _testFixturePath.CombineAssert("temp").Combine("temp__");
             _infosCreated.Add(filePath);
 
-            // simply write something to to file.
+            // Simply write something to to file.
             using (var wr = File.CreateText(filePath))
             {
                 wr.WriteLine("Hello");
@@ -175,13 +176,13 @@ namespace Castle.Services.Transaction.Tests
             var filePath = _testFixturePath.CombineAssert("temp").Combine("temp2");
             _infosCreated.Add(filePath);
 
-            // simply write something to to file.
+            // Simply write something to to file.
             using (var wr = File.CreateText(filePath))
             {
                 wr.WriteLine("Hello");
             }
 
-            using (var tx = new FileTransaction("Rollback tx"))
+            using (var tx = new FileTransaction("Rollback Tx"))
             {
                 tx.Begin();
 
@@ -216,7 +217,7 @@ namespace Castle.Services.Transaction.Tests
 
             _infosCreated.Add(filepath);
 
-            using (var tx = new FileTransaction("Commit TX"))
+            using (var tx = new FileTransaction("Commit Tx"))
             {
                 tx.Begin();
                 tx.WriteAllText(filepath, "Transactioned file.");

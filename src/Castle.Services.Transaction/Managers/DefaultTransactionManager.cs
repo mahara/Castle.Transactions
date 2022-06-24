@@ -25,11 +25,11 @@ namespace Castle.Services.Transaction
         private IActivityManager _activityManager;
 
         public event EventHandler<TransactionEventArgs> TransactionCreated;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
         public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
         public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
         public event EventHandler<TransactionEventArgs> TransactionDisposed;
+        public event EventHandler<TransactionEventArgs> ChildTransactionCreated;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
@@ -63,11 +63,11 @@ namespace Castle.Services.Transaction
         public IActivityManager ActivityManager
         {
             get => _activityManager;
-            set => _activityManager = value ?? throw new ArgumentNullException("value");
+            set => _activityManager = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <summary>
-        /// <see cref="ITransactionManager.CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)" />.
+        /// <see cref="ITransactionManager.CreateTransaction(TransactionMode,IsolationMode)" />.
         /// </summary>
         public ITransaction CreateTransaction(TransactionMode txMode, IsolationMode isolationMode)
         {
@@ -106,13 +106,13 @@ namespace Castle.Services.Transaction
                 if (isAmbient)
                 {
 #if MONO
-                    throw new NotSupportedException("Distributed transactions are not supported on Mono");
+                    throw new NotSupportedException("Distributed transactions are not supported on Mono.");
 #else
                     transaction.CreateAmbientTransaction();
 #endif
                 }
 
-                Logger.DebugFormat("Transaction \"{0}\" created. ", transaction.Name);
+                Logger.DebugFormat("Transaction \"{0}\" created.", transaction.Name);
             }
 
             _activityManager.CurrentActivity.Push(transaction);
@@ -143,9 +143,9 @@ namespace Castle.Services.Transaction
             return t;
         }
 
-        private void FailedHandler(object sender, TransactionFailedEventArgs e)
+        private void CompletedHandler(object sender, TransactionEventArgs e)
         {
-            TransactionFailed.Fire(this, e);
+            TransactionCompleted.Fire(this, e);
         }
 
         private void RolledBackHandler(object sender, TransactionEventArgs e)
@@ -153,9 +153,9 @@ namespace Castle.Services.Transaction
             TransactionRolledBack.Fire(this, e);
         }
 
-        private void CompletedHandler(object sender, TransactionEventArgs e)
+        private void FailedHandler(object sender, TransactionFailedEventArgs e)
         {
-            TransactionCompleted.Fire(this, e);
+            TransactionFailed.Fire(this, e);
         }
 
         private void AssertModeSupported(TransactionMode mode)
@@ -177,7 +177,7 @@ namespace Castle.Services.Transaction
 
         /// <summary>
         /// Gets the default transaction mode, i.e. the mode which is the current mode
-        /// when <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(Castle.Services.Transaction.TransactionMode,Castle.Services.Transaction.IsolationMode)" />.
+        /// when <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(TransactionMode,IsolationMode)" />.
         /// </summary>
         /// <param name="mode">The mode which was passed.</param>
         /// <returns>
@@ -224,8 +224,8 @@ namespace Castle.Services.Transaction
             if (transaction is IEventPublisher)
             {
                 (transaction as IEventPublisher).TransactionCompleted -= CompletedHandler;
-                (transaction as IEventPublisher).TransactionFailed -= FailedHandler;
                 (transaction as IEventPublisher).TransactionRolledBack -= RolledBackHandler;
+                (transaction as IEventPublisher).TransactionFailed -= FailedHandler;
             }
 
             TransactionDisposed.Fire(this, new TransactionEventArgs(transaction));

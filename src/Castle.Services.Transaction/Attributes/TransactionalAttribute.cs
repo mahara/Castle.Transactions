@@ -22,7 +22,7 @@ namespace Castle.Services.Transaction
     /// Indicates that the target class wants to use the transactional services.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public sealed class TransactionalAttribute : System.Attribute
+    public sealed class TransactionalAttribute : Attribute
     {
     }
 }

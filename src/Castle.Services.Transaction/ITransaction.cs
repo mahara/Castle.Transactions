@@ -40,15 +40,15 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// <list>
         /// <item>
-        /// Pre:	TransactionStatus = Active
+        /// Pre:    TransactionStatus = Active
         /// </item>
         /// <item>
-        /// Mid:	Supply a logger and any exceptions from rollbacks will be logged as they happen.
+        /// Mid:    Supply a logger and any exceptions from rollbacks will be logged as they happen.
         /// </item>
         /// <item>
         /// Post:
-        ///	<list>
-        ///	<item>InnerRollback will be called for inheritors, then</item>
+        /// <list>
+        /// <item>InnerRollback will be called for inheritors, then</item>
         /// <item>All resources will have Rollback called, then</item>
         /// <item>All sync infos will have AfterCompletion called.</item>
         /// </list>

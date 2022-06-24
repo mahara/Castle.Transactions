@@ -437,8 +437,8 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ChildTransactions_AreAmbient()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                                    IsolationMode.Unspecified);
+            _ = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+                                                      IsolationMode.Unspecified);
             var childTransaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                          IsolationMode.Unspecified);
 

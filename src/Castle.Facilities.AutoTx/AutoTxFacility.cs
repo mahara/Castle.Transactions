@@ -66,7 +66,7 @@ namespace Castle.Facilities.AutoTx
             AssertHasDirectories();
 
             Kernel.Register(
-                Component.For<TransactionInterceptor>(), //.Named("transaction.interceptor"),
+                Component.For<TransactionInterceptor>().Named("transaction.interceptor"),
                 Component.For<TransactionMetaInfoStore>().Named("transaction.MetaInfoStore"),
                 Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mappath")
                 );
@@ -74,7 +74,6 @@ namespace Castle.Facilities.AutoTx
             RegisterAdapters();
 
             Kernel.ComponentModelBuilder.AddContributor(new TransactionComponentInspector());
-
         }
 
         private void RegisterAdapters()
@@ -103,7 +102,7 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private void Kernel_ComponentRegistered(string key, Castle.MicroKernel.IHandler handler)
+        private void Kernel_ComponentRegistered(string key, MicroKernel.IHandler handler)
         {
             foreach (var service in handler.ComponentModel.Services)
             {

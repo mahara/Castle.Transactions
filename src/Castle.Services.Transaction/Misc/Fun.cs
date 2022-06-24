@@ -51,7 +51,7 @@ namespace Castle.Services.Transaction
         {
             if (sem == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(sem));
             }
 
             if (action == null)
@@ -89,7 +89,7 @@ namespace Castle.Services.Transaction
         {
             if (sem == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(sem));
             }
 
             if (function == null)
@@ -113,7 +113,7 @@ namespace Castle.Services.Transaction
         {
             if (sem == null)
             {
-                throw new ArgumentNullException("sem");
+                throw new ArgumentNullException(nameof(sem));
             }
 
             if (action == null)
@@ -140,12 +140,12 @@ namespace Castle.Services.Transaction
         {
             if (items == null)
             {
-                throw new ArgumentNullException("items");
+                throw new ArgumentNullException(nameof(items));
             }
 
             if (action == null)
             {
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
             }
 
             foreach (var item in items)

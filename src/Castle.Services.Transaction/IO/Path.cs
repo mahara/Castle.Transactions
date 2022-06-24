@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ namespace Castle.Services.Transaction.IO
         static Path()
         {
             //_reserved = new List<string>("CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9"
-            //							 .Split('|'));
+            //                           .Split('|'));
             _invalidChars = new List<char>(GetInvalidPathChars());
         }
 
@@ -59,7 +59,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
@@ -79,17 +79,17 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("path was empty.");
+                throw new ArgumentException("path was empty.", nameof(path));
             }
 
             if (ContainsInvalidChars(path))
             {
-                throw new ArgumentException("path contains invalid characters.");
+                throw new ArgumentException("path contains invalid characters.", nameof(path));
             }
 
             return PathInfo.Parse(path).Root;
@@ -124,7 +124,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path.Length == 0)
@@ -140,8 +140,10 @@ namespace Castle.Services.Transaction.IO
         /// Also removes empty space in beginning and end of string.
         /// </summary>
         /// <param name="pathWithAlternatingChars"></param>
-        /// <returns>The directory string path with all occurrances of the alternating chars
-        /// replaced for that specified in <see cref="System.IO.Path.DirectorySeparatorChar" /></returns>
+        /// <returns>
+        /// The directory string path with all occurrances of the alternating chars
+        /// replaced for that specified in <see cref="System.IO.Path.DirectorySeparatorChar" />
+        /// </returns>
         public static string NormDirSepChars(string pathWithAlternatingChars)
         {
             var sb = new StringBuilder();
@@ -171,7 +173,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             return PathInfo.Parse(path);
@@ -187,7 +189,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
@@ -220,7 +222,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             var chars = new List<char>(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar });
@@ -249,23 +251,23 @@ namespace Castle.Services.Transaction.IO
 
             if (last == -1)
             {
-                throw new ArgumentException(string.Format("Could not find a path separator character in the path \"{0}\"", path));
+                throw new ArgumentException($"Could not find a path separator character in the path: \"{path}\".");
             }
 
-            var res = path.Substring(0, endsWithSlash ? secondLast : last);
-            return res == string.Empty ? new string(lastType, 1) : res;
+            var result = path.Substring(0, endsWithSlash ? secondLast : last);
+            return result == string.Empty ? new string(lastType, 1) : result;
         }
 
         public static string GetFileName(string path)
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("path musn't be null", "path");
+                throw new ArgumentException("path must not be null.", nameof(path));
             }
 
             if (path.EndsWith("/") || path.EndsWith("\\"))
@@ -277,7 +279,7 @@ namespace Castle.Services.Transaction.IO
 
             int strIndex;
 
-            // resharper is wrong that you can transform this to a ternary operator.
+            // ReSharper is wrong that you can transform this to a ternary operator.
             if ((strIndex = nonRoot.LastIndexOfAny(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar })) != -1)
             {
                 return nonRoot.Substring(strIndex + 1);
@@ -290,12 +292,12 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", "path");
+                throw new ArgumentException("Path musn't be empty.", nameof(path));
             }
 
             return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
@@ -305,12 +307,12 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", "path");
+                throw new ArgumentException("Path musn't be empty.", nameof(path));
             }
 
             var fn = GetFileName(path);
@@ -323,7 +325,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             var filename = GetFileName(path);
@@ -347,9 +349,11 @@ namespace Castle.Services.Transaction.IO
             return System.IO.Path.GetInvalidFileNameChars();
         }
 
-        public static char DirectorySeparatorChar => System.IO.Path.DirectorySeparatorChar;
+        public static char DirectorySeparatorChar =>
+            System.IO.Path.DirectorySeparatorChar;
 
-        public static char AltDirectorySeparatorChar => System.IO.Path.AltDirectorySeparatorChar;
+        public static char AltDirectorySeparatorChar =>
+            System.IO.Path.AltDirectorySeparatorChar;
 
         public static char[] GetDirectorySeparatorChars()
         {

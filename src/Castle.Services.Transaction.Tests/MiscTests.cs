@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction.Tests
     {
         [Test]
         [Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
-        [Ignore("TODO: .NET Core Migration")]
+        [Ignore("TODO: .NET Migration")]
         public void CheckSTA()
         {
             var state = Thread.CurrentThread.GetApartmentState();

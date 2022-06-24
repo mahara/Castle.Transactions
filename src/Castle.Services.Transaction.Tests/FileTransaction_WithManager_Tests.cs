@@ -37,7 +37,8 @@ namespace Castle.Services.Transaction.Tests
         {
             _transactionManager = new DefaultTransactionManager(new TransientActivityManager());
 
-            _directoryPath = "../../Transactions/".CombineAssert("tmp");
+            _directoryPath = TestContext.CurrentContext.TestDirectory;
+            _directoryPath = _directoryPath.CombineAssert(@"Transactions\tmp");
             _filePath = _directoryPath.Combine("test.txt");
 
             if (File.Exists(_filePath))
@@ -81,7 +82,8 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
+
                 return;
             }
 
@@ -131,7 +133,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void BugWhenResourceFailsAndTransactionCommits()
         {
-            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            _ = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
         }
     }
 }

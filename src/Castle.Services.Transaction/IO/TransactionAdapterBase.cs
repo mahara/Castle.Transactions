@@ -33,7 +33,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (constrainToSpecifiedDir && specifiedDir == null)
             {
-                throw new ArgumentNullException("specifiedDir");
+                throw new ArgumentNullException(nameof(specifiedDir));
             }
 
             if (constrainToSpecifiedDir && specifiedDir == string.Empty)

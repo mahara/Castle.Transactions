@@ -29,16 +29,6 @@ namespace Castle.Services.Transaction.Tests
             _throwOnRollback = throwOnRollback;
         }
 
-        public override void Rollback()
-        {
-            if (_throwOnRollback)
-            {
-                throw new Exception("Simulated rollback error.");
-            }
-
-            base.Rollback();
-        }
-
         public override void Commit()
         {
             if (_throwOnCommit)
@@ -47,6 +37,16 @@ namespace Castle.Services.Transaction.Tests
             }
 
             base.Commit();
+        }
+
+        public override void Rollback()
+        {
+            if (_throwOnRollback)
+            {
+                throw new Exception("Simulated rollback error.");
+            }
+
+            base.Rollback();
         }
     }
 }

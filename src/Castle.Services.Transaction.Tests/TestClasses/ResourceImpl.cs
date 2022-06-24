@@ -40,16 +40,6 @@ namespace Castle.Services.Transaction.Tests
             Started = true;
         }
 
-        public virtual void Rollback()
-        {
-            if (Rolledback)
-            {
-                throw new ApplicationException("Rollback called before.");
-            }
-
-            Rolledback = true;
-        }
-
         public virtual void Commit()
         {
             if (Committed)
@@ -58,6 +48,16 @@ namespace Castle.Services.Transaction.Tests
             }
 
             Committed = true;
+        }
+
+        public virtual void Rollback()
+        {
+            if (Rolledback)
+            {
+                throw new ApplicationException("Rollback called before.");
+            }
+
+            Rolledback = true;
         }
 
         #endregion

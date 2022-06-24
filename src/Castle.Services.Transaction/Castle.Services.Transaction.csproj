@@ -13,7 +13,8 @@
     <Description>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</Description>
     <PackageTags>castle, transactions</PackageTags>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>$(NoWarn);NU5125</NoWarn> <!-- remove once tools are truly ready for NuGet's new 'license' element -->
+    <!-- remove once tools are truly ready for NuGet's new 'license' element -->
+    <NoWarn>$(NoWarn);NU5125</NoWarn>
     <AssemblyName>Castle.Services.Transaction</AssemblyName>
     <RootNamespace>Castle.Services.Transaction</RootNamespace>
   </PropertyGroup>

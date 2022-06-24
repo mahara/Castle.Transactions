@@ -71,7 +71,7 @@ namespace Castle.Services.Transaction.IO
         {
             if (path == null)
             {
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
             }
 
             var matches = _regex.Matches(path);

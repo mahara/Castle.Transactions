@@ -27,8 +27,8 @@ namespace Castle.Services.Transaction.Tests
     using NUnit.Framework;
 
     using Path = IO.Path;
-    using TransactionException = Transaction.TransactionException;
-    using TransactionStatus = Transaction.TransactionStatus;
+    using TransactionException = TransactionException;
+    using TransactionStatus = TransactionStatus;
 
     [TestFixture]
     public class FileTransactionTests
@@ -47,6 +47,13 @@ namespace Castle.Services.Transaction.Tests
             Monitor.Enter(_serializer);
 
             _infosCreated.Clear();
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _dllPath = TestContext.CurrentContext.TestDirectory;
+            _testFixturePath = _dllPath.Combine("Kernel");
         }
 
         [TearDown]
@@ -70,13 +77,6 @@ namespace Castle.Services.Transaction.Tests
             }
 
             Monitor.Exit(_serializer);
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            _dllPath = Environment.CurrentDirectory;
-            _testFixturePath = _dllPath.Combine(@"..\..\Kernel");
         }
 
         private class R : IResource

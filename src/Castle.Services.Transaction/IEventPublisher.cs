@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,14 +25,14 @@ namespace Castle.Services.Transaction
     public interface IEventPublisher
     {
         /// <summary>
-        /// Raised when the transaction rolled back successfully.
-        /// </summary>
-        event EventHandler<TransactionEventArgs> TransactionRolledBack;
-
-        /// <summary>
         /// Raised when the transaction committed successfully.
         /// </summary>
         event EventHandler<TransactionEventArgs> TransactionCompleted;
+
+        /// <summary>
+        /// Raised when the transaction rolled back successfully.
+        /// </summary>
+        event EventHandler<TransactionEventArgs> TransactionRolledBack;
 
         /// <summary>
         /// Raised when the transaction has failed on commit/rollback

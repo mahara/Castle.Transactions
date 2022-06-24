@@ -36,7 +36,7 @@ namespace Castle.Services.Transaction.IO
         public DirectoryAdapter(IMapPath pathFinder, bool constrainToSpecifiedDir, string specifiedDir)
             : base(constrainToSpecifiedDir, specifiedDir)
         {
-            _pathFinder = pathFinder ?? throw new ArgumentNullException("pathFinder");
+            _pathFinder = pathFinder ?? throw new ArgumentNullException(nameof(pathFinder));
         }
 
         /// <summary>

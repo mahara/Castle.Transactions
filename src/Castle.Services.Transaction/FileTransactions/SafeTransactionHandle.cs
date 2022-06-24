@@ -61,8 +61,8 @@ namespace Castle.Services.Transaction
         }
 
         /*
-		 * BOOL WINAPI CloseHandle(__in HANDLE hObject);
-		 */
+         * BOOL WINAPI CloseHandle(__in HANDLE hObject);
+         */
         [DllImport("kernel32.dll")]
         //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         //[SuppressUnmanagedCodeSecurity]

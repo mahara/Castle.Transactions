@@ -295,7 +295,7 @@ namespace Castle.Services.Transaction
         {
             if (resource == null)
             {
-                throw new ArgumentNullException("resource");
+                throw new ArgumentNullException(nameof(resource));
             }
 
             if (_resources.Contains(resource))

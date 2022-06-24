@@ -39,7 +39,14 @@ namespace Castle.Services.Transaction.Tests
         public void CleanOutListEtc()
         {
             Monitor.Enter(_serializer);
+
             _infosCreated.Clear();
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _dllPath = TestContext.CurrentContext.TestDirectory;
         }
 
         [TearDown]
@@ -63,13 +70,6 @@ namespace Castle.Services.Transaction.Tests
             }
 
             Monitor.Exit(_serializer);
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            _dllPath = Environment.CurrentDirectory;
-            _dllPath.Combine(@"..\..\Kernel");
         }
 
         #endregion
@@ -282,9 +282,9 @@ namespace Castle.Services.Transaction.Tests
             Directory.CreateDirectory(pr.Combine("three"));
 
             // 2. Write contents
-            File.WriteAllLines(Exts.Combine(pr, "one").Combine("fileone"), new[] { "Hello world", "second line" });
-            File.WriteAllLines(Exts.Combine(pr, "one").Combine("filetwo"), new[] { "two", "second line" });
-            File.WriteAllLines(Exts.Combine(pr, "two").Combine("filethree"), new[] { "three", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(pr, "one").Combine("fileone"), new[] { "Hello world", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(pr, "one").Combine("filetwo"), new[] { "two", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(pr, "two").Combine("filethree"), new[] { "three", "second line" });
 
             // 3. test
             using (var t = new FileTransaction())
