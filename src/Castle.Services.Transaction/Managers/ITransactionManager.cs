@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 namespace Castle.Services.Transaction
 {
@@ -54,10 +55,10 @@ namespace Castle.Services.Transaction
         ITransaction CurrentTransaction { get; }
 
         /// <summary>
-        /// <see cref="CreateTransaction(TransactionMode,IsolationMode,bool,bool)" />.
+        /// <see cref="CreateTransaction(TransactionMode,IsolationLevel,bool,bool)" />.
         /// </summary>
         ITransaction CreateTransaction(TransactionMode transactionMode,
-                                       IsolationMode isolationMode);
+                                       IsolationLevel isolationMode);
 
         /// <summary>
         /// Creates a transaction.
@@ -75,7 +76,7 @@ namespace Castle.Services.Transaction
         /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
         ITransaction CreateTransaction(TransactionMode transactionMode,
-                                       IsolationMode isolationMode,
+                                       IsolationLevel isolationMode,
                                        bool isAmbient,
                                        bool isReadOnly);
     }
