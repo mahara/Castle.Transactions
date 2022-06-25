@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
 
 namespace Castle.Services.Transaction
 {
+    using System;
+
     /// <summary>
     /// The supported transaction mode for the components.
     /// </summary>
@@ -24,6 +26,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         ///
         /// </summary>
+        [Obsolete]
         Unspecified,
 
         /// <summary>
@@ -46,6 +49,7 @@ namespace Castle.Services.Transaction
         /// An existing appropriate transaction context will be joined if present,
         /// but if there is no current transaction on the thread, no transaction will be created.
         /// </summary>
+        [Obsolete]
         Supported
     }
 }

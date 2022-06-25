@@ -137,7 +137,7 @@ namespace Castle.Facilities.AutoTx
         {
             if (mode == null)
             {
-                return TransactionMode.Unspecified;
+                return TransactionMode.Requires;
             }
 
             try

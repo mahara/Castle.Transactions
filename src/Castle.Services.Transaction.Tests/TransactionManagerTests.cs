@@ -34,7 +34,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void SynchronizationsAndCommit()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                     IsolationMode.Unspecified);
 
             transaction.Begin();
@@ -55,7 +55,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void SynchronizationsAndRollback_RegistredAfter_CommitOrRollBack_AreStarted()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                     IsolationMode.Unspecified);
 
             transaction.Begin();
@@ -76,7 +76,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void DontStartResource_IfTransactionIsNotActive_WhenEnlisting()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                     IsolationMode.Unspecified);
 
             var resource = new ResourceImpl();
@@ -91,7 +91,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ResourcesAndCommit()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                     IsolationMode.Unspecified);
 
             var resource = new ResourceImpl();
@@ -118,7 +118,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ResourcesAndRollback()
         {
-            var transaction = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            var transaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                     IsolationMode.Unspecified);
 
             var resource = new ResourceImpl();
@@ -437,7 +437,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ChildTransactions_AreAmbient()
         {
-            _ = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
+            _ = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                       IsolationMode.Unspecified);
             var childTransaction = _transactionManager.CreateTransaction(TransactionMode.Requires,
                                                                          IsolationMode.Unspecified);

@@ -30,7 +30,7 @@ namespace Castle.Services.Transaction
         /// for them
         /// </summary>
         public TransactionAttribute()
-            : this(TransactionMode.Unspecified, IsolationMode.Unspecified)
+            : this(TransactionMode.Requires, IsolationMode.Unspecified)
         {
         }
 

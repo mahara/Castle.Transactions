@@ -59,7 +59,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="name">The name of the transaction.</param>
         public FileTransaction(string name)
-            : base(name, TransactionMode.Unspecified, IsolationMode.ReadCommitted)
+            : base(name, TransactionMode.Requires, IsolationMode.ReadCommitted)
         {
         }
 

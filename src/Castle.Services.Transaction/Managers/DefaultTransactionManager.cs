@@ -49,7 +49,7 @@ namespace Castle.Services.Transaction
 
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug("DefaultTransactionManager created.");
+                Logger.Debug($"{nameof(DefaultTransactionManager)} created.");
             }
         }
 
@@ -76,13 +76,9 @@ namespace Castle.Services.Transaction
 
         public ITransaction CreateTransaction(TransactionMode txMode, IsolationMode iMode, bool isAmbient, bool isReadOnly)
         {
-            txMode = ObtainDefaultTransactionMode(txMode);
-
             AssertModeSupported(txMode);
 
-            if (CurrentTransaction == null &&
-                (txMode == TransactionMode.Supported ||
-                 txMode == TransactionMode.NotSupported))
+            if (CurrentTransaction == null && txMode == TransactionMode.NotSupported)
             {
                 return null;
             }
@@ -91,11 +87,13 @@ namespace Castle.Services.Transaction
 
             if (CurrentTransaction != null)
             {
-                if (txMode == TransactionMode.Requires || txMode == TransactionMode.Supported)
+                if (txMode == TransactionMode.Requires)
                 {
                     transaction = ((TransactionBase) CurrentTransaction).CreateChildTransaction();
 
-                    Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.", transaction.Name, txMode);
+                    Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.",
+                                       transaction.Name,
+                                       txMode);
                 }
             }
 
@@ -133,7 +131,7 @@ namespace Castle.Services.Transaction
         {
             var t = new TalkactiveTransaction(mode, isolationMode, ambient, readOnly)
             {
-                Logger = Logger.CreateChildLogger("TalkactiveTransaction")
+                Logger = Logger.CreateChildLogger(nameof(TalkactiveTransaction))
             };
 
             t.TransactionCompleted += CompletedHandler;
@@ -167,25 +165,12 @@ namespace Castle.Services.Transaction
                 ctx.Status == TransactionStatus.Active)
             {
                 var message = "There is a transaction active and the transaction mode " +
-                              "explicit says that no transaction is supported for this context";
+                              "explicit says that no transaction is supported for this context.";
 
                 Logger.Error(message);
 
                 throw new TransactionModeUnsupportedException(message);
             }
-        }
-
-        /// <summary>
-        /// Gets the default transaction mode, i.e. the mode which is the current mode
-        /// when <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(TransactionMode,IsolationMode)" />.
-        /// </summary>
-        /// <param name="mode">The mode which was passed.</param>
-        /// <returns>
-        /// Requires &lt;- mode = Unspecified mode &lt;- otherwise.
-        /// </returns>
-        protected virtual TransactionMode ObtainDefaultTransactionMode(TransactionMode mode)
-        {
-            return mode == TransactionMode.Unspecified ? TransactionMode.Requires : mode;
         }
 
         /// <summary>
@@ -203,7 +188,7 @@ namespace Castle.Services.Transaction
         {
             if (transaction == null)
             {
-                throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction");
+                throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction.");
             }
 
             Logger.DebugFormat("Trying to dispose transaction {0}.", transaction.Name);
