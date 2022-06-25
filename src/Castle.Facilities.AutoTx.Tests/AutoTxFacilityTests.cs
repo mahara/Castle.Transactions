@@ -14,6 +14,8 @@
 // limitations under the License.
 #endregion
 
+using System.Transactions;
+
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Services.Transaction;

@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using Castle.Services.Transaction;
 

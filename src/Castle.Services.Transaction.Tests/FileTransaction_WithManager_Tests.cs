@@ -16,6 +16,7 @@
 
 using System;
 using System.IO;
+using System.Transactions;
 
 using Castle.Services.Transaction.IO;
 
@@ -73,7 +74,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void TransactionResourcesAreDisposed()
         {
-            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -103,7 +104,7 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.That(currentTransaction, Is.Null);
 
-            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
 
             tx.Begin();
 
@@ -114,7 +115,7 @@ namespace Castle.Services.Transaction.Tests
 
             // invocation.Proceed() in Castle.DynamicProxy.IInterceptor.Intercept(IInvocation).
 
-            var childTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            var childTx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
 
             currentTransaction = _transactionManager.CurrentTransaction;
 
@@ -141,7 +142,7 @@ namespace Castle.Services.Transaction.Tests
             // Now we can dispose the main transaction.
             _transactionManager.Dispose(tx);
 
-            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
+            Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
             Assert.That(txF.IsDisposed);
         }
 
@@ -154,7 +155,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void BugWhenResourceFailsAndTransactionCommits()
         {
-            _ = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationMode.Unspecified);
+            _ = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
         }
     }
 }
