@@ -3,6 +3,11 @@
 
 ## 5.3.0 (2022-06-xx)
 
+### Castle.Services.Transaction
+
+Breaking Changes:
+- Replaced ```Castle.Services.Transaction.IsolationMode``` with ```System.Transactions.IsolationLevel```.
+
 
 ## 5.2.0 (2022-06-24)
 

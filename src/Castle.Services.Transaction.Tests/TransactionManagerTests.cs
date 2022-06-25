@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using NUnit.Framework;
 
@@ -35,7 +36,7 @@ namespace Castle.Services.Transaction.Tests
         public void SynchronizationsAndCommit()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             tx.Begin();
 
@@ -55,7 +56,7 @@ namespace Castle.Services.Transaction.Tests
         public void SynchronizationsAndRollback_RegisteredAfter_CommitOrRollBack_AreStarted()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             tx.Begin();
 
@@ -75,7 +76,7 @@ namespace Castle.Services.Transaction.Tests
         public void DontStartResource_IfTransactionIsNotActive_WhenEnlisting()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -91,7 +92,7 @@ namespace Castle.Services.Transaction.Tests
         public void ResourcesAndCommit()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -117,7 +118,7 @@ namespace Castle.Services.Transaction.Tests
         public void ResourcesAndRollback()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -145,7 +146,7 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                               IsolationMode.Unspecified);
+                                                               IsolationLevel.Unspecified);
 
                 tx.Begin();
                 tx.Begin();
@@ -160,7 +161,7 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                               IsolationMode.Unspecified);
+                                                               IsolationLevel.Unspecified);
 
                 tx.Begin();
                 tx.Rollback();
@@ -181,7 +182,7 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(transactionCreatedEventTriggered, Is.False);
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             Assert.That(transactionCreatedEventTriggered);
         }
@@ -194,7 +195,7 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager.TransactionDisposed += delegate { transactionDisposedEventTriggered = true; };
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             Assert.That(transactionDisposedEventTriggered, Is.False);
 
@@ -223,7 +224,7 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -257,7 +258,7 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -291,7 +292,7 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ThrowsExceptionResourceImpl(true, false);
             tx.Enlist(resource);
@@ -337,7 +338,7 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager.TransactionFailed += delegate { transactionFailedEventTriggered = true; };
 
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ThrowsExceptionResourceImpl(false, true);
             tx.Enlist(resource);
@@ -375,7 +376,7 @@ namespace Castle.Services.Transaction.Tests
         public void TransactionResourcesAreDisposed()
         {
             var tx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                           IsolationMode.Unspecified);
+                                                           IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -397,9 +398,9 @@ namespace Castle.Services.Transaction.Tests
         public void ChildTransactionsAreAmbient()
         {
             _ = _transactionManager.CreateTransaction(TransactionMode.Unspecified,
-                                                      IsolationMode.Unspecified);
+                                                      IsolationLevel.Unspecified);
             var cTx = _transactionManager.CreateTransaction(TransactionMode.Requires,
-                                                            IsolationMode.Unspecified);
+                                                            IsolationLevel.Unspecified);
 
             Assert.That(cTx.IsChildTransaction);
             Assert.That(cTx.IsAmbient);

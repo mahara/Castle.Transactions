@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using Castle.Services.Transaction.Utilities;
 
@@ -26,7 +27,7 @@ namespace Castle.Services.Transaction
         private bool _isReadOnly;
 
         public TalkactiveTransaction(TransactionMode transactionMode,
-                                     IsolationMode isolationMode,
+                                     IsolationLevel isolationMode,
                                      bool isAmbient,
                                      bool isReadOnly) :
             base(null, transactionMode, isolationMode)
