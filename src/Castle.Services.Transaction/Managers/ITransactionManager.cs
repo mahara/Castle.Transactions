@@ -58,7 +58,7 @@ namespace Castle.Services.Transaction
         ///
         /// </returns>
         /// <exception cref="TransactionModeUnsupportedException">
-        /// transactionMode = <see cref="TransactionMode.NotSupported" />
+        /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
         /// and yet there is an ambient transaction in the transaction manager
         /// which is active.
         /// </exception>

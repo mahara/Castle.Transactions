@@ -46,7 +46,8 @@ namespace Castle.Services.Transaction
             Context = new Hashtable();
         }
 
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } =
+            NullLogger.Instance;
 
         #region Nice-to-have properties
 
@@ -140,11 +141,11 @@ namespace Castle.Services.Transaction
             Status = TransactionStatus.Active;
 
             Logger.TryLogFail(InnerBegin)
-                  .Exception(e =>
+                  .Exception(x =>
                              {
                                  _canCommit = false;
 
-                                 throw new TransactionException("Could not begin transaction.", e);
+                                 throw new TransactionException("Could not begin transaction.", x);
                              })
                   .Success(() => _canCommit = true);
 
@@ -154,13 +155,11 @@ namespace Castle.Services.Transaction
                 {
                     r.Start();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     SetRollbackOnly();
 
-                    throw new CommitResourceException("Transaction could not commit because of a failed resource.",
-                                                      e,
-                                                      r);
+                    throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                 }
             }
         }
@@ -189,28 +188,28 @@ namespace Castle.Services.Transaction
                 {
                     try
                     {
-                        Logger.DebugFormat("Resource: " + r);
+                        Logger.DebugFormat($"Resource: {r}.");
 
                         r.Commit();
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         SetRollbackOnly();
 
                         commitFailed = true;
 
-                        Logger.ErrorFormat("Resource state: " + r);
+                        Logger.ErrorFormat($"Resource state: {r}.");
 
-                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", e, r);
+                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                     }
                 }
 
                 Logger.TryLogFail(InnerCommit)
-                      .Exception(e =>
+                      .Exception(ex =>
                                  {
                                      commitFailed = true;
 
-                                     throw new TransactionException("Could not commit", e);
+                                     throw new TransactionException("Could not commit.", ex);
                                  });
             }
             finally
@@ -219,9 +218,10 @@ namespace Castle.Services.Transaction
                 {
                     if (_ambientTransaction != null)
                     {
-                        Logger.DebugFormat("Commiting TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                        Logger.DebugFormat("Committing TransactionScope (Ambient Transaction) for '{0}'.", Name);
 
                         _ambientTransaction.Complete();
+
                         DisposeAmbientTransaction();
                     }
 
@@ -247,7 +247,7 @@ namespace Castle.Services.Transaction
             _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
             Logger.TryLogFail(InnerRollback)
-                  .Exception(e => toThrow = e);
+                  .Exception(x => toThrow = x);
 
             try
             {
@@ -262,7 +262,7 @@ namespace Castle.Services.Transaction
                 if (toThrow == null)
                 {
                     throw new RollbackResourceException(
-                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details",
+                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details.",
                         failures);
                 }
 
@@ -272,7 +272,7 @@ namespace Castle.Services.Transaction
             {
                 if (_ambientTransaction != null)
                 {
-                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'.", Name);
 
                     DisposeAmbientTransaction();
                 }
@@ -327,7 +327,7 @@ namespace Castle.Services.Transaction
         {
             if (synchronization == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(synchronization));
             }
 
             if (_syncInfo.Contains(synchronization))
