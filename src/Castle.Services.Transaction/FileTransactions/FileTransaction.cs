@@ -59,7 +59,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="name">The name of the transaction.</param>
         public FileTransaction(string name)
-            : base(name, TransactionMode.Requires, IsolationMode.ReadCommitted)
+            : base(name, TransactionScopeOption.Required, IsolationMode.ReadCommitted)
         {
         }
 
@@ -88,7 +88,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the name of the transaction.
         /// </summary>
-        public override string Name => TheName ?? string.Format("FtX #{0}", GetHashCode());
+        public override string Name => InnerName ?? string.Format("FtX #{0}", GetHashCode());
 
         protected override void InnerBegin()
         {
@@ -108,7 +108,7 @@ namespace Castle.Services.Transaction
             }
             else
             {
-                _TransactionHandle = CreateTransaction(string.Format("{0} Transaction", TheName));
+                _TransactionHandle = CreateTransaction(string.Format("{0} Transaction", InnerName));
             }
 
             if (!_TransactionHandle.IsInvalid)

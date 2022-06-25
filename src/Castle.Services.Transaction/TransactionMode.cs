@@ -21,6 +21,7 @@ namespace Castle.Services.Transaction
     /// <summary>
     /// The supported transaction mode for the components.
     /// </summary>
+    [Obsolete]
     public enum TransactionMode
     {
         /// <summary>

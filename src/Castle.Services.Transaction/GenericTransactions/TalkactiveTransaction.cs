@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 namespace Castle.Services.Transaction
 {
     using System;
+    using System.Transactions;
 
     public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
     {
@@ -27,7 +28,10 @@ namespace Castle.Services.Transaction
         public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
         public event EventHandler<TransactionEventArgs> TransactionRolledBack;
 
-        public TalkactiveTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly) :
+        public TalkactiveTransaction(TransactionScopeOption transactionMode,
+                                     IsolationMode isolationMode,
+                                     bool isAmbient,
+                                     bool isReadOnly) :
             base(null, transactionMode, isolationMode)
         {
             _isAmbient = isAmbient;
@@ -55,6 +59,7 @@ namespace Castle.Services.Transaction
             catch (TransactionException e)
             {
                 Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+
                 throw;
             }
         }
@@ -66,11 +71,13 @@ namespace Castle.Services.Transaction
             try
             {
                 base.Commit();
+
                 Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
             }
             catch (TransactionException e)
             {
                 Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+
                 throw;
             }
         }
@@ -82,11 +89,13 @@ namespace Castle.Services.Transaction
             try
             {
                 base.Rollback();
+
                 Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
             }
             catch (TransactionException e)
             {
                 Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+
                 throw;
             }
         }

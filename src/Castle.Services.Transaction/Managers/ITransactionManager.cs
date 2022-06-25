@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 namespace Castle.Services.Transaction
 {
     using System;
+    using System.Transactions;
 
     /// <summary>
     /// Manages the creation and disposal of <see cref="ITransaction" /> instances.
@@ -39,9 +40,10 @@ namespace Castle.Services.Transaction
         event EventHandler<TransactionEventArgs> TransactionDisposed;
 
         /// <summary>
-        /// <see cref="CreateTransaction(TransactionMode,IsolationMode,bool,bool)" />.
+        /// <see cref="CreateTransaction(TransactionScopeOption,IsolationMode,bool,bool)" />.
         /// </summary>
-        ITransaction CreateTransaction(TransactionMode transactionMode, IsolationMode isolationMode);
+        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                       IsolationMode isolationMode);
 
         /// <summary>
         /// Creates a transaction.
@@ -60,7 +62,10 @@ namespace Castle.Services.Transaction
         /// and yet there is an ambient transaction in the transaction manager
         /// which is active.
         /// </exception>
-        ITransaction CreateTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly);
+        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                       IsolationMode isolationMode,
+                                       bool isAmbient,
+                                       bool isReadOnly);
 
         /// <summary>
         /// Returns the current <see cref="ITransaction" />.

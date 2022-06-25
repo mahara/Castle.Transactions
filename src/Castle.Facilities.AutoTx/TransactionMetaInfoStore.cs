@@ -21,6 +21,7 @@ namespace Castle.Facilities.AutoTx
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Reflection;
+    using System.Transactions;
 
     using Core.Configuration;
 
@@ -133,20 +134,20 @@ namespace Castle.Facilities.AutoTx
             return (TransactionMetaInfo) _typeToMetaInfo[implementation];
         }
 
-        private static TransactionMode ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
+        private static TransactionScopeOption ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
         {
             if (mode == null)
             {
-                return TransactionMode.Requires;
+                return TransactionScopeOption.Required;
             }
 
             try
             {
-                return (TransactionMode) Enum.Parse(typeof(TransactionMode), mode, true);
+                return (TransactionScopeOption) Enum.Parse(typeof(TransactionScopeOption), mode, true);
             }
             catch (Exception)
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +
@@ -173,7 +174,7 @@ namespace Castle.Facilities.AutoTx
             }
             catch (Exception)
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +

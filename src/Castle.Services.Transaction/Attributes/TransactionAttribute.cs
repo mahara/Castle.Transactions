@@ -17,6 +17,7 @@
 namespace Castle.Services.Transaction
 {
     using System;
+    using System.Transactions;
 
     /// <summary>
     /// Indicates the transaction support for a method.
@@ -30,7 +31,7 @@ namespace Castle.Services.Transaction
         /// for them
         /// </summary>
         public TransactionAttribute()
-            : this(TransactionMode.Requires, IsolationMode.Unspecified)
+            : this(TransactionScopeOption.Required, IsolationMode.Unspecified)
         {
         }
 
@@ -40,7 +41,7 @@ namespace Castle.Services.Transaction
         /// default value for it.
         /// </summary>
         /// <param name="transactionMode"></param>
-        public TransactionAttribute(TransactionMode transactionMode)
+        public TransactionAttribute(TransactionScopeOption transactionMode)
             : this(transactionMode, IsolationMode.Unspecified)
         {
         }
@@ -52,7 +53,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="transactionMode"></param>
         /// <param name="isolationMode"></param>
-        public TransactionAttribute(TransactionMode transactionMode, IsolationMode isolationMode)
+        public TransactionAttribute(TransactionScopeOption transactionMode, IsolationMode isolationMode)
         {
             TransactionMode = transactionMode;
             IsolationMode = isolationMode;
@@ -61,7 +62,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Returns the <see cref="TransactionMode" />
         /// </summary>
-        public TransactionMode TransactionMode { get; }
+        public TransactionScopeOption TransactionMode { get; }
 
         /// <summary>
         /// Returns the <see cref="IsolationMode" />

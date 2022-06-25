@@ -17,12 +17,13 @@
 namespace Castle.Facilities.AutoTx.Tests
 {
     using System;
+    using System.Transactions;
 
     using Services.Transaction;
 
     public class MockTransaction : TransactionBase
     {
-        public MockTransaction() : base(null, TransactionMode.Requires, IsolationMode.Unspecified)
+        public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationMode.Unspecified)
         {
         }
 
@@ -38,7 +39,8 @@ namespace Castle.Facilities.AutoTx.Tests
         {
         }
 
-        public override bool IsChildTransaction => false;
+        public override bool IsChildTransaction =>
+            false;
 
         public override bool IsAmbient
         {

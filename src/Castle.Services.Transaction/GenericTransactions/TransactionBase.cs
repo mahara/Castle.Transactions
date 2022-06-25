@@ -30,14 +30,16 @@ namespace Castle.Services.Transaction
         private readonly IList<IResource> _resources = new List<IResource>();
         private readonly IList<ISynchronization> _syncInfo = new List<ISynchronization>();
 
-        protected readonly string TheName;
+        protected readonly string InnerName;
 
         private TransactionScope _ambientTransaction;
         private volatile bool _canCommit;
 
-        protected TransactionBase(string name, TransactionMode transactionMode, IsolationMode isolationMode)
+        protected TransactionBase(string name,
+                                  TransactionScopeOption transactionMode,
+                                  IsolationMode isolationMode)
         {
-            TheName = name ?? string.Empty;
+            InnerName = name ?? string.Empty;
             TransactionMode = transactionMode;
             IsolationMode = isolationMode;
             Status = TransactionStatus.NoTransaction;
@@ -61,7 +63,8 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets whether the transaction is a child transaction or not.
         /// </summary>
-        public virtual bool IsChildTransaction => false;
+        public virtual bool IsChildTransaction =>
+            false;
 
         /// <summary>
         /// <see cref="ITransaction.IsAmbient" />.
@@ -76,12 +79,13 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets whether rollback only is set.
         /// </summary>
-        public virtual bool IsRollbackOnlySet => !_canCommit;
+        public virtual bool IsRollbackOnlySet =>
+            !_canCommit;
 
         /// <summary>
         /// Gets the transaction mode of the transaction.
         /// </summary>
-        public TransactionMode TransactionMode { get; }
+        public TransactionScopeOption TransactionMode { get; }
 
         /// <summary>
         /// Gets the isolation mode of the transaction.
@@ -91,8 +95,10 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the name of the transaction.
         /// </summary>
-        public virtual string Name => string.IsNullOrEmpty(TheName) ?
-                       string.Format("Transaction #{0}", GetHashCode()) : TheName;
+        public virtual string Name =>
+            string.IsNullOrEmpty(InnerName) ?
+            string.Format("Transaction #{0}", GetHashCode()) :
+            InnerName;
 
         public ChildTransaction CreateChildTransaction()
         {
@@ -134,13 +140,13 @@ namespace Castle.Services.Transaction
             Status = TransactionStatus.Active;
 
             Logger.TryLogFail(InnerBegin)
-                   .Exception(e =>
-                              {
-                                  _canCommit = false;
+                  .Exception(e =>
+                             {
+                                 _canCommit = false;
 
-                                  throw new TransactionException("Could not begin transaction.", e);
-                              })
-                   .Success(() => _canCommit = true);
+                                 throw new TransactionException("Could not begin transaction.", e);
+                             })
+                  .Success(() => _canCommit = true);
 
             foreach (var r in _resources)
             {
@@ -151,6 +157,7 @@ namespace Castle.Services.Transaction
                 catch (Exception e)
                 {
                     SetRollbackOnly();
+
                     throw new CommitResourceException("Transaction could not commit because of a failed resource.",
                                                       e,
                                                       r);
@@ -199,12 +206,12 @@ namespace Castle.Services.Transaction
                 }
 
                 Logger.TryLogFail(InnerCommit)
-                       .Exception(e =>
-                                  {
-                                      commitFailed = true;
+                      .Exception(e =>
+                                 {
+                                     commitFailed = true;
 
-                                      throw new TransactionException("Could not commit", e);
-                                  });
+                                     throw new TransactionException("Could not commit", e);
+                                 });
             }
             finally
             {
@@ -240,12 +247,12 @@ namespace Castle.Services.Transaction
             _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
             Logger.TryLogFail(InnerRollback)
-                   .Exception(e => toThrow = e);
+                  .Exception(e => toThrow = e);
 
             try
             {
                 _resources.ForEach(r => Logger.TryLogFail(r.Rollback)
-                                               .Exception(e => failures.Add(r.And(e))));
+                                              .Exception(e => failures.Add(r.And(e))));
 
                 if (failures.Count == 0)
                 {
@@ -350,7 +357,7 @@ namespace Castle.Services.Transaction
 
         protected void AssertState(TransactionStatus status, string message)
         {
-            if (status != Status)
+            if (Status != status)
             {
                 if (!string.IsNullOrEmpty(message))
                 {
@@ -358,7 +365,7 @@ namespace Castle.Services.Transaction
                 }
 
                 throw new TransactionException(
-                    string.Format("State failure; should have been {0} but was {1}",
+                    string.Format("State failure; should have been {0} but was {1}.",
                                   status,
                                   Status));
             }
