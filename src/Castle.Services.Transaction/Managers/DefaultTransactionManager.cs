@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using Castle.Core.Logging;
 
@@ -108,19 +109,19 @@ namespace Castle.Services.Transaction
             _activityManager.CurrentActivity.CurrentTransaction;
 
         /// <summary>
-        /// <see cref="ITransactionManager.CreateTransaction(TransactionMode,IsolationMode)" />.
+        /// <see cref="ITransactionManager.CreateTransaction(TransactionMode,IsolationLevel)" />.
         /// </summary>
         /// <remarks>
         /// Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.
         /// </remarks>
         public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationMode isolationMode)
+                                              IsolationLevel isolationMode)
         {
             return CreateTransaction(transactionMode, isolationMode, false, false);
         }
 
         public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationMode isolationMode,
+                                              IsolationLevel isolationMode,
                                               bool isAmbient,
                                               bool isReadOnly)
         {
@@ -178,7 +179,7 @@ namespace Castle.Services.Transaction
 
         private TalkactiveTransaction InstantiateTransaction(
             TransactionMode transactionMode,
-            IsolationMode isolationMode,
+            IsolationLevel isolationMode,
             bool isAmbient,
             bool isReadOnly)
         {
@@ -211,7 +212,7 @@ namespace Castle.Services.Transaction
 
         /// <summary>
         /// Gets the default transaction mode, i.e. the transaction mode which is the current transaction mode when
-        /// <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(TransactionMode,IsolationMode)" />.
+        /// <see cref="TransactionMode.Unspecified" /> is passed to <see cref="CreateTransaction(TransactionMode,IsolationLevel)" />.
         /// </summary>
         /// <param name="transactionMode">The transaction mode which was passed.</param>
         /// <returns>
