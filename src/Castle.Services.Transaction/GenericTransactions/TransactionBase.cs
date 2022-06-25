@@ -36,7 +36,7 @@ namespace Castle.Services.Transaction
 
         protected TransactionBase(string name,
                                   TransactionMode transactionMode,
-                                  IsolationMode isolationMode)
+                                  IsolationLevel isolationMode)
         {
             InnerName = !string.IsNullOrEmpty(name) ?
                         name :
@@ -73,7 +73,7 @@ namespace Castle.Services.Transaction
 
         public TransactionMode TransactionMode { get; }
 
-        public IsolationMode IsolationMode { get; }
+        public IsolationLevel IsolationMode { get; }
 
         public TransactionStatus Status { get; private set; }
 
