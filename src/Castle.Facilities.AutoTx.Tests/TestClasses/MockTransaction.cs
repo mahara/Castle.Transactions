@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,13 @@
 namespace Castle.Facilities.AutoTx.Tests
 {
     using System;
+    using System.Transactions;
 
     using Services.Transaction;
 
     public class MockTransaction : TransactionBase
     {
-        public MockTransaction() : base(null, TransactionMode.Unspecified, IsolationMode.Unspecified)
+        public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationLevel.Unspecified)
         {
         }
 
@@ -38,7 +39,8 @@ namespace Castle.Facilities.AutoTx.Tests
         {
         }
 
-        public override bool IsChildTransaction => false;
+        public override bool IsChildTransaction =>
+            false;
 
         public override bool IsAmbient
         {

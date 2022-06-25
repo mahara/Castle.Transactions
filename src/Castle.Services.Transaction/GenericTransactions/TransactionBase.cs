@@ -30,21 +30,24 @@ namespace Castle.Services.Transaction
         private readonly IList<IResource> _resources = new List<IResource>();
         private readonly IList<ISynchronization> _syncInfo = new List<ISynchronization>();
 
-        protected readonly string TheName;
+        protected readonly string InnerName;
 
         private TransactionScope _ambientTransaction;
         private volatile bool _canCommit;
 
-        protected TransactionBase(string name, TransactionMode transactionMode, IsolationMode isolationMode)
+        protected TransactionBase(string name,
+                                  TransactionScopeOption transactionMode,
+                                  IsolationLevel isolationMode)
         {
-            TheName = name ?? string.Empty;
+            InnerName = name ?? string.Empty;
             TransactionMode = transactionMode;
             IsolationMode = isolationMode;
             Status = TransactionStatus.NoTransaction;
             Context = new Hashtable();
         }
 
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } =
+            NullLogger.Instance;
 
         #region Nice-to-have properties
 
@@ -61,7 +64,8 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets whether the transaction is a child transaction or not.
         /// </summary>
-        public virtual bool IsChildTransaction => false;
+        public virtual bool IsChildTransaction =>
+            false;
 
         /// <summary>
         /// <see cref="ITransaction.IsAmbient" />.
@@ -76,28 +80,31 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets whether rollback only is set.
         /// </summary>
-        public virtual bool IsRollbackOnlySet => !_canCommit;
+        public virtual bool IsRollbackOnlySet =>
+            !_canCommit;
 
         /// <summary>
         /// Gets the transaction mode of the transaction.
         /// </summary>
-        public TransactionMode TransactionMode { get; }
+        public TransactionScopeOption TransactionMode { get; }
 
         /// <summary>
         /// Gets the isolation mode of the transaction.
         /// </summary>
-        public IsolationMode IsolationMode { get; }
+        public IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets the name of the transaction.
         /// </summary>
-        public virtual string Name => string.IsNullOrEmpty(TheName) ?
-                       string.Format("Transaction #{0}", GetHashCode()) : TheName;
+        public virtual string Name =>
+            string.IsNullOrEmpty(InnerName) ?
+            string.Format("Transaction #{0}", GetHashCode()) :
+            InnerName;
 
         public ChildTransaction CreateChildTransaction()
         {
-            // opposite to what old code things, I don't think we need
-            // to have a list of child transactions since we never use them.
+            // The opposite to what old code things,
+            // I don't think we need to have a list of child transactions since we never use them.
             return new ChildTransaction(this);
         }
 
@@ -134,13 +141,13 @@ namespace Castle.Services.Transaction
             Status = TransactionStatus.Active;
 
             Logger.TryLogFail(InnerBegin)
-                   .Exception(e =>
-                              {
-                                  _canCommit = false;
+                  .Exception(x =>
+                             {
+                                 _canCommit = false;
 
-                                  throw new TransactionException("Could not begin transaction.", e);
-                              })
-                   .Success(() => _canCommit = true);
+                                 throw new TransactionException("Could not begin transaction.", x);
+                             })
+                  .Success(() => _canCommit = true);
 
             foreach (var r in _resources)
             {
@@ -148,12 +155,11 @@ namespace Castle.Services.Transaction
                 {
                     r.Start();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     SetRollbackOnly();
-                    throw new CommitResourceException("Transaction could not commit because of a failed resource.",
-                                                      e,
-                                                      r);
+
+                    throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                 }
             }
         }
@@ -182,29 +188,29 @@ namespace Castle.Services.Transaction
                 {
                     try
                     {
-                        Logger.DebugFormat("Resource: " + r);
+                        Logger.DebugFormat($"Resource: {r}.");
 
                         r.Commit();
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         SetRollbackOnly();
 
                         commitFailed = true;
 
-                        Logger.ErrorFormat("Resource state: " + r);
+                        Logger.ErrorFormat($"Resource state: {r}.");
 
-                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", e, r);
+                        throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                     }
                 }
 
                 Logger.TryLogFail(InnerCommit)
-                       .Exception(e =>
-                                  {
-                                      commitFailed = true;
+                      .Exception(ex =>
+                                 {
+                                     commitFailed = true;
 
-                                      throw new TransactionException("Could not commit", e);
-                                  });
+                                     throw new TransactionException("Could not commit.", ex);
+                                 });
             }
             finally
             {
@@ -212,9 +218,10 @@ namespace Castle.Services.Transaction
                 {
                     if (_ambientTransaction != null)
                     {
-                        Logger.DebugFormat("Commiting TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                        Logger.DebugFormat("Committing TransactionScope (Ambient Transaction) for '{0}'.", Name);
 
                         _ambientTransaction.Complete();
+
                         DisposeAmbientTransaction();
                     }
 
@@ -240,12 +247,12 @@ namespace Castle.Services.Transaction
             _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
             Logger.TryLogFail(InnerRollback)
-                   .Exception(e => toThrow = e);
+                  .Exception(x => toThrow = x);
 
             try
             {
                 _resources.ForEach(r => Logger.TryLogFail(r.Rollback)
-                                               .Exception(e => failures.Add(r.And(e))));
+                                              .Exception(e => failures.Add(r.And(e))));
 
                 if (failures.Count == 0)
                 {
@@ -255,7 +262,7 @@ namespace Castle.Services.Transaction
                 if (toThrow == null)
                 {
                     throw new RollbackResourceException(
-                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details",
+                        "Failed to properly roll back all resources. See the inner exception or the failed resources list for details.",
                         failures);
                 }
 
@@ -265,7 +272,7 @@ namespace Castle.Services.Transaction
             {
                 if (_ambientTransaction != null)
                 {
-                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'. ", Name);
+                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'.", Name);
 
                     DisposeAmbientTransaction();
                 }
@@ -320,7 +327,7 @@ namespace Castle.Services.Transaction
         {
             if (synchronization == null)
             {
-                throw new ArgumentNullException("s");
+                throw new ArgumentNullException(nameof(synchronization));
             }
 
             if (_syncInfo.Contains(synchronization))
@@ -350,7 +357,7 @@ namespace Castle.Services.Transaction
 
         protected void AssertState(TransactionStatus status, string message)
         {
-            if (status != Status)
+            if (Status != status)
             {
                 if (!string.IsNullOrEmpty(message))
                 {
@@ -358,7 +365,7 @@ namespace Castle.Services.Transaction
                 }
 
                 throw new TransactionException(
-                    string.Format("State failure; should have been {0} but was {1}",
+                    string.Format("State failure; should have been {0} but was {1}.",
                                   status,
                                   Status));
             }

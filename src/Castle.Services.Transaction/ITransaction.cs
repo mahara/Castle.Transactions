@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ namespace Castle.Services.Transaction
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Transactions;
 
     /// <summary>
     /// Represents the contract for a transaction.
@@ -107,12 +108,12 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the transaction mode of the transaction.
         /// </summary>
-        TransactionMode TransactionMode { get; }
+        TransactionScopeOption TransactionMode { get; }
 
         /// <summary>
         /// Gets the isolation mode in use for the transaction.
         /// </summary>
-        IsolationMode IsolationMode { get; }
+        IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets whether the transaction "found an" ambient transaction to run in.

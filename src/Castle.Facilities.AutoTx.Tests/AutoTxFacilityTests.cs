@@ -16,6 +16,8 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
+    using System.Transactions;
+
     using Castle.MicroKernel.Registration;
     using Castle.MicroKernel.SubSystems.Configuration;
     using Castle.Services.Transaction;
@@ -148,7 +150,7 @@ namespace Castle.Facilities.AutoTx.Tests
             this.customerService = customerService;
         }
 
-        [Transaction(TransactionMode.Requires)]
+        [Transaction(TransactionScopeOption.Required)]
         public virtual void DelegateInsert(string name, string
                                                             address)
         {

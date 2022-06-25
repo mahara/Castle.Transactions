@@ -21,6 +21,7 @@ namespace Castle.Facilities.AutoTx
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Reflection;
+    using System.Transactions;
 
     using Core.Configuration;
 
@@ -113,7 +114,7 @@ namespace Castle.Facilities.AutoTx
                 var isolationLevel = config.Attributes[IsolationModeAttribute];
 
                 var mode = ObtainTransactionMode(implementation, method, transactionMode);
-                var level = ObtainIsolation(implementation, method, isolationLevel);
+                var level = ObtainIsolationMode(implementation, method, isolationLevel);
 
                 metaInfo.Add(method, new TransactionAttribute(mode, level));
             }
@@ -133,20 +134,20 @@ namespace Castle.Facilities.AutoTx
             return (TransactionMetaInfo) _typeToMetaInfo[implementation];
         }
 
-        private static TransactionMode ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
+        private static TransactionScopeOption ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
         {
             if (mode == null)
             {
-                return TransactionMode.Unspecified;
+                return TransactionScopeOption.Required;
             }
 
             try
             {
-                return (TransactionMode) Enum.Parse(typeof(TransactionMode), mode, true);
+                return (TransactionScopeOption) Enum.Parse(typeof(TransactionScopeOption), mode, true);
             }
             catch (Exception)
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +
@@ -160,20 +161,20 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private IsolationMode ObtainIsolation(Type implementation, MethodInfo method, string level)
+        private IsolationLevel ObtainIsolationMode(Type implementation, MethodInfo method, string level)
         {
             if (level == null)
             {
-                return IsolationMode.Unspecified;
+                return IsolationLevel.Unspecified;
             }
 
             try
             {
-                return (IsolationMode) Enum.Parse(typeof(IsolationMode), level, true);
+                return (IsolationLevel) Enum.Parse(typeof(IsolationLevel), level, true);
             }
             catch (Exception)
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +

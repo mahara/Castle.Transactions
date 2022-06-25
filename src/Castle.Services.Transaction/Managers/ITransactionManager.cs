@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 namespace Castle.Services.Transaction
 {
     using System;
+    using System.Transactions;
 
     /// <summary>
     /// Manages the creation and disposal of <see cref="ITransaction" /> instances.
@@ -24,24 +25,25 @@ namespace Castle.Services.Transaction
     public interface ITransactionManager : IEventPublisher
     {
         /// <summary>
-        /// Raised when a top level transaction was created
+        /// Raised when a top level transaction was created.
         /// </summary>
         event EventHandler<TransactionEventArgs> TransactionCreated;
 
         /// <summary>
-        /// Raised when a child transaction was created
-        /// </summary>
-        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
-
-        /// <summary>
-        /// Raised when the transaction was disposed
+        /// Raised when the transaction was disposed.
         /// </summary>
         event EventHandler<TransactionEventArgs> TransactionDisposed;
 
         /// <summary>
-        /// <see cref="CreateTransaction(TransactionMode,IsolationMode,bool,bool)" />.
+        /// Raised when a child transaction was created.
         /// </summary>
-        ITransaction CreateTransaction(TransactionMode transactionMode, IsolationMode isolationMode);
+        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+
+        /// <summary>
+        /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
+        /// </summary>
+        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                       IsolationLevel isolationMode);
 
         /// <summary>
         /// Creates a transaction.
@@ -56,11 +58,13 @@ namespace Castle.Services.Transaction
         ///
         /// </returns>
         /// <exception cref="TransactionModeUnsupportedException">
-        /// transactionMode = <see cref="TransactionMode.NotSupported" />
-        /// and yet there is an ambient transaction in the transaction manager
-        /// which is active.
+        /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
+        /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
-        ITransaction CreateTransaction(TransactionMode transactionMode, IsolationMode isolationMode, bool isAmbient, bool isReadOnly);
+        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                       IsolationLevel isolationMode,
+                                       bool isAmbient,
+                                       bool isReadOnly);
 
         /// <summary>
         /// Returns the current <see cref="ITransaction" />.

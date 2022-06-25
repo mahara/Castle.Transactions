@@ -59,7 +59,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="name">The name of the transaction.</param>
         public FileTransaction(string name)
-            : base(name, TransactionMode.Unspecified, IsolationMode.ReadCommitted)
+            : base(name, TransactionScopeOption.Required, IsolationLevel.ReadCommitted)
         {
         }
 
@@ -88,27 +88,27 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the name of the transaction.
         /// </summary>
-        public override string Name => TheName ?? string.Format("FtX #{0}", GetHashCode());
+        public override string Name => InnerName ?? string.Format("FtX #{0}", GetHashCode());
 
         protected override void InnerBegin()
         {
             // we have a ongoing current transaction, join it!
             if (System.Transactions.Transaction.Current != null)
             {
-                var ktx = (IKernelTransaction) TransactionInterop
-                                                   .GetDtcTransaction(System.Transactions.Transaction.Current);
+                var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(System.Transactions.Transaction.Current);
 
-                ktx.GetHandle(out var handle);
+                kTx.GetHandle(out var handle);
 
                 // even though _TransactionHandle can already contain a handle if this thread
                 // had been yielded just before setting this reference, the "safe"-ness of the wrapper should
                 // not dispose the other handle which is now removed
                 _TransactionHandle = handle;
+
                 IsAmbient = true;
             }
             else
             {
-                _TransactionHandle = CreateTransaction(string.Format("{0} Transaction", TheName));
+                _TransactionHandle = CreateTransaction(string.Format("{0} Transaction", InnerName));
             }
 
             if (!_TransactionHandle.IsInvalid)
@@ -147,7 +147,7 @@ namespace Castle.Services.Transaction
 
         #endregion
 
-        #region IFileAdapter & IDirectoryAdapter >> Ambiguous members
+        #region IFileAdapter & IDirectoryAdapter >> Ambiguous Members
 
         FileStream IFileAdapter.Create(string path)
         {
@@ -174,7 +174,7 @@ namespace Castle.Services.Transaction
 
             path = Path.NormDirSepChars(CleanPathEnd(path));
 
-            // we don't need to re-create existing folders.
+            // We don't need to re-create existing folders.
             if (((IDirectoryAdapter) this).Exists(path))
             {
                 return true;
@@ -183,16 +183,16 @@ namespace Castle.Services.Transaction
             var nonExistent = new Stack<string>();
             nonExistent.Push(path);
 
-            var curr = path;
-            while (!((IDirectoryAdapter) this).Exists(curr)
-                   && (curr.Contains(System.IO.Path.DirectorySeparatorChar)
-                       || curr.Contains(System.IO.Path.AltDirectorySeparatorChar)))
+            var current = path;
+            while (!((IDirectoryAdapter) this).Exists(current)
+                   && (current.Contains(System.IO.Path.DirectorySeparatorChar)
+                       || current.Contains(System.IO.Path.AltDirectorySeparatorChar)))
             {
-                curr = Path.GetPathWithoutLastBit(curr);
+                current = Path.GetPathWithoutLastBit(current);
 
-                if (!((IDirectoryAdapter) this).Exists(curr))
+                if (!((IDirectoryAdapter) this).Exists(current))
                 {
-                    nonExistent.Push(curr);
+                    nonExistent.Push(current);
                 }
             }
 
@@ -202,7 +202,7 @@ namespace Castle.Services.Transaction
                 {
                     var win32Exception = new Win32Exception(Marshal.GetLastWin32Error());
                     throw new TransactionException(string.Format("Failed to create directory \"{1}\" at path \"{0}\". "
-                                                                 + "See inner exception for more details.", path, curr),
+                                                                 + "See inner exception for more details.", path, current),
                                                    win32Exception);
                 }
             }
@@ -304,11 +304,11 @@ namespace Castle.Services.Transaction
             throw new NotSupportedException("Implemented on the directory adapter.");
         }
 
-        void IDirectoryAdapter.Move(string originalPath, string newPath)
+        void IDirectoryAdapter.Move(string path, string newPath)
         {
-            if (originalPath == null)
+            if (path == null)
             {
-                throw new ArgumentNullException(nameof(originalPath));
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (newPath == null)
@@ -318,11 +318,11 @@ namespace Castle.Services.Transaction
 
             var da = (IDirectoryAdapter) this;
 
-            if (!da.Exists(originalPath))
+            if (!da.Exists(path))
             {
                 throw new DirectoryNotFoundException(
                     string.Format("The path \"{0}\" could not be found. The source directory needs to exist.",
-                                  originalPath));
+                                  path));
             }
 
             if (!da.Exists(newPath))
@@ -331,7 +331,7 @@ namespace Castle.Services.Transaction
             }
 
             // TODO: Complete.
-            RecurseFiles(originalPath,
+            RecurseFiles(path,
                          f =>
                          {
                              Console.WriteLine("file: {0}", f);
@@ -369,7 +369,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         int IFileAdapter.WriteStream(string toFilePath, Stream fromStream)
         {
-            throw new NotSupportedException("Use the file adapter instead!!");
+            throw new NotSupportedException("Use the file adapter instead.");
         }
 
         /// <summary>
@@ -388,19 +388,26 @@ namespace Castle.Services.Transaction
             }
         }
 
-        void IFileAdapter.Move(string originalFilePath, string newFilePath)
+        void IFileAdapter.Move(string filePath, string newFilePath)
         {
             // case 1, the new file path is a folder
             if (((IDirectoryAdapter) this).Exists(newFilePath))
             {
-                MoveFileTransacted(originalFilePath, newFilePath.Combine(Path.GetFileName(originalFilePath)), IntPtr.Zero,
-                                   IntPtr.Zero, MoveFileFlags.CopyAllowed,
+                MoveFileTransacted(filePath,
+                                   newFilePath.Combine(Path.GetFileName(filePath)),
+                                   IntPtr.Zero,
+                                   IntPtr.Zero,
+                                   MoveFileFlags.CopyAllowed,
                                    _TransactionHandle);
                 return;
             }
 
             // case 2, its not a folder, so assume it's a file.
-            MoveFileTransacted(originalFilePath, newFilePath, IntPtr.Zero, IntPtr.Zero, MoveFileFlags.CopyAllowed,
+            MoveFileTransacted(filePath,
+                               newFilePath,
+                               IntPtr.Zero,
+                               IntPtr.Zero,
+                               MoveFileFlags.CopyAllowed,
                                _TransactionHandle);
         }
 
@@ -431,9 +438,8 @@ namespace Castle.Services.Transaction
             AssertState(TransactionStatus.Active);
 
             var exists = ((IFileAdapter) this).Exists(path);
-            using (
-                var writer =
-                    new StreamWriter(Open(path, exists ? FileMode.Truncate : FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)))
+            var mode = exists ? FileMode.Truncate : FileMode.OpenOrCreate;
+            using (var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None)))
             {
                 writer.Write(contents);
             }
@@ -497,7 +503,7 @@ namespace Castle.Services.Transaction
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         private void Dispose(bool disposing)
         {
-            // no unmanaged code here, just return.
+            // Mo unmanaged code here, just return.
             if (!disposing)
             {
                 return;
@@ -507,7 +513,7 @@ namespace Castle.Services.Transaction
             {
                 return;
             }
-            // called via the Dispose() method on IDisposable,
+            // Called via the Dispose() method on IDisposable,
             // can use private object references.
 
             if (Status == TransactionStatus.Active)
@@ -939,7 +945,8 @@ namespace Castle.Services.Transaction
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern bool MoveFileTransacted([In] string lpExistingFileName,
-                                                      [In] string lpNewFileName, [In] IntPtr lpProgressRoutine,
+                                                      [In] string lpNewFileName,
+                                                      [In] IntPtr lpProgressRoutine,
                                                       [In] IntPtr lpData,
                                                       [In] MoveFileFlags dwFlags,
                                                       [In] SafeTransactionHandle hTransaction);

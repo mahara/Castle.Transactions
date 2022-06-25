@@ -17,6 +17,7 @@
 namespace Castle.Facilities.AutoTx.Tests
 {
     using System;
+    using System.Transactions;
 
     using MicroKernel;
 
@@ -37,12 +38,12 @@ namespace Castle.Facilities.AutoTx.Tests
             _kernel = kernel;
         }
 
-        [Transaction(TransactionMode.Requires)]
+        [Transaction(TransactionScopeOption.Required)]
         public virtual void Insert(string name, string address)
         {
         }
 
-        [Transaction(TransactionMode.Requires)]
+        [Transaction(TransactionScopeOption.Required)]
         public virtual void Delete(int id)
         {
             throw new ApplicationException("Whopps. Problems!");
@@ -54,14 +55,14 @@ namespace Castle.Facilities.AutoTx.Tests
             var tm = _kernel.Resolve<ITransactionManager>();
 
             Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+            Assert.AreEqual(Services.Transaction.TransactionStatus.Active, tm.CurrentTransaction.Status);
 
             tm.CurrentTransaction.SetRollbackOnly();
 
-            Assert.AreEqual(TransactionStatus.Active, tm.CurrentTransaction.Status);
+            Assert.AreEqual(Services.Transaction.TransactionStatus.Active, tm.CurrentTransaction.Status);
         }
 
-        [Transaction(TransactionMode.Requires)]
+        [Transaction(TransactionScopeOption.Required)]
         public virtual void DoSomethingNotMarkedAsReadOnly()
         {
             var tm = _kernel.Resolve<ITransactionManager>();
@@ -71,7 +72,7 @@ namespace Castle.Facilities.AutoTx.Tests
         }
 
 
-        [Transaction(TransactionMode.Requires, ReadOnly = true)]
+        [Transaction(TransactionScopeOption.Required, ReadOnly = true)]
         public virtual void DoSomethingReadOnly()
         {
             var tm = _kernel.Resolve<ITransactionManager>();

@@ -63,9 +63,9 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Gets the full path of the specified directory.
         /// </summary>
-        /// <param name="dir">The relative path.</param>
+        /// <param name="path">The relative path.</param>
         /// <returns>A string with the full path.</returns>
-        string GetFullPath(string dir);
+        string GetFullPath(string path);
 
         /// <summary>
         /// Gets the MapPath of the path.
@@ -80,8 +80,8 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Moves the directory from the original path to the new path.
         /// </summary>
-        /// <param name="originalPath">Path from</param>
+        /// <param name="path">Path from</param>
         /// <param name="newPath">Path to</param>
-        void Move(string originalPath, string newPath);
+        void Move(string path, string newPath);
     }
 }

@@ -1,5 +1,14 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
+## 5.3.x (202x-xx-xx)
+
+### All
+
+Breaking Changes:
+- Replaced Castle.Services.Transaction.TransactionMode with System.Transactions.TransactionScopeOption.
+- Replaced Castle.Services.Transaction.IsolationMode with System.Transactions.IsolationLevel.
+
+
 ## 5.2.0 (2022-06-24)
 
 ### All
