@@ -37,7 +37,7 @@ namespace Castle.Services.Transaction
 
         protected TransactionBase(string name,
                                   TransactionScopeOption transactionMode,
-                                  IsolationMode isolationMode)
+                                  IsolationLevel isolationMode)
         {
             InnerName = name ?? string.Empty;
             TransactionMode = transactionMode;
@@ -91,7 +91,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the isolation mode of the transaction.
         /// </summary>
-        public IsolationMode IsolationMode { get; }
+        public IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets the name of the transaction.
@@ -103,8 +103,8 @@ namespace Castle.Services.Transaction
 
         public ChildTransaction CreateChildTransaction()
         {
-            // opposite to what old code things, I don't think we need
-            // to have a list of child transactions since we never use them.
+            // The opposite to what old code things,
+            // I don't think we need to have a list of child transactions since we never use them.
             return new ChildTransaction(this);
         }
 

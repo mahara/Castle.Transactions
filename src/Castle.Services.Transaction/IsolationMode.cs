@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,13 @@
 
 namespace Castle.Services.Transaction
 {
+    using System;
+
     /// <summary>
     /// Isolation modes which the transactions can run in.
     /// These do not apply equally to FtX which run as ReadCommitted for all transactions.
     /// </summary>
+    [Obsolete]
     public enum IsolationMode
     {
         Unspecified,

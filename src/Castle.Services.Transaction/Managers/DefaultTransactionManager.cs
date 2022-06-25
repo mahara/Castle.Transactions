@@ -68,22 +68,22 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// <see cref="ITransactionManager.CreateTransaction(TransactionScopeOption,IsolationMode)" />.
+        /// <see cref="ITransactionManager.CreateTransaction(TransactionScopeOption,IsolationLevel)" />.
         /// </summary>
-        public ITransaction CreateTransaction(TransactionScopeOption transactionScopeOption,
-                                              IsolationMode isolationMode)
+        public ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                              IsolationLevel isolationMode)
         {
-            return CreateTransaction(transactionScopeOption, isolationMode, false, false);
+            return CreateTransaction(transactionMode, isolationMode, false, false);
         }
 
-        public ITransaction CreateTransaction(TransactionScopeOption transactionScopeOption,
-                                              IsolationMode iMode,
+        public ITransaction CreateTransaction(TransactionScopeOption transactionMode,
+                                              IsolationLevel isolationMode,
                                               bool isAmbient,
                                               bool isReadOnly)
         {
-            AssertModeSupported(transactionScopeOption);
+            AssertModeSupported(transactionMode);
 
-            if (CurrentTransaction == null && transactionScopeOption == TransactionScopeOption.Suppress)
+            if (CurrentTransaction == null && transactionMode == TransactionScopeOption.Suppress)
             {
                 return null;
             }
@@ -92,19 +92,19 @@ namespace Castle.Services.Transaction
 
             if (CurrentTransaction != null)
             {
-                if (transactionScopeOption == TransactionScopeOption.Required)
+                if (transactionMode == TransactionScopeOption.Required)
                 {
                     transaction = ((TransactionBase) CurrentTransaction).CreateChildTransaction();
 
                     Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.",
                                        transaction.Name,
-                                       transactionScopeOption);
+                                       transactionMode);
                 }
             }
 
             if (transaction == null)
             {
-                transaction = InstantiateTransaction(transactionScopeOption, iMode, isAmbient, isReadOnly);
+                transaction = InstantiateTransaction(transactionMode, isolationMode, isAmbient, isReadOnly);
 
                 if (isAmbient)
                 {
@@ -132,7 +132,10 @@ namespace Castle.Services.Transaction
             return transaction;
         }
 
-        private TransactionBase InstantiateTransaction(TransactionScopeOption transactionScopeOption, IsolationMode isolationMode, bool ambient, bool readOnly)
+        private TransactionBase InstantiateTransaction(TransactionScopeOption transactionScopeOption,
+                                                       IsolationLevel isolationMode,
+                                                       bool ambient,
+                                                       bool readOnly)
         {
             var t = new TalkactiveTransaction(transactionScopeOption, isolationMode, ambient, readOnly)
             {

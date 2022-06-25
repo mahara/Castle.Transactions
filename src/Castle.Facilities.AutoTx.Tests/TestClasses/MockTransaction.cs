@@ -23,7 +23,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
     public class MockTransaction : TransactionBase
     {
-        public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationMode.Unspecified)
+        public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationLevel.Unspecified)
         {
         }
 

@@ -62,7 +62,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void TransactionResources_AreDisposed()
         {
-            var t = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationMode.Unspecified);
+            var t = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
 
@@ -91,7 +91,7 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.That(_transactionManager.CurrentTransaction, Is.Null);
 
-            var stdTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationMode.Unspecified);
+            var stdTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
             stdTx.Begin();
 
             Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
@@ -99,7 +99,7 @@ namespace Castle.Services.Transaction.Tests
 
             // invocation.Proceed() in interceptor
 
-            var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationMode.Unspecified);
+            var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
             Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
             Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
                         "Now that we have created a child, it's the current tx.");
@@ -135,7 +135,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void BugWhenResourceFailsAndTransactionCommits()
         {
-            _ = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationMode.Unspecified);
+            _ = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
         }
     }
 }

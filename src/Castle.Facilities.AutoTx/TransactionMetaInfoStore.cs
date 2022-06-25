@@ -114,7 +114,7 @@ namespace Castle.Facilities.AutoTx
                 var isolationLevel = config.Attributes[IsolationModeAttribute];
 
                 var mode = ObtainTransactionMode(implementation, method, transactionMode);
-                var level = ObtainIsolation(implementation, method, isolationLevel);
+                var level = ObtainIsolationMode(implementation, method, isolationLevel);
 
                 metaInfo.Add(method, new TransactionAttribute(mode, level));
             }
@@ -161,16 +161,16 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private IsolationMode ObtainIsolation(Type implementation, MethodInfo method, string level)
+        private IsolationLevel ObtainIsolationMode(Type implementation, MethodInfo method, string level)
         {
             if (level == null)
             {
-                return IsolationMode.Unspecified;
+                return IsolationLevel.Unspecified;
             }
 
             try
             {
-                return (IsolationMode) Enum.Parse(typeof(IsolationMode), level, true);
+                return (IsolationLevel) Enum.Parse(typeof(IsolationLevel), level, true);
             }
             catch (Exception)
             {

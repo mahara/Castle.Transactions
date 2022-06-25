@@ -113,7 +113,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the isolation mode in use for the transaction.
         /// </summary>
-        IsolationMode IsolationMode { get; }
+        IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets whether the transaction "found an" ambient transaction to run in.

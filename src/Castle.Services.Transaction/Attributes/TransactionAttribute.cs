@@ -31,7 +31,7 @@ namespace Castle.Services.Transaction
         /// for them
         /// </summary>
         public TransactionAttribute()
-            : this(TransactionScopeOption.Required, IsolationMode.Unspecified)
+            : this(TransactionScopeOption.Required, IsolationLevel.Unspecified)
         {
         }
 
@@ -42,7 +42,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="transactionMode"></param>
         public TransactionAttribute(TransactionScopeOption transactionMode)
-            : this(transactionMode, IsolationMode.Unspecified)
+            : this(transactionMode, IsolationLevel.Unspecified)
         {
         }
 
@@ -53,7 +53,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="transactionMode"></param>
         /// <param name="isolationMode"></param>
-        public TransactionAttribute(TransactionScopeOption transactionMode, IsolationMode isolationMode)
+        public TransactionAttribute(TransactionScopeOption transactionMode, IsolationLevel isolationMode)
         {
             TransactionMode = transactionMode;
             IsolationMode = isolationMode;
@@ -67,7 +67,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Returns the <see cref="IsolationMode" />
         /// </summary>
-        public IsolationMode IsolationMode { get; }
+        public IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the transaction should be distributed.

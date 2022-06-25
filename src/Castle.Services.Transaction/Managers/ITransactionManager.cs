@@ -25,25 +25,25 @@ namespace Castle.Services.Transaction
     public interface ITransactionManager : IEventPublisher
     {
         /// <summary>
-        /// Raised when a top level transaction was created
+        /// Raised when a top level transaction was created.
         /// </summary>
         event EventHandler<TransactionEventArgs> TransactionCreated;
 
         /// <summary>
-        /// Raised when a child transaction was created
-        /// </summary>
-        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
-
-        /// <summary>
-        /// Raised when the transaction was disposed
+        /// Raised when the transaction was disposed.
         /// </summary>
         event EventHandler<TransactionEventArgs> TransactionDisposed;
 
         /// <summary>
-        /// <see cref="CreateTransaction(TransactionScopeOption,IsolationMode,bool,bool)" />.
+        /// Raised when a child transaction was created.
+        /// </summary>
+        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+
+        /// <summary>
+        /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
         /// </summary>
         ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                       IsolationMode isolationMode);
+                                       IsolationLevel isolationMode);
 
         /// <summary>
         /// Creates a transaction.
@@ -59,11 +59,10 @@ namespace Castle.Services.Transaction
         /// </returns>
         /// <exception cref="TransactionModeUnsupportedException">
         /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
-        /// and yet there is an ambient transaction in the transaction manager
-        /// which is active.
+        /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
         ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                       IsolationMode isolationMode,
+                                       IsolationLevel isolationMode,
                                        bool isAmbient,
                                        bool isReadOnly);
 

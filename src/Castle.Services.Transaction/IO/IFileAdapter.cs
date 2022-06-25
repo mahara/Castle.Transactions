@@ -41,16 +41,16 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Reads all text from a file as part of a transaction.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns></returns>
-        string ReadAllText(string path);
+        string ReadAllText(string filePath);
 
         /// <summary>
         /// Writes text to a file as part of a transaction.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <param name="contents"></param>
-        void WriteAllText(string path, string contents);
+        void WriteAllText(string filePath, string contents);
 
         /// <summary>
         /// Deletes a file as part of a transaction.
@@ -77,10 +77,10 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Reads all text in a file and returns the string of it.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        string ReadAllText(string path, Encoding encoding);
+        string ReadAllText(string filePath, Encoding encoding);
 
         /// <summary>
         /// Moves a file from one path to another.

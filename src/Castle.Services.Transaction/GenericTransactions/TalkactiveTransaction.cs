@@ -29,7 +29,7 @@ namespace Castle.Services.Transaction
         public event EventHandler<TransactionEventArgs> TransactionRolledBack;
 
         public TalkactiveTransaction(TransactionScopeOption transactionMode,
-                                     IsolationMode isolationMode,
+                                     IsolationLevel isolationMode,
                                      bool isAmbient,
                                      bool isReadOnly) :
             base(null, transactionMode, isolationMode)
@@ -56,9 +56,9 @@ namespace Castle.Services.Transaction
             {
                 base.Begin();
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }
@@ -74,9 +74,9 @@ namespace Castle.Services.Transaction
 
                 Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }
@@ -92,9 +92,9 @@ namespace Castle.Services.Transaction
 
                 Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
             }
-            catch (TransactionException e)
+            catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, e)));
+                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }
