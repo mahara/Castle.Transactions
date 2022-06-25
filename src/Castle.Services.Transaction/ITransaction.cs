@@ -42,7 +42,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Gets the isolation mode of the transaction.
         /// </summary>
-        IsolationMode IsolationMode { get; }
+        IsolationLevel IsolationMode { get; }
 
         /// <summary>
         /// Gets current transaction status.

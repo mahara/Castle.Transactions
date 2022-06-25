@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using Castle.Services.Transaction;
 
@@ -23,7 +24,7 @@ namespace Castle.Facilities.AutoTx.Tests
     public class MockTransaction : TransactionBase
     {
         public MockTransaction() :
-            base(null, TransactionMode.Unspecified, IsolationMode.Unspecified)
+            base(null, TransactionMode.Unspecified, IsolationLevel.Unspecified)
         {
         }
 
