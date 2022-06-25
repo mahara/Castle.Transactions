@@ -15,11 +15,14 @@
 #endregion
 
 using System;
+using System.Transactions;
 
 using Castle.MicroKernel;
 using Castle.Services.Transaction;
 
 using NUnit.Framework;
+
+using TransactionStatus = Castle.Services.Transaction.TransactionStatus;
 
 namespace Castle.Facilities.AutoTx.Tests
 {
