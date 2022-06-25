@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Transactions;
 
 using Castle.Core.Configuration;
 
@@ -150,16 +151,16 @@ namespace Castle.Facilities.AutoTx
             return transactionMode;
         }
 
-        private static IsolationMode ParseIsolationModeName(Type implementationType, MethodInfo method, string isolationModeName)
+        private static IsolationLevel ParseIsolationModeName(Type implementationType, MethodInfo method, string isolationModeName)
         {
             if (string.IsNullOrEmpty(isolationModeName))
             {
-                return IsolationMode.Unspecified;
+                return IsolationLevel.Unspecified;
             }
 
-            if (!Enum.TryParse(isolationModeName, true, out IsolationMode isolationMode))
+            if (!Enum.TryParse(isolationModeName, true, out IsolationLevel isolationMode))
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[]) Enum.GetValues(typeof(IsolationLevel));
 
                 throw new FacilityException(
                     $"The configuration for the class '{implementationType.FullName}', method '{method.Name}', " +
