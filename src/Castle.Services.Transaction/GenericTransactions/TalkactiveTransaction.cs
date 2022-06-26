@@ -27,10 +27,10 @@ namespace Castle.Services.Transaction
         private bool _isReadOnly;
 
         public TalkactiveTransaction(TransactionMode transactionMode,
-                                     IsolationLevel isolationMode,
+                                     IsolationLevel isolationLevel,
                                      bool isAmbient,
                                      bool isReadOnly) :
-            base(null, transactionMode, isolationMode)
+            base(null, transactionMode, isolationLevel)
         {
             _isAmbient = isAmbient;
             _isReadOnly = isReadOnly;
