@@ -7,6 +7,7 @@
 
 Breaking Changes:
 - Replaced ```Castle.Services.Transaction.IsolationMode``` with ```System.Transactions.IsolationLevel```.
+- Renamed ```IsolationMode``` to ```IsolationLevel```.
 
 
 ## 5.2.0 (2022-06-24)
