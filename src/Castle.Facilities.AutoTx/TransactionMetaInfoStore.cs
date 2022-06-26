@@ -33,7 +33,7 @@ namespace Castle.Facilities.AutoTx
     public class TransactionMetaInfoStore : MarshalByRefObject
     {
         private const string TransactionModeAttribute = "transactionMode";
-        private const string IsolationModeAttribute = "isolationMode";
+        private const string IsolationLevelAttribute = "isolationLevel";
 
         private static readonly BindingFlags BindingFlags =
             BindingFlags.Instance |
@@ -101,12 +101,12 @@ namespace Castle.Facilities.AutoTx
             foreach (var method in methods)
             {
                 var transactionModeName = configuration.Attributes[TransactionModeAttribute];
+                var isolationLevelName = configuration.Attributes[IsolationLevelAttribute];
+
                 var transactionMode = ParseTransactionModeName(implementationType, method, transactionModeName);
+                var isolationLevel = ParseIsolationLevelName(implementationType, method, isolationLevelName);
 
-                var isolationModeName = configuration.Attributes[IsolationModeAttribute];
-                var isolationMode = ParseIsolationModeName(implementationType, method, isolationModeName);
-
-                metaInfo.AddTransactionalMethod(method, new TransactionAttribute(transactionMode, isolationMode));
+                metaInfo.AddTransactionalMethod(method, new TransactionAttribute(transactionMode, isolationLevel));
             }
 
             RegisterMetaInfo(implementationType, metaInfo);
@@ -151,24 +151,24 @@ namespace Castle.Facilities.AutoTx
             return transactionMode;
         }
 
-        private static IsolationLevel ParseIsolationModeName(Type implementationType, MethodInfo method, string isolationModeName)
+        private static IsolationLevel ParseIsolationLevelName(Type implementationType, MethodInfo method, string isolationLevelName)
         {
-            if (string.IsNullOrEmpty(isolationModeName))
+            if (string.IsNullOrEmpty(isolationLevelName))
             {
                 return IsolationLevel.Unspecified;
             }
 
-            if (!Enum.TryParse(isolationModeName, true, out IsolationLevel isolationMode))
+            if (!Enum.TryParse(isolationLevelName, true, out IsolationLevel isolationLevel))
             {
                 var values = (string[]) Enum.GetValues(typeof(IsolationLevel));
 
                 throw new FacilityException(
                     $"The configuration for the class '{implementationType.FullName}', method '{method.Name}', " +
-                    $"has specified '{isolationModeName}' on '{IsolationModeAttribute}' attribute which is not supported. " +
+                    $"has specified '{isolationLevelName}' on '{IsolationLevelAttribute}' attribute which is not supported. " +
                     $"The possible values are '{string.Join(", ", values)}'.");
             }
 
-            return isolationMode;
+            return isolationLevel;
         }
 
         public override object InitializeLifetimeService()
