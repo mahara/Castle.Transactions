@@ -114,13 +114,13 @@ namespace Castle.Services.Transaction
         /// Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.
         /// </remarks>
         public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationLevel isolationMode)
+                                              IsolationLevel isolationLevel)
         {
-            return CreateTransaction(transactionMode, isolationMode, false, false);
+            return CreateTransaction(transactionMode, isolationLevel, false, false);
         }
 
         public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationLevel isolationMode,
+                                              IsolationLevel isolationLevel,
                                               bool isAmbient,
                                               bool isReadOnly)
         {
@@ -152,7 +152,7 @@ namespace Castle.Services.Transaction
 
             if (transaction == null)
             {
-                transaction = InstantiateTransaction(transactionMode, isolationMode, isAmbient, isReadOnly);
+                transaction = InstantiateTransaction(transactionMode, isolationLevel, isAmbient, isReadOnly);
 
                 if (isAmbient)
                 {
@@ -178,11 +178,11 @@ namespace Castle.Services.Transaction
 
         private TalkactiveTransaction InstantiateTransaction(
             TransactionMode transactionMode,
-            IsolationLevel isolationMode,
+            IsolationLevel isolationLevel,
             bool isAmbient,
             bool isReadOnly)
         {
-            var tx = new TalkactiveTransaction(transactionMode, isolationMode, isAmbient, isReadOnly)
+            var tx = new TalkactiveTransaction(transactionMode, isolationLevel, isAmbient, isReadOnly)
             {
                 Logger = Logger.CreateChildLogger(nameof(TalkactiveTransaction)),
             };

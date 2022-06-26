@@ -27,7 +27,7 @@ namespace Castle.Services.Transaction
         public ChildTransaction(ITransaction parent) :
             base($"{nameof(ChildTransaction)} to {parent.Name}",
                  parent.TransactionMode,
-                 parent.IsolationMode)
+                 parent.IsolationLevel)
         {
             _parent = parent;
         }
