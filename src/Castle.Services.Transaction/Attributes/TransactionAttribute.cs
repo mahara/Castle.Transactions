@@ -40,9 +40,9 @@ namespace Castle.Services.Transaction
         /// which means that the transaction manager should use the
         /// default value for it.
         /// </summary>
-        /// <param name="transactionMode"></param>
-        public TransactionAttribute(TransactionScopeOption transactionMode)
-            : this(transactionMode, IsolationLevel.Unspecified)
+        /// <param name="mode"></param>
+        public TransactionAttribute(TransactionScopeOption mode)
+            : this(mode, IsolationLevel.Unspecified)
         {
         }
 
@@ -51,23 +51,23 @@ namespace Castle.Services.Transaction
         /// desired for this method. The transaction manager should
         /// obey the declaration.
         /// </summary>
-        /// <param name="transactionMode"></param>
-        /// <param name="isolationMode"></param>
-        public TransactionAttribute(TransactionScopeOption transactionMode, IsolationLevel isolationMode)
+        /// <param name="mode"></param>
+        /// <param name="isolationLevel"></param>
+        public TransactionAttribute(TransactionScopeOption mode, IsolationLevel isolationLevel)
         {
-            TransactionMode = transactionMode;
-            IsolationMode = isolationMode;
+            Mode = mode;
+            IsolationLevel = isolationLevel;
         }
 
         /// <summary>
-        /// Returns the <see cref="TransactionMode" />
+        /// Returns the <see cref="Mode" />
         /// </summary>
-        public TransactionScopeOption TransactionMode { get; }
+        public TransactionScopeOption Mode { get; }
 
         /// <summary>
-        /// Returns the <see cref="IsolationMode" />
+        /// Returns the <see cref="IsolationLevel" />
         /// </summary>
-        public IsolationLevel IsolationMode { get; }
+        public IsolationLevel IsolationLevel { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the transaction should be distributed.
@@ -75,11 +75,12 @@ namespace Castle.Services.Transaction
         /// <value>
         /// <c>true</c> if a distributed transaction should be created; otherwise, <c>false</c>.
         /// </value>
-        public bool Distributed { get; set; }
+        public bool IsDistributed { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the transaction should be read only.
+        /// Gets or sets a value indicating whether the transaction should be read-only.
         /// </summary>
-        public bool ReadOnly { get; set; }
+        /// <c>true</c> if a read-only transaction should be created; otherwise, <c>false</c>.
+        public bool IsReadOnly { get; set; }
     }
 }

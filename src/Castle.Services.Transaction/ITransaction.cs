@@ -27,6 +27,61 @@ namespace Castle.Services.Transaction
     public interface ITransaction
     {
         /// <summary>
+        /// Gets the friendly name (if set) or an unfriendly integer hash name (if not set).
+        /// Never returns null.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Gets the transaction mode of the transaction.
+        /// </summary>
+        TransactionScopeOption Mode { get; }
+
+        /// <summary>
+        /// Gets the isolation level in use for the transaction.
+        /// </summary>
+        IsolationLevel IsolationLevel { get; }
+
+        /// <summary>
+        /// Gets whether the transaction "found an" ambient transaction to run in.
+        /// This is true if the tx is running in the DTC or a TransactionScope,
+        /// but doesn't imply a distributed transaction
+        /// (as TransactionScopes automatically choose the least performance invasive option).
+        /// </summary>
+        bool IsAmbient { get; }
+
+        /// <summary>
+        /// Returns true for a read-only transaction; otherwise, false.
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Returns the current transaction status.
+        /// </summary>
+        TransactionStatus Status { get; }
+
+        /// <summary>
+        /// Gets whether rollback only is set.
+        /// </summary>
+        bool IsRollbackOnlySet { get; }
+
+        /// <summary>
+        /// Gets whether the transaction is running inside another of castle's transactions.
+        /// </summary>
+        bool IsChildTransaction { get; }
+
+        /// <summary>
+        /// Transaction context. Can be used by applications.
+        /// </summary>
+        IDictionary Context { get; }
+
+        /// <summary>
+        /// Gets an enumerable of the resources present.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IResource> Resources();
+
+        /// <summary>
         /// Starts the transaction.
         /// Implementors should activate the apropriate resources
         /// in order to start the underlying transaction.
@@ -72,11 +127,6 @@ namespace Castle.Services.Transaction
         void SetRollbackOnly();
 
         /// <summary>
-        /// Returns the current transaction status.
-        /// </summary>
-        TransactionStatus Status { get; }
-
-        /// <summary>
         /// Register a participant on the transaction.
         /// </summary>
         /// <param name="resource"></param>
@@ -89,55 +139,5 @@ namespace Castle.Services.Transaction
         /// <param name="synchronization"></param>
         /// <exception cref="ArgumentNullException">If the parameter is null.</exception>
         void RegisterSynchronization(ISynchronization synchronization);
-
-        /// <summary>
-        /// Transaction context. Can be used by applications.
-        /// </summary>
-        IDictionary Context { get; }
-
-        /// <summary>
-        /// Gets whether the transaction is running inside another of castle's transactions.
-        /// </summary>
-        bool IsChildTransaction { get; }
-
-        /// <summary>
-        /// Gets whether rollback only is set.
-        /// </summary>
-        bool IsRollbackOnlySet { get; }
-
-        /// <summary>
-        /// Gets the transaction mode of the transaction.
-        /// </summary>
-        TransactionScopeOption TransactionMode { get; }
-
-        /// <summary>
-        /// Gets the isolation mode in use for the transaction.
-        /// </summary>
-        IsolationLevel IsolationMode { get; }
-
-        /// <summary>
-        /// Gets whether the transaction "found an" ambient transaction to run in.
-        /// This is true if the tx is running in the DTC or a TransactionScope,
-        /// but doesn't imply a distributed transaction
-        /// (as TransactionScopes automatically choose the least performance invasive option).
-        /// </summary>
-        bool IsAmbient { get; }
-
-        /// <summary>
-        /// Gets the friendly name (if set) or an unfriendly integer hash name (if not set).
-        /// Never returns null.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// Gets an enumerable of the resources present.
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<IResource> Resources();
-
-        /// <summary>
-        /// Returns true for a read only transaction, false otherwise.
-        /// </summary>
-        bool IsReadOnly { get; }
     }
 }

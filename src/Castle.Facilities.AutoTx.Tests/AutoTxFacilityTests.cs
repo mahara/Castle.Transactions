@@ -30,20 +30,20 @@ namespace Castle.Facilities.AutoTx.Tests
     public class AutoTxFacilityTests
     {
         [Test]
-        public void Container_InjectsTransactions_IfTransactionInjectAttribute_is_set()
+        public void ContainerInjectsTransactionsIfTransactionInjectAttributeIsSet()
         {
-            var c = new WindsorContainer(new DefaultConfigurationStore());
+            var container = new WindsorContainer(new DefaultConfigurationStore());
 
-            c.AddFacility(new AutoTxFacility());
+            container.AddFacility(new AutoTxFacility());
 
-            c.Register(Component.For<ITransactionManager>()
-                                .ImplementedBy<MockTransactionManager>()
-                                .Named("transactionmanager"));
-            c.Register(Component.For<ISomething>()
-                                .ImplementedBy<AClass>()
-                                .Named("AClass"));
+            container.Register(Component.For<ITransactionManager>()
+                                        .ImplementedBy<MockTransactionManager>()
+                                        .Named("transactionmanager"));
+            container.Register(Component.For<ISomething>()
+                                        .ImplementedBy<AClass>()
+                                        .Named("AClass"));
 
-            var something = c.Resolve<ISomething>();
+            var something = container.Resolve<ISomething>();
 
             Assert.That(something, Is.Not.Null);
             Assert.That(something.DA, Is.Not.Null);
@@ -67,9 +67,9 @@ namespace Castle.Facilities.AutoTx.Tests
             container.Register(Component.For<CustomerService>().Named("mycomp"));
             container.Register(Component.For<ProxyService>().Named("delegatecomp"));
 
-            var serv = container.Resolve<ProxyService>("delegatecomp");
+            var service = container.Resolve<ProxyService>("delegatecomp");
 
-            serv.DelegateInsert("John", "Home Address");
+            service.DelegateInsert("John", "Home Address");
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
@@ -79,7 +79,6 @@ namespace Castle.Facilities.AutoTx.Tests
 
         [Test]
         public void TestReadonlyTransactions()
-
         {
             IWindsorContainer container = new WindsorContainer();
 
@@ -143,18 +142,17 @@ namespace Castle.Facilities.AutoTx.Tests
     [Transactional]
     public class ProxyService
     {
-        private readonly CustomerService customerService;
+        private readonly CustomerService _customerService;
 
         public ProxyService(CustomerService customerService)
         {
-            this.customerService = customerService;
+            _customerService = customerService;
         }
 
         [Transaction(TransactionScopeOption.Required)]
-        public virtual void DelegateInsert(string name, string
-                                                            address)
+        public virtual void DelegateInsert(string name, string address)
         {
-            customerService.Insert(name, address);
+            _customerService.Insert(name, address);
         }
     }
 }

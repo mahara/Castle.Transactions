@@ -28,11 +28,11 @@ namespace Castle.Services.Transaction
         public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
         public event EventHandler<TransactionEventArgs> TransactionRolledBack;
 
-        public TalkactiveTransaction(TransactionScopeOption transactionMode,
-                                     IsolationLevel isolationMode,
+        public TalkactiveTransaction(TransactionScopeOption mode,
+                                     IsolationLevel isolationLevel,
                                      bool isAmbient,
                                      bool isReadOnly) :
-            base(null, transactionMode, isolationMode)
+            base(null, mode, isolationLevel)
         {
             _isAmbient = isAmbient;
             _isReadOnly = isReadOnly;

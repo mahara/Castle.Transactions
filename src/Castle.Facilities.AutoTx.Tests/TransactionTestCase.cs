@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,9 +209,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             container.Register(Component.For<CustomerService>().Named("mycomp"));
 
-            var serv = container.Resolve<CustomerService>("mycomp");
+            var service = container.Resolve<CustomerService>("mycomp");
 
-            serv.Update(1);
+            service.Update(1);
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 

@@ -72,7 +72,7 @@ namespace Castle.Facilities.AutoTx.Tests
         }
 
 
-        [Transaction(TransactionScopeOption.Required, ReadOnly = true)]
+        [Transaction(TransactionScopeOption.Required, IsReadOnly = true)]
         public virtual void DoSomethingReadOnly()
         {
             var tm = _kernel.Resolve<ITransactionManager>();

@@ -39,9 +39,6 @@ namespace Castle.Facilities.AutoTx.Tests
         {
         }
 
-        public override bool IsChildTransaction =>
-            false;
-
         public override bool IsAmbient
         {
             get => throw new NotImplementedException();
@@ -53,5 +50,8 @@ namespace Castle.Facilities.AutoTx.Tests
             get => throw new NotImplementedException();
             protected set => throw new NotImplementedException();
         }
+
+        public override bool IsChildTransaction =>
+           false;
     }
 }

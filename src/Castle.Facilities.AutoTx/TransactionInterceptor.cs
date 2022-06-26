@@ -98,10 +98,10 @@ namespace Castle.Facilities.AutoTx
 
             var attribute = _metaInfo.GetTransactionAttributeFor(methodInfo);
             var manager = _kernel.Resolve<ITransactionManager>();
-            var transaction = manager.CreateTransaction(attribute.TransactionMode,
-                                                        attribute.IsolationMode,
-                                                        attribute.Distributed,
-                                                        attribute.ReadOnly);
+            var transaction = manager.CreateTransaction(attribute.Mode,
+                                                        attribute.IsolationLevel,
+                                                        attribute.IsDistributed,
+                                                        attribute.IsReadOnly);
 
             if (transaction == null)
             {

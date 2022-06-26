@@ -36,14 +36,14 @@ namespace Castle.Facilities.AutoTx
     {
         private static readonly BindingFlags BindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
         private static readonly string TransactionModeAttribute = "transactionMode";
-        private static readonly string IsolationModeAttribute = "isolationLevel";
+        private static readonly string IsolationLevelAttribute = "isolationLevel";
 
         private readonly IDictionary _typeToMetaInfo = new HybridDictionary();
 
         #region MarshalByRefObject overrides
 
         /// <summary>
-        /// Overrides the MBRO Lifetime initialization
+        /// Overrides the MBRO lifetime initialization.
         /// </summary>
         /// <returns>Null</returns>
         public override object InitializeLifetimeService()
@@ -79,13 +79,12 @@ namespace Castle.Facilities.AutoTx
             foreach (var method in methods)
             {
                 var attributes = method.GetCustomAttributes(typeof(TransactionAttribute), true);
-
                 if (attributes.Length != 0)
                 {
                     metaInfo.Add(method, attributes[0] as TransactionAttribute);
+
                     // Only add the method as transaction injection if we also have specified a transaction attribute.
                     attributes = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
-
                     if (attributes.Length != 0)
                     {
                         metaInfo.AddInjection(method);
@@ -111,10 +110,10 @@ namespace Castle.Facilities.AutoTx
             foreach (var method in methods)
             {
                 var transactionMode = config.Attributes[TransactionModeAttribute];
-                var isolationLevel = config.Attributes[IsolationModeAttribute];
+                var isolationLevel = config.Attributes[IsolationLevelAttribute];
 
                 var mode = ObtainTransactionMode(implementation, method, transactionMode);
-                var level = ObtainIsolationMode(implementation, method, isolationLevel);
+                var level = ObtainIsolationLevel(implementation, method, isolationLevel);
 
                 metaInfo.Add(method, new TransactionAttribute(mode, level));
             }
@@ -132,6 +131,11 @@ namespace Castle.Facilities.AutoTx
         public TransactionMetaInfo GetMetaFor(Type implementation)
         {
             return (TransactionMetaInfo) _typeToMetaInfo[implementation];
+        }
+
+        private void Register(Type implementation, TransactionMetaInfo metaInfo)
+        {
+            _typeToMetaInfo[implementation] = metaInfo;
         }
 
         private static TransactionScopeOption ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
@@ -161,7 +165,7 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private IsolationLevel ObtainIsolationMode(Type implementation, MethodInfo method, string level)
+        private static IsolationLevel ObtainIsolationLevel(Type implementation, MethodInfo method, string level)
         {
             if (level == null)
             {
@@ -182,15 +186,10 @@ namespace Castle.Facilities.AutoTx
                                             implementation.FullName,
                                             method.Name,
                                             level,
-                                            IsolationModeAttribute,
+                                            IsolationLevelAttribute,
                                             string.Join(", ", values));
                 throw new FacilityException(message);
             }
-        }
-
-        private void Register(Type implementation, TransactionMetaInfo metaInfo)
-        {
-            _typeToMetaInfo[implementation] = metaInfo;
         }
     }
 }

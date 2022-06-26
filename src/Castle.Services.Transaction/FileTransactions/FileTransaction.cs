@@ -70,6 +70,12 @@ namespace Castle.Services.Transaction
         // This isn't really relevant with the current architecture
 
         /// <summary>
+        /// Gets the name of the transaction.
+        /// </summary>
+        public override string Name =>
+            InnerName ?? $"FtX #{GetHashCode()}";
+
+        /// <summary>
         /// Gets whether the transaction is a distributed transaction.
         /// </summary>
         public override bool IsAmbient { get; protected set; }
@@ -85,17 +91,12 @@ namespace Castle.Services.Transaction
             protected set => throw new InvalidOperationException("You cannot set read-only flags on file transactions.");
         }
 
-        /// <summary>
-        /// Gets the name of the transaction.
-        /// </summary>
-        public override string Name => InnerName ?? string.Format("FtX #{0}", GetHashCode());
-
         protected override void InnerBegin()
         {
             // we have a ongoing current transaction, join it!
-            if (System.Transactions.Transaction.Current != null)
+            if (Transaction.Current != null)
             {
-                var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(System.Transactions.Transaction.Current);
+                var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(Transaction.Current);
 
                 kTx.GetHandle(out var handle);
 
@@ -108,7 +109,7 @@ namespace Castle.Services.Transaction
             }
             else
             {
-                _TransactionHandle = CreateTransaction(string.Format("{0} Transaction", InnerName));
+                _TransactionHandle = CreateTransaction($"Transaction: {InnerName}");
             }
 
             if (!_TransactionHandle.IsInvalid)
@@ -119,11 +120,6 @@ namespace Castle.Services.Transaction
             throw new TransactionException(
                 "Cannot begin file transaction. CreateTransaction failed and there's no ambient transaction.",
                 GetLastException());
-        }
-
-        private Exception GetLastException()
-        {
-            return Marshal.GetExceptionForHR(Marshal.GetLastWin32Error());
         }
 
         protected override void InnerCommit()
@@ -143,6 +139,11 @@ namespace Castle.Services.Transaction
                 throw new TransactionException("Rollback failed.",
                                                Marshal.GetExceptionForHR(Marshal.GetLastWin32Error()));
             }
+        }
+
+        private Exception GetLastException()
+        {
+            return Marshal.GetExceptionForHR(Marshal.GetLastWin32Error());
         }
 
         #endregion
@@ -346,7 +347,29 @@ namespace Castle.Services.Transaction
 
         #endregion
 
-        #region IFileAdapter members
+        #region IDirectoryAdapter Members
+
+        /// <summary>
+        /// Deletes an empty directory
+        /// </summary>
+        /// <param name="path">The path to the folder to delete.</param>
+        /// <param name="recursively">
+        /// Whether to delete recursively or not.
+        /// When recursive, we delete all subfolders and files in the given
+        /// directory as well.
+        /// </param>
+        bool IDirectoryAdapter.Delete(string path, bool recursively)
+        {
+            AssertState(TransactionStatus.Active);
+
+            return recursively
+                       ? DeleteRecursive(path)
+                       : RemoveDirectoryTransactedW(path, _TransactionHandle);
+        }
+
+        #endregion
+
+        #region IFileAdapter Members
 
         /// <summary>
         /// Opens a file with RW access.
@@ -447,29 +470,7 @@ namespace Castle.Services.Transaction
 
         #endregion
 
-        #region IDirectoryAdapter members
-
-        /// <summary>
-        /// Deletes an empty directory
-        /// </summary>
-        /// <param name="path">The path to the folder to delete.</param>
-        /// <param name="recursively">
-        /// Whether to delete recursively or not.
-        /// When recursive, we delete all subfolders and files in the given
-        /// directory as well.
-        /// </param>
-        bool IDirectoryAdapter.Delete(string path, bool recursively)
-        {
-            AssertState(TransactionStatus.Active);
-
-            return recursively
-                       ? DeleteRecursive(path)
-                       : RemoveDirectoryTransactedW(path, _TransactionHandle);
-        }
-
-        #endregion
-
-        #region Dispose-pattern
+        #region IDisposable Members
 
         /// <summary>
         /// Gets whether the transaction is disposed.
@@ -493,7 +494,7 @@ namespace Castle.Services.Transaction
         {
             Dispose(true);
 
-            // the base transaction dispose all resources active, so we must be careful
+            // The base transaction dispose all resources active, so we must be careful
             // and call our own resources first, thereby having to call this afterwards.
             base.Dispose();
 
@@ -503,7 +504,7 @@ namespace Castle.Services.Transaction
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         private void Dispose(bool disposing)
         {
-            // Mo unmanaged code here, just return.
+            // No unmanaged code here, just return.
             if (!disposing)
             {
                 return;
@@ -568,18 +569,18 @@ namespace Castle.Services.Transaction
             if (fileHandle.IsInvalid)
             {
                 var error = Marshal.GetLastWin32Error();
-                var baseStr = string.Format("Transaction \"{1}\": Unable to open a file descriptor to \"{0}\".",
+                var message = string.Format("Transaction \"{1}\": Unable to open a file descriptor to \"{0}\".",
                                             path,
                                             Name ?? "[no name]");
 
                 if (error == ERROR_TRANSACTIONAL_CONFLICT)
                 {
-                    throw new TransactionalConflictException(baseStr +
-                                                             " You will get this error if you are accessing the transacted file from a non-transacted API before the transaction has " +
-                                                             "committed. See http://msdn.microsoft.com/en-us/library/aa365536%28VS.85%29.aspx for details.");
+                    throw new TransactionalConflictException(message +
+                                                             " You will get this error if you are accessing the transacted file from a non-transacted API before the transaction has committed. " +
+                                                             "See http://msdn.microsoft.com/en-us/library/aa365536%28VS.85%29.aspx for details.");
                 }
 
-                throw new TransactionException(baseStr +
+                throw new TransactionException(message +
                                                "Please see the inner exceptions for details.",
                                                new Win32Exception(Marshal.GetLastWin32Error()));
             }
@@ -1198,7 +1199,7 @@ namespace Castle.Services.Transaction
 
         #endregion
 
-        #region Minimal utils
+        #region Utils
 
         private static string CleanPathEnd(string path)
         {

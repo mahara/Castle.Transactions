@@ -36,12 +36,12 @@ namespace Castle.Services.Transaction
         private volatile bool _canCommit;
 
         protected TransactionBase(string name,
-                                  TransactionScopeOption transactionMode,
-                                  IsolationLevel isolationMode)
+                                  TransactionScopeOption mode,
+                                  IsolationLevel isolationLevel)
         {
             InnerName = name ?? string.Empty;
-            TransactionMode = transactionMode;
-            IsolationMode = isolationMode;
+            Mode = mode;
+            IsolationLevel = isolationLevel;
             Status = TransactionStatus.NoTransaction;
             Context = new Hashtable();
         }
@@ -49,23 +49,23 @@ namespace Castle.Services.Transaction
         public ILogger Logger { get; set; } =
             NullLogger.Instance;
 
-        #region Nice-to-have properties
+        /// <summary>
+        /// Gets the name of the transaction.
+        /// </summary>
+        public virtual string Name =>
+            string.IsNullOrEmpty(InnerName) ?
+            $"Transaction ##{GetHashCode()}" :
+            InnerName;
 
         /// <summary>
-        /// Returns the current transaction status.
+        /// Gets the mode of the transaction.
         /// </summary>
-        public TransactionStatus Status { get; private set; }
+        public TransactionScopeOption Mode { get; }
 
         /// <summary>
-        /// Transaction context. Can be used by applications.
+        /// Gets the isolation level of the transaction.
         /// </summary>
-        public IDictionary Context { get; private set; }
-
-        /// <summary>
-        /// Gets whether the transaction is a child transaction or not.
-        /// </summary>
-        public virtual bool IsChildTransaction =>
-            false;
+        public IsolationLevel IsolationLevel { get; }
 
         /// <summary>
         /// <see cref="ITransaction.IsAmbient" />.
@@ -78,28 +78,26 @@ namespace Castle.Services.Transaction
         public abstract bool IsReadOnly { get; protected set; }
 
         /// <summary>
+        /// Gets the current transaction status.
+        /// </summary>
+        public TransactionStatus Status { get; private set; }
+
+        /// <summary>
         /// Gets whether rollback only is set.
         /// </summary>
         public virtual bool IsRollbackOnlySet =>
             !_canCommit;
 
         /// <summary>
-        /// Gets the transaction mode of the transaction.
+        /// Gets whether the transaction is a child transaction or not.
         /// </summary>
-        public TransactionScopeOption TransactionMode { get; }
+        public virtual bool IsChildTransaction =>
+            false;
 
         /// <summary>
-        /// Gets the isolation mode of the transaction.
+        /// Transaction context. Can be used by applications.
         /// </summary>
-        public IsolationLevel IsolationMode { get; }
-
-        /// <summary>
-        /// Gets the name of the transaction.
-        /// </summary>
-        public virtual string Name =>
-            string.IsNullOrEmpty(InnerName) ?
-            string.Format("Transaction #{0}", GetHashCode()) :
-            InnerName;
+        public IDictionary Context { get; private set; }
 
         public ChildTransaction CreateChildTransaction()
         {
@@ -107,8 +105,6 @@ namespace Castle.Services.Transaction
             // I don't think we need to have a list of child transactions since we never use them.
             return new ChildTransaction(this);
         }
-
-        #endregion
 
         #region IDisposable Members
 

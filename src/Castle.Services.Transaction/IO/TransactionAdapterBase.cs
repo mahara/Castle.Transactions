@@ -134,7 +134,9 @@ namespace Castle.Services.Transaction.IO
             if (!IsInAllowedDir(fullPath))
             {
                 throw new UnauthorizedAccessException(
-                    string.Format("Authorization required for handling path \"{0}\" (passed as \"{1}\")", fullPath, path));
+                    string.Format("Authorization required for handling path \"{0}\" (passed as \"{1}\").",
+                                  fullPath,
+                                  path));
             }
         }
     }

@@ -70,20 +70,20 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// <see cref="ITransactionManager.CreateTransaction(TransactionScopeOption,IsolationLevel)" />.
         /// </summary>
-        public ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                              IsolationLevel isolationMode)
+        public ITransaction CreateTransaction(TransactionScopeOption mode,
+                                              IsolationLevel isolationLevel)
         {
-            return CreateTransaction(transactionMode, isolationMode, false, false);
+            return CreateTransaction(mode, isolationLevel, false, false);
         }
 
-        public ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                              IsolationLevel isolationMode,
+        public ITransaction CreateTransaction(TransactionScopeOption mode,
+                                              IsolationLevel isolationLevel,
                                               bool isAmbient,
                                               bool isReadOnly)
         {
-            AssertModeSupported(transactionMode);
+            AssertModeSupported(mode);
 
-            if (CurrentTransaction == null && transactionMode == TransactionScopeOption.Suppress)
+            if (CurrentTransaction == null && mode == TransactionScopeOption.Suppress)
             {
                 return null;
             }
@@ -92,19 +92,19 @@ namespace Castle.Services.Transaction
 
             if (CurrentTransaction != null)
             {
-                if (transactionMode == TransactionScopeOption.Required)
+                if (mode == TransactionScopeOption.Required)
                 {
                     transaction = ((TransactionBase) CurrentTransaction).CreateChildTransaction();
 
                     Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.",
                                        transaction.Name,
-                                       transactionMode);
+                                       mode);
                 }
             }
 
             if (transaction == null)
             {
-                transaction = InstantiateTransaction(transactionMode, isolationMode, isAmbient, isReadOnly);
+                transaction = InstantiateTransaction(mode, isolationLevel, isAmbient, isReadOnly);
 
                 if (isAmbient)
                 {
@@ -132,12 +132,12 @@ namespace Castle.Services.Transaction
             return transaction;
         }
 
-        private TransactionBase InstantiateTransaction(TransactionScopeOption transactionScopeOption,
-                                                       IsolationLevel isolationMode,
+        private TransactionBase InstantiateTransaction(TransactionScopeOption mode,
+                                                       IsolationLevel isolationLevel,
                                                        bool ambient,
                                                        bool readOnly)
         {
-            var t = new TalkactiveTransaction(transactionScopeOption, isolationMode, ambient, readOnly)
+            var t = new TalkactiveTransaction(mode, isolationLevel, ambient, readOnly)
             {
                 Logger = Logger.CreateChildLogger(nameof(TalkactiveTransaction))
             };
@@ -164,13 +164,12 @@ namespace Castle.Services.Transaction
             TransactionFailed.Fire(this, e);
         }
 
-        private void AssertModeSupported(TransactionScopeOption option)
+        private void AssertModeSupported(TransactionScopeOption mode)
         {
             var ctx = CurrentTransaction;
 
-            if (option == TransactionScopeOption.Suppress &&
-                ctx != null &&
-                ctx.Status == TransactionStatus.Active)
+            if (mode == TransactionScopeOption.Suppress &&
+                ctx != null && ctx.Status == TransactionStatus.Active)
             {
                 var message = "There is a transaction active and the transaction mode " +
                               "explicit says that no transaction is supported for this context.";

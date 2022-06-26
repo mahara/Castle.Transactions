@@ -25,19 +25,37 @@ namespace Castle.Services.Transaction
         private readonly ITransaction _parent;
 
         public ChildTransaction(ITransaction parent)
-            : base(string.Format("ChildTransaction to \"{0}\"",
-                                 parent.Name),
-                   parent.TransactionMode,
-                   parent.IsolationMode)
+            : base($"ChildTransaction to \"{parent.Name}\".",
+                   parent.Mode,
+                   parent.IsolationLevel)
         {
             _parent = parent;
         }
+
+        public override bool IsAmbient
+        {
+            get => true;
+            protected set { }
+        }
+
+        public override bool IsReadOnly
+        {
+            get => _parent.IsReadOnly;
+            protected set { }
+        }
+
+        public override bool IsRollbackOnlySet =>
+          _parent.IsRollbackOnlySet;
 
         public override void Begin()
         {
         }
 
         protected override void InnerBegin()
+        {
+        }
+
+        public override void Commit()
         {
         }
 
@@ -51,17 +69,13 @@ namespace Castle.Services.Transaction
             _parent.SetRollbackOnly();
         }
 
-        public override void SetRollbackOnly()
-        {
-            _parent.SetRollbackOnly();
-        }
-
         protected override void InnerRollback()
         {
         }
 
-        public override void Commit()
+        public override void SetRollbackOnly()
         {
+            _parent.SetRollbackOnly();
         }
 
         public override bool IsChildTransaction =>
@@ -75,21 +89,6 @@ namespace Castle.Services.Transaction
         public override void RegisterSynchronization(ISynchronization s)
         {
             _parent.RegisterSynchronization(s);
-        }
-
-        public override bool IsAmbient
-        {
-            get => true;
-            protected set { }
-        }
-
-        public override bool IsRollbackOnlySet =>
-            _parent.IsRollbackOnlySet;
-
-        public override bool IsReadOnly
-        {
-            get => _parent.IsReadOnly;
-            protected set { }
         }
     }
 }

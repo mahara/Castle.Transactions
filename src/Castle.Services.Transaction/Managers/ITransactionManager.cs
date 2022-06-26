@@ -42,14 +42,14 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
         /// </summary>
-        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                       IsolationLevel isolationMode);
+        ITransaction CreateTransaction(TransactionScopeOption mode,
+                                       IsolationLevel isolationLevel);
 
         /// <summary>
         /// Creates a transaction.
         /// </summary>
-        /// <param name="transactionMode">The transaction mode.</param>
-        /// <param name="isolationMode">The isolation mode.</param>
+        /// <param name="mode">The mode of the transaction.</param>
+        /// <param name="isolationLevel">The isolation level.</param>
         /// <param name="isAmbient">if set to <c>true</c>, the TM will create a distributed transaction.</param>
         /// <param name="isReadOnly">if set to <c>true</c>, the TM will create a read only transaction.</param>
         /// <returns>
@@ -61,8 +61,8 @@ namespace Castle.Services.Transaction
         /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
         /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
-        ITransaction CreateTransaction(TransactionScopeOption transactionMode,
-                                       IsolationLevel isolationMode,
+        ITransaction CreateTransaction(TransactionScopeOption mode,
+                                       IsolationLevel isolationLevel,
                                        bool isAmbient,
                                        bool isReadOnly);
 
