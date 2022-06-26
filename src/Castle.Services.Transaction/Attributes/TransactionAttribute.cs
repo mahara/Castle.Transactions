@@ -50,11 +50,11 @@ namespace Castle.Services.Transaction
         /// The transaction manager should obey the declaration.
         /// </summary>
         /// <param name="transactionMode"></param>
-        /// <param name="isolationMode"></param>
-        public TransactionAttribute(TransactionMode transactionMode, IsolationLevel isolationMode)
+        /// <param name="isolationLevel"></param>
+        public TransactionAttribute(TransactionMode transactionMode, IsolationLevel isolationLevel)
         {
             TransactionMode = transactionMode;
-            IsolationMode = isolationMode;
+            IsolationLevel = isolationLevel;
         }
 
         /// <summary>
@@ -63,9 +63,9 @@ namespace Castle.Services.Transaction
         public TransactionMode TransactionMode { get; }
 
         /// <summary>
-        /// Returns the <see cref="IsolationMode" />.
+        /// Returns the <see cref="IsolationLevel" />.
         /// </summary>
-        public IsolationLevel IsolationMode { get; }
+        public IsolationLevel IsolationLevel { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the transaction should be distributed.
