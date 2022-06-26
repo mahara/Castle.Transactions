@@ -35,11 +35,11 @@ namespace Castle.Services.Transaction
 
         protected TransactionBase(string name,
                                   TransactionMode transactionMode,
-                                  IsolationLevel isolationMode)
+                                  IsolationLevel isolationLevel)
         {
             InnerName = name ?? string.Empty;
             TransactionMode = transactionMode;
-            IsolationMode = isolationMode;
+            IsolationLevel = isolationLevel;
             Status = TransactionStatus.NoTransaction;
             Context = new Dictionary<string, object>();
         }
@@ -70,7 +70,7 @@ namespace Castle.Services.Transaction
 
         public TransactionMode TransactionMode { get; }
 
-        public IsolationLevel IsolationMode { get; }
+        public IsolationLevel IsolationLevel { get; }
 
         public TransactionStatus Status { get; private set; }
 
