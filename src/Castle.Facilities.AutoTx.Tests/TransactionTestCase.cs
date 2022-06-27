@@ -46,9 +46,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(1));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
         }
 
         [Test]
@@ -68,9 +68,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(1));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
@@ -81,9 +81,9 @@ namespace Castle.Facilities.AutoTx.Tests
                 // Expected
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(2));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
         }
 
         [Test]
@@ -101,9 +101,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(1));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
@@ -114,9 +114,9 @@ namespace Castle.Facilities.AutoTx.Tests
                 // Expected
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(2));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
         }
 
         [Test]
@@ -134,9 +134,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(1));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
 
             try
             {
@@ -147,15 +147,15 @@ namespace Castle.Facilities.AutoTx.Tests
                 // Expected
             }
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(2));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
 
             genericService.Bar<int>();
 
-            Assert.AreEqual(3, transactionManager.TransactionCount);
-            Assert.AreEqual(2, transactionManager.CommittedCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(3));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(2));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
 
             try
             {
@@ -166,9 +166,9 @@ namespace Castle.Facilities.AutoTx.Tests
                 //exepected
             }
 
-            Assert.AreEqual(4, transactionManager.TransactionCount);
-            Assert.AreEqual(2, transactionManager.CommittedCount);
-            Assert.AreEqual(2, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(4));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(2));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(2));
         }
 
         [Test]
@@ -188,9 +188,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(3, transactionManager.TransactionCount);
-            Assert.AreEqual(3, transactionManager.CommittedCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(3));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(3));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
         }
 
         /// <summary>
@@ -215,9 +215,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(1, transactionManager.TransactionCount);
-            Assert.AreEqual(1, transactionManager.RolledBackCount);
-            Assert.AreEqual(0, transactionManager.CommittedCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(1));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
+            Assert.That(transactionManager.CommittedCount, Is.EqualTo(0));
         }
     }
 }

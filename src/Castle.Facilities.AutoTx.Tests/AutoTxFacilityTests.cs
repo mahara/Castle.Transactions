@@ -73,8 +73,8 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(2));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
         }
 
         [Test]

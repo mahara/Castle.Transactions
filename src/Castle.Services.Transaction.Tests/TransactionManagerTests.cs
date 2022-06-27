@@ -44,13 +44,13 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.RegisterSynchronization(sync);
 
-            Assert.AreEqual(DateTime.MinValue, sync.Before);
-            Assert.AreEqual(DateTime.MinValue, sync.After);
+            Assert.That(sync.Before, Is.EqualTo(DateTime.MinValue));
+            Assert.That(sync.After, Is.EqualTo(DateTime.MinValue));
 
             transaction.Commit();
 
-            Assert.IsTrue(sync.Before > DateTime.MinValue);
-            Assert.IsTrue(sync.After > DateTime.MinValue);
+            Assert.That(sync.Before, Is.GreaterThan(DateTime.MinValue));
+            Assert.That(sync.After, Is.GreaterThan(DateTime.MinValue));
         }
 
         [Test]
@@ -65,13 +65,13 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.RegisterSynchronization(sync);
 
-            Assert.AreEqual(DateTime.MinValue, sync.Before);
-            Assert.AreEqual(DateTime.MinValue, sync.After);
+            Assert.That(sync.Before, Is.EqualTo(DateTime.MinValue));
+            Assert.That(sync.After, Is.EqualTo(DateTime.MinValue));
 
             transaction.Rollback();
 
-            Assert.IsTrue(sync.Before > DateTime.MinValue);
-            Assert.IsTrue(sync.After > DateTime.MinValue);
+            Assert.That(sync.Before, Is.GreaterThan(DateTime.MinValue));
+            Assert.That(sync.After, Is.GreaterThan(DateTime.MinValue));
         }
 
         [Test]
@@ -105,14 +105,14 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Begin();
 
-            Assert.IsTrue(resource.Started);
+            Assert.That(resource.Started, Is.True);
             Assert.IsFalse(resource.Committed);
             Assert.IsFalse(resource.Rolledback);
 
             transaction.Commit();
 
-            Assert.IsTrue(resource.Started);
-            Assert.IsTrue(resource.Committed);
+            Assert.That(resource.Started, Is.True);
+            Assert.That(resource.Committed, Is.True);
             Assert.IsFalse(resource.Rolledback);
         }
 
@@ -132,14 +132,14 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Begin();
 
-            Assert.IsTrue(resource.Started);
+            Assert.That(resource.Started, Is.True);
             Assert.IsFalse(resource.Committed);
             Assert.IsFalse(resource.Rolledback);
 
             transaction.Rollback();
 
-            Assert.IsTrue(resource.Started);
-            Assert.IsTrue(resource.Rolledback);
+            Assert.That(resource.Started, Is.True);
+            Assert.That(resource.Rolledback, Is.True);
             Assert.IsFalse(resource.Committed);
         }
 
@@ -190,7 +190,7 @@ namespace Castle.Services.Transaction.Tests
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
 
-            Assert.IsTrue(transactionCreatedEventTriggered);
+            Assert.That(transactionCreatedEventTriggered, Is.True);
         }
 
         [Test]
@@ -218,7 +218,7 @@ namespace Castle.Services.Transaction.Tests
 
             _transactionManager.Dispose(transaction);
 
-            Assert.IsTrue(transactionDisposedEventTriggered);
+            Assert.That(transactionDisposedEventTriggered, Is.True);
         }
 
         [Test]
@@ -260,7 +260,7 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Commit();
 
-            Assert.IsTrue(transactionCommittedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.True);
             Assert.IsFalse(transactionRolledBackEventTriggered);
             Assert.IsFalse(transactionFailedEventTriggered);
         }
@@ -303,7 +303,7 @@ namespace Castle.Services.Transaction.Tests
             transaction.Rollback();
 
             Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsTrue(transactionRolledBackEventTriggered);
+            Assert.That(transactionRolledBackEventTriggered, Is.True);
             Assert.IsFalse(transactionFailedEventTriggered);
         }
 
@@ -355,7 +355,7 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.IsFalse(transactionCommittedEventTriggered);
             Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsTrue(transactionFailedEventTriggered);
+            Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.IsNotNull(exception);
             Assert.IsInstanceOf(typeof(CommitResourceException), exception);
@@ -409,7 +409,7 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.IsFalse(transactionCommittedEventTriggered);
             Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsTrue(transactionFailedEventTriggered);
+            Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.IsNotNull(exception);
             Assert.IsInstanceOf(typeof(RollbackResourceException), exception);
@@ -432,7 +432,7 @@ namespace Castle.Services.Transaction.Tests
             transaction.Rollback();
             _transactionManager.Dispose(transaction);
 
-            Assert.IsTrue(resource.WasDisposed);
+            Assert.That(resource.WasDisposed, Is.True);
         }
 
         [Test]

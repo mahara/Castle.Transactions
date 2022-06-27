@@ -14,23 +14,18 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+using System;
+
+using NUnit.Common;
+
+using NUnitLite;
+
+internal class Program
 {
-    using System.Threading;
-
-    using NUnit.Framework;
-
-    public class MiscTests
+    public static int Main(string[] args)
     {
-        [Test]
-        [Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
-        [Ignore("TODO: .NET Migration")]
-        public void CheckSTA()
-        {
-            var state = Thread.CurrentThread.GetApartmentState();
-
-            // This is somehow appear to be MTA.
-            Assert.That(state == ApartmentState.STA, Is.True);
-        }
+        var result = new AutoRun(typeof(Program).Assembly)
+                     .Execute(args, new ExtendedTextWrapper(Console.Out), Console.In);
+        return result;
     }
 }

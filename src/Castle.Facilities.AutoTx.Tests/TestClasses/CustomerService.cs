@@ -55,11 +55,11 @@ namespace Castle.Facilities.AutoTx.Tests
             var tm = _kernel.Resolve<ITransactionManager>();
 
             Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.AreEqual(Services.Transaction.TransactionStatus.Active, tm.CurrentTransaction.Status);
+            Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
 
             tm.CurrentTransaction.SetRollbackOnly();
 
-            Assert.AreEqual(Services.Transaction.TransactionStatus.Active, tm.CurrentTransaction.Status);
+            Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
         }
 
         [Transaction(TransactionScopeOption.Required)]

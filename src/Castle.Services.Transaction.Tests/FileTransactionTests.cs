@@ -193,17 +193,15 @@ namespace Castle.Services.Transaction.Tests
 
             using (new TransactionScope())
             {
-                using (var tx = new FileTransaction())
-                {
-                    tx.Begin();
+                using var tx = new FileTransaction();
+                tx.Begin();
 
-                    Assert.That(tx.IsAmbient);
+                Assert.That(tx.IsAmbient);
 
-                    tx.Rollback();
+                tx.Rollback();
 
-                    Assert.That(tx.IsRollbackOnlySet);
-                    Assert.That(tx.Status, Is.EqualTo(TransactionStatus.RolledBack));
-                }
+                Assert.That(tx.IsRollbackOnlySet);
+                Assert.That(tx.Status, Is.EqualTo(TransactionStatus.RolledBack));
             }
         }
 #endif

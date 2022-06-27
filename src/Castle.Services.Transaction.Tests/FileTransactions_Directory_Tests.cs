@@ -111,7 +111,7 @@ namespace Castle.Services.Transaction.Tests
                 Assert.IsFalse(dir.Exists("/hahaha"));
                 Assert.IsFalse(dir.Exists("another_non_existent"));
                 dir.Create("existing");
-                Assert.IsTrue(dir.Exists("existing"));
+                Assert.That(dir.Exists("existing"), Is.True);
             }
             // no commit
             Assert.IsFalse(Directory.Exists("existing"));
@@ -282,7 +282,7 @@ namespace Castle.Services.Transaction.Tests
             using var t = new FileTransaction();
             t.Begin();
 
-            Assert.IsTrue((t as IDirectoryAdapter).Delete(pr, true));
+            Assert.That((t as IDirectoryAdapter).Delete(pr, true), Is.True);
 
             t.Commit();
         }

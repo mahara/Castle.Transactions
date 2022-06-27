@@ -61,7 +61,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
             Assert.IsNotNull(meta);
-            Assert.AreEqual(3, meta.Methods.Count());
+            Assert.That(meta.Methods.Count(), Is.EqualTo(3));
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp2));
             Assert.IsNotNull(meta);
-            Assert.AreEqual(4, meta.Methods.Count());
+            Assert.That(meta.Methods.Count(), Is.EqualTo(4));
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp3));
             Assert.IsNotNull(meta);
-            Assert.AreEqual(2, meta.Methods.Count());
+            Assert.That(meta.Methods.Count(), Is.EqualTo(2));
         }
     }
 }

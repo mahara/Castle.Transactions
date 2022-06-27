@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction
     {
         private const string Key = "Castle.Services.Transaction.TLSActivity";
 
-        private readonly object _lockObj = new object();
+        private readonly object _lockObj = new();
         private static readonly LocalDataStoreSlot _dataSlot;
 
         static TLSActivityManager()
