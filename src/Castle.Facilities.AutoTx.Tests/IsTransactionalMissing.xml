@@ -4,6 +4,7 @@
   <facilities>
     <facility type="Castle.Facilities.AutoTx.AutoTxFacility, Castle.Facilities.AutoTx" />
   </facilities>
+
   <components>
     <component id="mycomp" type="Castle.Facilities.AutoTx.Tests.TransactionalComp1, Castle.Facilities.AutoTx.Tests">
       <transaction>
