@@ -16,6 +16,7 @@
 
 namespace Castle.Services.Transaction
 {
+#if NETFRAMEWORK
     using System;
     using System.Runtime.Remoting.Messaging;
 
@@ -31,7 +32,7 @@ namespace Castle.Services.Transaction
             CallContext.SetData(Key, null);
         }
 
-        #region MarshalByRefObject
+    #region MarshalByRefObject
 
         /// <summary>
         /// Obtains a lifetime service object to control the lifetime policy for this instance.
@@ -45,7 +46,7 @@ namespace Castle.Services.Transaction
             return null;
         }
 
-        #endregion
+    #endregion
 
         /// <summary>
         /// Gets the current activity.
@@ -67,4 +68,5 @@ namespace Castle.Services.Transaction
             }
         }
     }
+#endif
 }

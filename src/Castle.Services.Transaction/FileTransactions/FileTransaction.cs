@@ -260,10 +260,8 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            using (var handle = FindFirstFileTransacted(filePath, false))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(filePath, false);
+            return !handle.IsInvalid;
         }
 
         /// <summary>
@@ -282,10 +280,8 @@ namespace Castle.Services.Transaction
 
             path = CleanPathEnd(path);
 
-            using (var handle = FindFirstFileTransacted(path, true))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(path, true);
+            return !handle.IsInvalid;
         }
 
         string IDirectoryAdapter.GetFullPath(string dir)
@@ -405,10 +401,8 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
+            return reader.ReadToEnd();
         }
 
         void IFileAdapter.Move(string filePath, string newFilePath)
@@ -443,10 +437,8 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return reader.ReadToEnd();
         }
 
         /// <summary>
@@ -462,10 +454,8 @@ namespace Castle.Services.Transaction
 
             var exists = ((IFileAdapter) this).Exists(path);
             var mode = exists ? FileMode.Truncate : FileMode.OpenOrCreate;
-            using (var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None)))
-            {
-                writer.Write(contents);
-            }
+            using var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None));
+            writer.Write(contents);
         }
 
         #endregion
@@ -501,7 +491,9 @@ namespace Castle.Services.Transaction
             GC.SuppressFinalize(this);
         }
 
+#if NETFRAMEWORK
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+#endif
         private void Dispose(bool disposing)
         {
             // No unmanaged code here, just return.
@@ -610,20 +602,13 @@ namespace Castle.Services.Transaction
         /// <returns></returns>
         private static NativeFileAccess TranslateFileAccess(FileAccess access)
         {
-            switch (access)
+            return access switch
             {
-                case FileAccess.Read:
-                    return NativeFileAccess.GenericRead;
-
-                case FileAccess.Write:
-                    return NativeFileAccess.GenericWrite;
-
-                case FileAccess.ReadWrite:
-                    return NativeFileAccess.GenericRead | NativeFileAccess.GenericWrite;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(access));
-            }
+                FileAccess.Read => NativeFileAccess.GenericRead,
+                FileAccess.Write => NativeFileAccess.GenericWrite,
+                FileAccess.ReadWrite => NativeFileAccess.GenericRead | NativeFileAccess.GenericWrite,
+                _ => throw new ArgumentOutOfRangeException(nameof(access)),
+            };
         }
 
         /// <summary>
@@ -700,7 +685,7 @@ namespace Castle.Services.Transaction
 
                     if ((findData.dwFileAttributes & (uint) FileAttributes.Directory) != 0)
                     {
-                        if (findData.cFileName != "." && findData.cFileName != "..")
+                        if (findData.cFileName is not "." and not "..")
                         {
                             ok &= DeleteRecursive(subPath);
                         }

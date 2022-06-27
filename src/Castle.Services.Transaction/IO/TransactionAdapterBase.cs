@@ -72,7 +72,7 @@ namespace Castle.Services.Transaction.IO
             {
                 foreach (var resource in TransactionManager.CurrentTransaction.Resources())
                 {
-                    if (!(resource is FileResourceAdapter))
+                    if (resource is not FileResourceAdapter)
                     {
                         continue;
                     }

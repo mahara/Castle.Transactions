@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="..\..\buildscripts\common.props"></Import>
@@ -24,12 +24,9 @@
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Castle.Windsor" Version="5.1.2" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='net472'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
-    <DefineConstants>$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net48'">
+  </ItemGroup>
 
 </Project>

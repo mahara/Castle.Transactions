@@ -30,7 +30,11 @@ namespace Castle.Services.Transaction.Tests
         [SetUp]
         public void SetUp()
         {
+#if NETFRAMEWORK
             _currentDirectory = Path.GetPathWithoutLastBit(Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase));
+#else
+            _currentDirectory = Path.GetPathWithoutLastBit(AppDomain.CurrentDomain.BaseDirectory);
+#endif
         }
 
         [Test]
@@ -38,6 +42,16 @@ namespace Castle.Services.Transaction.Tests
         {
             var adapter = new DirectoryAdapter(new MapPathImpl(), false, null);
             Assert.That(adapter.UseTransactions);
+        }
+
+        [Test]
+        public void CanGetLocalFile()
+        {
+            // "C:\Users\xyz\Documents\dev\logibit_cms\scm\trunk\Tests\Henrik.Cms.Tests\TestGlobals.cs";
+            var d = new DirectoryAdapter(new MapPathImpl(), false, null);
+            var path = Path.GetPathWithoutLastBit(d.MapPath("~/../../TestGlobals.cs")); // get directory instead
+            Console.WriteLine(path);
+            Assert.That(d.Exists(path));
         }
 
         //[Test]
@@ -50,16 +64,6 @@ namespace Castle.Services.Transaction.Tests
         //    Assert.IsFalse(d.IsInAllowedDir(@"\\.\dev0"));
         //    Assert.IsFalse(d.IsInAllowedDir(@"\\?\UNC\/"));
         //}
-
-        [Test]
-        public void CanGetLocalFile()
-        {
-            // "C:\Users\xyz\Documents\dev\logibit_cms\scm\trunk\Tests\Henrik.Cms.Tests\TestGlobals.cs";
-            var d = new DirectoryAdapter(new MapPathImpl(), false, null);
-            var path = Path.GetPathWithoutLastBit(d.MapPath("~/../../TestGlobals.cs")); // get directory instead
-            Console.WriteLine(path);
-            Assert.That(d.Exists(path));
-        }
 
         //[Test]
         //public void IsInAllowedDir_ReturnsTrueForInside()

@@ -349,7 +349,7 @@ namespace Castle.Services.Transaction.IO
                 return string.Empty;
             }
 
-            return FolderAndFiles.Substring(other.FolderAndFiles.Length).TrimStart(Path.GetDirectorySeparatorChars());
+            return FolderAndFiles[other.FolderAndFiles.Length..].TrimStart(Path.GetDirectorySeparatorChars());
         }
     }
 }

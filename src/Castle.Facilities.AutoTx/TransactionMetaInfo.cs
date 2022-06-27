@@ -27,7 +27,7 @@ namespace Castle.Facilities.AutoTx
     /// </summary>
     public class TransactionMetaInfo : MarshalByRefObject
     {
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private readonly Dictionary<MethodInfo, TransactionAttribute> _methodToAttribute;
         private readonly HashSet<MethodInfo> _injectMethods;
         private readonly Dictionary<MethodInfo, string> _notTransactionalCache;
@@ -42,22 +42,13 @@ namespace Castle.Facilities.AutoTx
             _notTransactionalCache = new Dictionary<MethodInfo, string>();
         }
 
-        #region MarshalByRefObject overrides
-
-        /// <summary>
-        /// Obtains a lifetime service object to control the lifetime policy for this instance.
-        /// </summary>
-        /// <returns>
-        /// An object of type <see cref="T:System.Runtime.Remoting.Lifetime.ILease" /> used to control the lifetime policy for this instance. This is the current lifetime service object for this instance if one exists; otherwise, a new lifetime service object initialized to the value of the <see cref="P:System.Runtime.Remoting.Lifetime.LifetimeServices.LeaseManagerPollTime" /> property.
-        /// </returns>
-        /// <exception cref="T:System.Security.SecurityException">The immediate caller does not have infrastructure permission.
-        ///                 </exception><filterpriority>2</filterpriority><PermissionSet><IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="RemotingConfiguration, Infrastructure" /></PermissionSet>
+#if NET
+        [Obsolete]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;
         }
-
-        #endregion
 
         /// <summary>
         /// Adds a method info and the corresponding transaction attribute.

@@ -185,7 +185,7 @@ namespace Castle.Services.Transaction
     /// </summary>
     internal struct Error
     {
-        public static Error OK = new Error(true, null);
+        public static Error OK = new(true, null);
 
         private readonly Exception _exception;
         private readonly bool _success;

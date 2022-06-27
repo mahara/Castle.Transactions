@@ -31,7 +31,7 @@ namespace Castle.Facilities.AutoTx.Tests
         [Test]
         public void IsTransactionalMissing()
         {
-            void Method()
+            static void Method()
             {
                 new WindsorContainer("IsTransactionalMissing.xml");
             }
@@ -67,7 +67,7 @@ namespace Castle.Facilities.AutoTx.Tests
         [Test]
         public void HasInvalidMethod()
         {
-            void Method()
+            static void Method()
             {
                 new WindsorContainer("HasInvalidMethod.xml");
             }

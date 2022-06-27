@@ -132,7 +132,7 @@ namespace Castle.Services.Transaction.IO
                 return string.Empty;
             }
 
-            return path.Substring(GetPathRoot(path).Length);
+            return path[GetPathRoot(path).Length..];
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Castle.Services.Transaction.IO
 
             for (var i = 0; i < pathWithAlternatingChars.Length; i++)
             {
-                if ((pathWithAlternatingChars[i] == '\\') || (pathWithAlternatingChars[i] == '/'))
+                if (pathWithAlternatingChars[i] is '\\' or '/')
                 {
                     sb.Append(DirectorySeparatorChar);
                 }
@@ -194,12 +194,12 @@ namespace Castle.Services.Transaction.IO
 
             if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
             {
-                return System.IO.Path.GetFullPath(path.Substring(4));
+                return System.IO.Path.GetFullPath(path[4..]);
             }
 
             if (path.StartsWith("\\\\?\\UNC\\"))
             {
-                return System.IO.Path.GetFullPath(path.Substring(8));
+                return System.IO.Path.GetFullPath(path[8..]);
             }
 
             if (path.StartsWith("file:///"))
@@ -254,7 +254,7 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentException($"Could not find a path separator character in the path: \"{path}\".");
             }
 
-            var result = path.Substring(0, endsWithSlash ? secondLast : last);
+            var result = path[..(endsWithSlash ? secondLast : last)];
             return result == string.Empty ? new string(lastType, 1) : result;
         }
 
@@ -282,7 +282,7 @@ namespace Castle.Services.Transaction.IO
             // ReSharper is wrong that you can transform this to a ternary operator.
             if ((strIndex = nonRoot.LastIndexOfAny(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar })) != -1)
             {
-                return nonRoot.Substring(strIndex + 1);
+                return nonRoot[(strIndex + 1)..];
             }
 
             return nonRoot;
@@ -318,7 +318,7 @@ namespace Castle.Services.Transaction.IO
             var fn = GetFileName(path);
             var lastPeriod = fn.LastIndexOf('.');
 
-            return lastPeriod == -1 ? string.Empty : fn.Substring(lastPeriod + 1);
+            return lastPeriod == -1 ? string.Empty : fn[(lastPeriod + 1)..];
         }
 
         public static string GetFileNameWithoutExtension(string path)
@@ -331,7 +331,7 @@ namespace Castle.Services.Transaction.IO
             var filename = GetFileName(path);
             var lastPeriod = filename.LastIndexOf('.');
 
-            return lastPeriod == -1 ? filename : filename.Substring(0, lastPeriod);
+            return lastPeriod == -1 ? filename : filename[..lastPeriod];
         }
 
         public static string GetRandomFileName()

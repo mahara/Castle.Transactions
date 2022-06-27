@@ -30,9 +30,9 @@ namespace Castle.Services.Transaction.Tests
     {
         #region Setup/Teardown
 
-        private static readonly object _serializer = new object();
+        private static readonly object _serializer = new();
 
-        private readonly List<string> _infosCreated = new List<string>();
+        private readonly List<string> _infosCreated = new();
         private string _dllPath;
 
         [SetUp]
@@ -127,14 +127,12 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var tx = new FileTransaction("Not distributed transaction"))
-            {
-                tx.Begin();
+            using var tx = new FileTransaction("Not distributed transaction");
+            tx.Begin();
 
-                Assert.That(tx.IsAmbient, Is.False);
+            Assert.That(tx.IsAmbient, Is.False);
 
-                tx.Commit();
-            }
+            tx.Commit();
         }
 
         [Test]
@@ -150,16 +148,14 @@ namespace Castle.Services.Transaction.Tests
             // From http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
             // An attempt to open a search with a trailing backslash always fails.
             // --> So I need to make it succeed.
-            using (var t = new FileTransaction())
-            {
-                t.Begin();
+            using var t = new FileTransaction();
+            t.Begin();
 
-                var dir = t as IDirectoryAdapter;
-                dir.Create("something");
+            var dir = t as IDirectoryAdapter;
+            dir.Create("something");
 
-                Assert.That(dir.Exists("something"));
-                Assert.That(dir.Exists("something\\"));
-            }
+            Assert.That(dir.Exists("something"));
+            Assert.That(dir.Exists("something\\"));
         }
 
         [Test]
@@ -199,18 +195,16 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var tx = new FileTransaction("s"))
-            {
-                tx.Begin();
+            using var tx = new FileTransaction("s");
+            tx.Begin();
 
-                Assert.That((tx as IDirectoryAdapter).Exists("something"), Is.False);
+            Assert.That((tx as IDirectoryAdapter).Exists("something"), Is.False);
 
-                (tx as IDirectoryAdapter).Create("something");
+            (tx as IDirectoryAdapter).Create("something");
 
-                Assert.That((tx as IDirectoryAdapter).Exists("something"));
+            Assert.That((tx as IDirectoryAdapter).Exists("something"));
 
-                tx.Rollback();
-            }
+            tx.Rollback();
         }
 
         [Test]
@@ -253,15 +247,13 @@ namespace Castle.Services.Transaction.Tests
             var dir = _dllPath.CombineAssert("testing");
 
             // 2. test it
-            using (var t = new FileTransaction("Can delete empty directory"))
-            {
-                IDirectoryAdapter da = t;
-                t.Begin();
+            using var t = new FileTransaction("Can delete empty directory");
+            IDirectoryAdapter da = t;
+            t.Begin();
 
-                Assert.That(da.Delete(dir, false), "Successfully deleted.");
+            Assert.That(da.Delete(dir, false), "Successfully deleted.");
 
-                t.Commit();
-            }
+            t.Commit();
         }
 
         [Test]
@@ -287,14 +279,12 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllLines(ExtensionMethods.Combine(pr, "two").Combine("filethree"), new[] { "three", "second line" });
 
             // 3. test
-            using (var t = new FileTransaction())
-            {
-                t.Begin();
+            using var t = new FileTransaction();
+            t.Begin();
 
-                Assert.IsTrue((t as IDirectoryAdapter).Delete(pr, true));
+            Assert.IsTrue((t as IDirectoryAdapter).Delete(pr, true));
 
-                t.Commit();
-            }
+            t.Commit();
         }
 
         [Test]
@@ -313,23 +303,21 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllText(file, "hello");
 
             // 2. test it
-            using (var t = new FileTransaction("Can not delete non-empty directory"))
-            {
-                IDirectoryAdapter da = t;
-                t.Begin();
+            using var t = new FileTransaction("Can not delete non-empty directory");
+            IDirectoryAdapter da = t;
+            t.Begin();
 
-                Assert.That(da.Delete(dir, false),
-                            Is.False,
-                            "Did not delete non-empty dir.");
+            Assert.That(da.Delete(dir, false),
+                        Is.False,
+                        "Did not delete non-empty dir.");
 
-                IFileAdapter fa = t;
-                fa.Delete(file);
+            IFileAdapter fa = t;
+            fa.Delete(file);
 
-                Assert.That(da.Delete(dir, false),
-                            "After deleting the file in the folder, the folder is also deleted.");
+            Assert.That(da.Delete(dir, false),
+                        "After deleting the file in the folder, the folder is also deleted.");
 
-                t.Commit();
-            }
+            t.Commit();
         }
     }
 }

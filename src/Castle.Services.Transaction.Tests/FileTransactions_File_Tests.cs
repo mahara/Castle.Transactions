@@ -31,9 +31,9 @@ namespace Castle.Services.Transaction.Tests
     {
         #region Setup/Teardown
 
-        private static readonly object _serializer = new object();
+        private static readonly object _serializer = new();
 
-        private readonly List<string> _infosCreated = new List<string>();
+        private readonly List<string> _infosCreated = new();
         private string _dllPath;
         private string _testFixturePath;
 

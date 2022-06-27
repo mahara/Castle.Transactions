@@ -137,11 +137,11 @@ namespace Castle.Services.Transaction
             Status = TransactionStatus.Active;
 
             Logger.TryLogFail(InnerBegin)
-                  .Exception(x =>
+                  .Exception(ex =>
                              {
                                  _canCommit = false;
 
-                                 throw new TransactionException("Could not begin transaction.", x);
+                                 throw new TransactionException("Could not begin transaction.", ex);
                              })
                   .Success(() => _canCommit = true);
 
@@ -243,7 +243,7 @@ namespace Castle.Services.Transaction
             _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
             Logger.TryLogFail(InnerRollback)
-                  .Exception(x => toThrow = x);
+                  .Exception(ex => toThrow = ex);
 
             try
             {

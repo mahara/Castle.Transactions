@@ -71,7 +71,7 @@ namespace Castle.Services.Transaction.IO
 
             if (path[0] == '~')
             {
-                path = path.Substring(1);
+                path = path[1..];
             }
 
             if (path == string.Empty)
@@ -81,7 +81,7 @@ namespace Castle.Services.Transaction.IO
 
             if (Path.DirectorySeparatorChar == path[0])
             {
-                path = path.Substring(1);
+                path = path[1..];
             }
 
             return path == string.Empty ?

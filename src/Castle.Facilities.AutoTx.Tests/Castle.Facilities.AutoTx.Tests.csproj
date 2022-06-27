@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="..\..\buildscripts\common.props"></Import>
@@ -24,8 +24,9 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='net472'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net48'">
   </ItemGroup>
 
   <ItemGroup>
@@ -38,9 +39,5 @@
     <ProjectReference Include="..\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj" />
     <ProjectReference Include="..\Castle.Services.Transaction\Castle.Services.Transaction.csproj" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net472'">
-    <DefineConstants>$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
 
 </Project>
