@@ -24,12 +24,12 @@ namespace Castle.Services.Transaction.Tests
     {
         [Test]
         [Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
-        [Ignore("TODO: .NET Migration")]
+        [Ignore("TODO: Thread.CurrentThread.GetApartmentState() = MTA???")]
         public void CheckSTA()
         {
             var state = Thread.CurrentThread.GetApartmentState();
 
-            // This is somehow appear to be MTA.
+            // TODO: This somehow appears to be MTA in test projects.
             Assert.That(state, Is.EqualTo(ApartmentState.STA));
         }
     }
