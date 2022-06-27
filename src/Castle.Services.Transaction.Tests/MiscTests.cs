@@ -30,7 +30,7 @@ namespace Castle.Services.Transaction.Tests
             var state = Thread.CurrentThread.GetApartmentState();
 
             // This is somehow appear to be MTA.
-            Assert.That(state == ApartmentState.STA, Is.True);
+            Assert.That(state, Is.EqualTo(ApartmentState.STA));
         }
     }
 }

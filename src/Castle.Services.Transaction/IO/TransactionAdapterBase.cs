@@ -25,27 +25,28 @@ namespace Castle.Services.Transaction.IO
     /// </summary>
     public abstract class TransactionAdapterBase
     {
-        private readonly bool _allowOutsideSpecifiedFolder;
-        private readonly string _specifiedFolder;
+        private readonly bool _allowOutsideSpecifiedDirectory;
+        private readonly string _specifiedDirectory;
 
-        protected TransactionAdapterBase(bool constrainToSpecifiedDir,
-                                         string specifiedDir)
+        protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
+                                         string specifiedDirectory)
         {
-            if (constrainToSpecifiedDir && specifiedDir == null)
+            if (constrainToSpecifiedDirectory && specifiedDirectory == null)
             {
-                throw new ArgumentNullException(nameof(specifiedDir));
+                throw new ArgumentNullException(nameof(specifiedDirectory));
             }
 
-            if (constrainToSpecifiedDir && specifiedDir == string.Empty)
+            if (constrainToSpecifiedDirectory && specifiedDirectory == string.Empty)
             {
                 throw new ArgumentException("The specifified directory was empty.");
             }
 
-            _allowOutsideSpecifiedFolder = !constrainToSpecifiedDir;
-            _specifiedFolder = specifiedDir;
+            _allowOutsideSpecifiedDirectory = !constrainToSpecifiedDirectory;
+            _specifiedDirectory = specifiedDirectory;
         }
 
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } =
+            NullLogger.Instance;
 
         /// <summary>
         /// Gets the transaction manager, if there is one, or sets it.
@@ -55,7 +56,8 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Gets/sets whether to use transactions.
         /// </summary>
-        public bool UseTransactions { get; set; } = true;
+        public bool UseTransactions { get; set; } =
+            true;
 
         public bool OnlyJoinExisting { get; set; }
 
@@ -96,7 +98,7 @@ namespace Castle.Services.Transaction.IO
 
         protected internal bool IsInAllowedDir(string path)
         {
-            if (_allowOutsideSpecifiedFolder)
+            if (_allowOutsideSpecifiedDirectory)
             {
                 return true;
             }
@@ -109,7 +111,7 @@ namespace Castle.Services.Transaction.IO
                 return true;
             }
 
-            var specifiedPath = PathInfo.Parse(_specifiedFolder);
+            var specifiedPath = PathInfo.Parse(_specifiedDirectory);
 
             // they must be on the same drive.
             if (!string.IsNullOrEmpty(tentativePath.DriveLetter)
@@ -124,13 +126,12 @@ namespace Castle.Services.Transaction.IO
 
         protected void AssertAllowed(string path)
         {
-            if (_allowOutsideSpecifiedFolder)
+            if (_allowOutsideSpecifiedDirectory)
             {
                 return;
             }
 
             var fullPath = Path.GetFullPath(path);
-
             if (!IsInAllowedDir(fullPath))
             {
                 throw new UnauthorizedAccessException(

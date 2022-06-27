@@ -99,21 +99,21 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Enlist(resource);
 
-            Assert.IsFalse(resource.Started);
-            Assert.IsFalse(resource.Committed);
-            Assert.IsFalse(resource.Rolledback);
+            Assert.That(resource.Started, Is.False);
+            Assert.That(resource.Committed, Is.False);
+            Assert.That(resource.Rolledback, Is.False);
 
             transaction.Begin();
 
             Assert.That(resource.Started, Is.True);
-            Assert.IsFalse(resource.Committed);
-            Assert.IsFalse(resource.Rolledback);
+            Assert.That(resource.Committed, Is.False);
+            Assert.That(resource.Rolledback, Is.False);
 
             transaction.Commit();
 
             Assert.That(resource.Started, Is.True);
             Assert.That(resource.Committed, Is.True);
-            Assert.IsFalse(resource.Rolledback);
+            Assert.That(resource.Rolledback, Is.False);
         }
 
         [Test]
@@ -126,21 +126,21 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Enlist(resource);
 
-            Assert.IsFalse(resource.Started);
-            Assert.IsFalse(resource.Committed);
-            Assert.IsFalse(resource.Rolledback);
+            Assert.That(resource.Started, Is.False);
+            Assert.That(resource.Committed, Is.False);
+            Assert.That(resource.Rolledback, Is.False);
 
             transaction.Begin();
 
             Assert.That(resource.Started, Is.True);
-            Assert.IsFalse(resource.Committed);
-            Assert.IsFalse(resource.Rolledback);
+            Assert.That(resource.Committed, Is.False);
+            Assert.That(resource.Rolledback, Is.False);
 
             transaction.Rollback();
 
             Assert.That(resource.Started, Is.True);
             Assert.That(resource.Rolledback, Is.True);
-            Assert.IsFalse(resource.Committed);
+            Assert.That(resource.Committed, Is.False);
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace Castle.Services.Transaction.Tests
                 transactionCreatedEventTriggered = true;
             };
 
-            Assert.IsFalse(transactionCreatedEventTriggered);
+            Assert.That(transactionCreatedEventTriggered, Is.False);
 
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
@@ -206,15 +206,15 @@ namespace Castle.Services.Transaction.Tests
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
 
-            Assert.IsFalse(transactionDisposedEventTriggered);
+            Assert.That(transactionDisposedEventTriggered, Is.False);
 
             transaction.Begin();
 
-            Assert.IsFalse(transactionDisposedEventTriggered);
+            Assert.That(transactionDisposedEventTriggered, Is.False);
 
             transaction.Commit();
 
-            Assert.IsFalse(transactionDisposedEventTriggered);
+            Assert.That(transactionDisposedEventTriggered, Is.False);
 
             _transactionManager.Dispose(transaction);
 
@@ -248,21 +248,21 @@ namespace Castle.Services.Transaction.Tests
 
             transaction.Enlist(resource);
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Begin();
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Commit();
 
             Assert.That(transactionCommittedEventTriggered, Is.True);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
         }
 
         [Test]
@@ -290,21 +290,21 @@ namespace Castle.Services.Transaction.Tests
             var resource = new ResourceImpl();
             transaction.Enlist(resource);
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Begin();
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Rollback();
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
             Assert.That(transactionRolledBackEventTriggered, Is.True);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionFailedEventTriggered, Is.False);
         }
 
         [Test]
@@ -329,18 +329,18 @@ namespace Castle.Services.Transaction.Tests
 
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
-            ResourceImpl resource = new ThrowsExceptionResourceImpl(true, false);
+            ResourceImpl resource = new ThrowsExceptionResource(true, false);
             transaction.Enlist(resource);
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Begin();
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             Services.Transaction.TransactionException exception = null;
 
@@ -353,8 +353,8 @@ namespace Castle.Services.Transaction.Tests
                 exception = ex;
             }
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
             Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.IsNotNull(exception);
@@ -383,18 +383,18 @@ namespace Castle.Services.Transaction.Tests
 
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
-            ResourceImpl resource = new ThrowsExceptionResourceImpl(false, true);
+            ResourceImpl resource = new ThrowsExceptionResource(false, true);
             transaction.Enlist(resource);
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             transaction.Begin();
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
-            Assert.IsFalse(transactionFailedEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
+            Assert.That(transactionFailedEventTriggered, Is.False);
 
             Services.Transaction.TransactionException exception = null;
 
@@ -407,8 +407,8 @@ namespace Castle.Services.Transaction.Tests
                 exception = ex;
             }
 
-            Assert.IsFalse(transactionCommittedEventTriggered);
-            Assert.IsFalse(transactionRolledBackEventTriggered);
+            Assert.That(transactionCommittedEventTriggered, Is.False);
+            Assert.That(transactionRolledBackEventTriggered, Is.False);
             Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.IsNotNull(exception);

@@ -66,7 +66,7 @@ namespace Castle.Services.Transaction.Tests
             child1.Begin();
 
             var innerRoot = _transactionManager.CreateTransaction(TransactionScopeOption.RequiresNew, IsolationLevel.Unspecified);
-            Assert.IsFalse(innerRoot is ChildTransaction);
+            Assert.That(innerRoot is ChildTransaction, Is.False);
             innerRoot.Begin();
 
             var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
@@ -185,7 +185,7 @@ namespace Castle.Services.Transaction.Tests
         public void WhenOneResourceFails_OtherResourcesAreNotCommitted()
         {
             var first = new ResourceImpl();
-            var rFailed = new ThrowsExceptionResourceImpl(true, false);
+            var rFailed = new ThrowsExceptionResource(true, false);
             var rSuccess = new ResourceImpl();
 
             var t = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);

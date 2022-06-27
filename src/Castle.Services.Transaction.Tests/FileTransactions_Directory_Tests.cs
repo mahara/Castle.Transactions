@@ -75,11 +75,12 @@ namespace Castle.Services.Transaction.Tests
         #endregion
 
         [Test]
-        public void NoCommit_MeansNoDirectory()
+        public void NoCommitMeansNoDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
                 Assert.Ignore("TxF not supported");
+
                 return;
             }
 
@@ -96,29 +97,33 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void NonExistentDir()
+        public void NonExistentDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
                 Assert.Ignore("TxF not supported");
+
                 return;
             }
 
-            using (var t = new FileTransaction())
+            using (var tx = new FileTransaction())
             {
-                t.Begin();
-                var dir = t as IDirectoryAdapter;
-                Assert.IsFalse(dir.Exists("/hahaha"));
-                Assert.IsFalse(dir.Exists("another_non_existent"));
+                tx.Begin();
+                var dir = tx as IDirectoryAdapter;
+
+                Assert.That(dir.Exists("/hahaha"), Is.False);
+                Assert.That(dir.Exists("another_non_existent"), Is.False);
+
                 dir.Create("existing");
+
                 Assert.That(dir.Exists("existing"), Is.True);
             }
-            // no commit
-            Assert.IsFalse(Directory.Exists("existing"));
+            // No commit.
+            Assert.That(Directory.Exists("existing"), Is.False);
         }
 
         [Test, Description("We are not in a distributed transaction if there is no transaction scope.")]
-        public void NotUsingTransactionScope_IsNotDistributed_AboveNegated()
+        public void NotUsingTransactionScopeIsNotDistributedAboveNegated()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
@@ -233,6 +238,7 @@ namespace Castle.Services.Transaction.Tests
 
             Directory.Delete(directoryPath);
         }
+
         [Test]
         public void CanDelete_NonRecursively_EmptyDir()
         {
@@ -243,10 +249,10 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            // 1. create dir
+            // 1. Create directory
             var dir = _dllPath.CombineAssert("testing");
 
-            // 2. test it
+            // 2. Test it
             using var t = new FileTransaction("Can delete empty directory");
             IDirectoryAdapter da = t;
             t.Begin();
@@ -303,21 +309,21 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllText(file, "hello");
 
             // 2. test it
-            using var t = new FileTransaction("Can not delete non-empty directory");
-            IDirectoryAdapter da = t;
-            t.Begin();
+            using var tx = new FileTransaction("Can not delete non-empty directory");
+            IDirectoryAdapter da = tx;
+            tx.Begin();
 
             Assert.That(da.Delete(dir, false),
                         Is.False,
                         "Did not delete non-empty dir.");
 
-            IFileAdapter fa = t;
+            IFileAdapter fa = tx;
             fa.Delete(file);
 
             Assert.That(da.Delete(dir, false),
                         "After deleting the file in the folder, the folder is also deleted.");
 
-            t.Commit();
+            tx.Commit();
         }
     }
 }

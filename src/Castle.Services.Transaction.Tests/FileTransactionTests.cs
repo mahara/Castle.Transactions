@@ -39,7 +39,6 @@ namespace Castle.Services.Transaction.Tests
 
         private readonly List<string> _infosCreated = new();
         private string _dllPath;
-        private string _testFixturePath;
 
         [SetUp]
         public void CleanOutListEtc()
@@ -53,7 +52,6 @@ namespace Castle.Services.Transaction.Tests
         public void Setup()
         {
             _dllPath = TestContext.CurrentContext.TestDirectory;
-            _testFixturePath = _dllPath.Combine("Kernel");
         }
 
         [TearDown]
@@ -147,7 +145,7 @@ namespace Castle.Services.Transaction.Tests
                 {
                 }
 
-                Assert.That(tx.Status == TransactionStatus.RolledBack);
+                Assert.That(tx.Status, Is.EqualTo(TransactionStatus.RolledBack));
             }
             catch (RollbackResourceException rex)
             {
@@ -230,9 +228,10 @@ namespace Castle.Services.Transaction.Tests
 
         #endregion
 
-        #region Region Ignored
+        #region Ignored Tests
 
-        [Test, Ignore("Not completely implemented.")]
+        [Test]
+        [Ignore("Not completely implemented.")]
         public void CanMoveDirectory()
         {
             var dir1 = _dllPath.CombineAssert("a");
@@ -250,7 +249,7 @@ namespace Castle.Services.Transaction.Tests
 
             (tx as IDirectoryAdapter).Move(dir1, dir2);
 
-            Assert.IsFalse(Directory.Exists(dir2), "The directory should not yet exist.");
+            Assert.That(Directory.Exists(dir2), Is.False, "The directory should not yet exist.");
 
             tx.Commit();
 
@@ -262,11 +261,12 @@ namespace Castle.Services.Transaction.Tests
         }
 
         // http://msdn.microsoft.com/en-us/library/aa365536%28VS.85%29.aspx
-        [Test, Ignore("MSDN is wrong in saying: \"If a non-transacted thread modifies the file before the transacted thread does, "
-                      + "and the file is still open when the transaction attempts to open it, "
-                      + "the transaction receives the error ERROR_TRANSACTIONAL_CONFLICT.\"... "
-                      + "This test proves the error in this statement. Actually, from testing the rest of the code, it's clear that "
-                      + "the error comes for the opposite; when a transacted thread modifies before a non-transacted thread.")]
+        [Test]
+        [Ignore("MSDN is wrong in saying: \"If a non-transacted thread modifies the file before the transacted thread does, "
+                + "and the file is still open when the transaction attempts to open it, "
+                + "the transaction receives the error ERROR_TRANSACTIONAL_CONFLICT.\"... "
+                + "This test proves the error in this statement. Actually, from testing the rest of the code, it's clear that "
+                + "the error comes for the opposite; when a transacted thread modifies before a non-transacted thread.")]
         public void TwoTransactionsSameNameFirstSleeps()
         {
             var t1_started = new ManualResetEvent(false);
@@ -274,17 +274,18 @@ namespace Castle.Services.Transaction.Tests
             var t2_done = new ManualResetEvent(false);
             Exception exception = null;
 
-            // non transacted thread
+            // Non-transacted thread.
             var t1 = new Thread(() =>
             {
                 try
                 {
-                    // modifies the file
+                    // Modifies the file.
                     using var fs = File.OpenWrite("abb");
                     Console.WriteLine("t2 start");
                     Console.Out.Flush();
 
-                    t2_started.Set(); // before the transacted thread does
+                    // Before the transacted thread does.
+                    t2_started.Set();
 
                     Console.WriteLine("t2 wait for t1 to start");
                     Console.Out.Flush();

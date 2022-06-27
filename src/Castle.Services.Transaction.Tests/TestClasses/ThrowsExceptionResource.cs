@@ -18,12 +18,12 @@ namespace Castle.Services.Transaction.Tests
 {
     using System;
 
-    public class ThrowsExceptionResourceImpl : ResourceImpl
+    public class ThrowsExceptionResource : ResourceImpl
     {
         private readonly bool _throwOnCommit = false;
         private readonly bool _throwOnRollback = false;
 
-        public ThrowsExceptionResourceImpl(bool throwOnCommit, bool throwOnRollback)
+        public ThrowsExceptionResource(bool throwOnCommit, bool throwOnRollback)
         {
             _throwOnCommit = throwOnCommit;
             _throwOnRollback = throwOnRollback;

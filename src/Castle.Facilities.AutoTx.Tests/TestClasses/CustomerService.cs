@@ -68,7 +68,7 @@ namespace Castle.Facilities.AutoTx.Tests
             var tm = _kernel.Resolve<ITransactionManager>();
 
             Assert.IsNotNull(tm.CurrentTransaction);
-            Assert.IsFalse(tm.CurrentTransaction.IsReadOnly);
+            Assert.That(tm.CurrentTransaction.IsReadOnly, Is.False);
         }
 
 

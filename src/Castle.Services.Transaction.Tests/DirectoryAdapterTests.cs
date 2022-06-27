@@ -41,6 +41,7 @@ namespace Castle.Services.Transaction.Tests
         public void ConstructorWorksIfNullAndNotConstraint()
         {
             var adapter = new DirectoryAdapter(new MapPathImpl(), false, null);
+
             Assert.That(adapter.UseTransactions);
         }
 
@@ -48,41 +49,43 @@ namespace Castle.Services.Transaction.Tests
         public void CanGetLocalFile()
         {
             // "C:\Users\xyz\Documents\dev\logibit_cms\scm\trunk\Tests\Henrik.Cms.Tests\TestGlobals.cs";
-            var d = new DirectoryAdapter(new MapPathImpl(), false, null);
-            var path = Path.GetPathWithoutLastBit(d.MapPath("~/../../TestGlobals.cs")); // get directory instead
+            var adapter = new DirectoryAdapter(new MapPathImpl(), false, null);
+            var path = Path.GetPathWithoutLastBit(adapter.MapPath("~/../../TestGlobals.cs")); // get directory instead
+
             Console.WriteLine(path);
-            Assert.That(d.Exists(path));
+            Assert.That(adapter.Exists(path));
         }
 
         //[Test]
-        //public void IsInAllowedDir_ReturnsFalseIfConstraint_AndOutside()
+        //public void IsInAllowedDirReturnsFalseIfConstraintAndOutside()
         //{
-        //    var d = new DirectoryAdapter(new MapPathImpl(), true, _currentDirectory);
+        //    var adapter = new DirectoryAdapter(new MapPathImpl(), true, _currentDirectory);
 
-        //    Assert.IsFalse(d.IsInAllowedDir("\\"));
-        //    Assert.IsFalse(d.IsInAllowedDir("\\\\?\\C:\\"));
-        //    Assert.IsFalse(d.IsInAllowedDir(@"\\.\dev0"));
-        //    Assert.IsFalse(d.IsInAllowedDir(@"\\?\UNC\/"));
+        //    Assert.That(adapter.IsInAllowedDir("\\"), Is.False);
+        //    Assert.That(adapter.IsInAllowedDir("\\\\?\\C:\\"), Is.False);
+        //    Assert.That(adapter.IsInAllowedDir(@"\\.\dev0"), Is.False);
+        //    Assert.That(adapter.IsInAllowedDir(@"\\?\UNC\/"), Is.False);
         //}
 
         //[Test]
-        //public void IsInAllowedDir_ReturnsTrueForInside()
+        //public void IsInAllowedDirReturnsTrueForInside()
         //{
-        //    var d = new DirectoryAdapter(new MapPathImpl(), true, curr_dir);
-        //    Assert.IsTrue(d.IsInAllowedDir(curr_dir));
-        //    Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej/something/test")));
-        //    Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej")));
-        //    Assert.IsTrue(d.IsInAllowedDir(curr_dir.Combine("hej.txt")));
+        //    var adapter = new DirectoryAdapter(new MapPathImpl(), true, _currentDirectory);
 
-        //    Assert.IsTrue(d.IsInAllowedDir("hej"), "It should return true for relative paths.");
-        //    Assert.IsTrue(d.IsInAllowedDir("hej.txt"), "It should return true for relative paths");
+        //    Assert.IsTrue(adapter.IsInAllowedDir(_currentDirectory));
+        //    Assert.IsTrue(adapter.IsInAllowedDir(_currentDirectory.Combine("hej/something/test")));
+        //    Assert.IsTrue(adapter.IsInAllowedDir(_currentDirectory.Combine("hej")));
+        //    Assert.IsTrue(adapter.IsInAllowedDir(_currentDirectory.Combine("hej.txt")));
+        //    Assert.IsTrue(adapter.IsInAllowedDir("hej"), "It should return true for relative paths.");
+        //    Assert.IsTrue(adapter.IsInAllowedDir("hej.txt"), "It should return true for relative paths");
         //}
 
         //[Test]
         //public void IsInAllowedDirReturnsTrueIfNoConstraint()
         //{
-        //    var ad = new DirectoryAdapter(new MapPathImpl(), false, null);
-        //    Assert.IsTrue(ad.IsInAllowedDir("\\"));
+        //    var adapter = new DirectoryAdapter(new MapPathImpl(), false, null);
+
+        //    Assert.IsTrue(adapter.IsInAllowedDir("\\"));
         //}
     }
 }
