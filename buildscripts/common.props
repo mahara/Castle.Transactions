@@ -41,6 +41,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\buildscripts\CommonAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="..\..\CHANGELOG.md" />
     <Content Include="..\..\LICENSE">
       <PackagePath></PackagePath>

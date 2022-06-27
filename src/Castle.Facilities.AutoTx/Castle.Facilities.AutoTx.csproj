@@ -20,16 +20,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\buildscripts\CommonAssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Reference Include="System.Transactions" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Castle.Windsor" Version="5.1.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net472'">
-    <Reference Include="System.Transactions" />
   </ItemGroup>
 
   <ItemGroup>
