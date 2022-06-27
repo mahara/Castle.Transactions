@@ -357,7 +357,7 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(transactionRolledBackEventTriggered, Is.False);
             Assert.That(transactionFailedEventTriggered, Is.True);
 
-            Assert.IsNotNull(exception);
+            Assert.That(exception, Is.Not.Null);
             Assert.IsInstanceOf(typeof(CommitResourceException), exception);
         }
 
@@ -411,7 +411,7 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(transactionRolledBackEventTriggered, Is.False);
             Assert.That(transactionFailedEventTriggered, Is.True);
 
-            Assert.IsNotNull(exception);
+            Assert.That(exception, Is.Not.Null);
             Assert.IsInstanceOf(typeof(RollbackResourceException), exception);
         }
 

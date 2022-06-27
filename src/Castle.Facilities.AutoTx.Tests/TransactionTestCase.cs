@@ -128,9 +128,9 @@ namespace Castle.Facilities.AutoTx.Tests
             container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
             container.Register(Component.For(typeof(GenericService<>)).Named("generic.services"));
 
-            var genericService = container.Resolve<GenericService<string>>();
+            var service = container.Resolve<GenericService<string>>();
 
-            genericService.Foo();
+            service.Foo();
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
@@ -140,7 +140,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             try
             {
-                genericService.Throw();
+                service.Throw();
             }
             catch (Exception)
             {
@@ -151,7 +151,7 @@ namespace Castle.Facilities.AutoTx.Tests
             Assert.That(transactionManager.CommittedCount, Is.EqualTo(1));
             Assert.That(transactionManager.RolledBackCount, Is.EqualTo(1));
 
-            genericService.Bar<int>();
+            service.Bar<int>();
 
             Assert.That(transactionManager.TransactionCount, Is.EqualTo(3));
             Assert.That(transactionManager.CommittedCount, Is.EqualTo(2));
@@ -159,11 +159,11 @@ namespace Castle.Facilities.AutoTx.Tests
 
             try
             {
-                genericService.Throw<float>();
+                service.Throw<float>();
             }
             catch
             {
-                //exepected
+                // Expected
             }
 
             Assert.That(transactionManager.TransactionCount, Is.EqualTo(4));
@@ -178,7 +178,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             container.Register(Component.For<ITransactionManager>().ImplementedBy<MockTransactionManager>().Named("transactionmanager"));
 
-            var comp1 = container.Resolve<TransactionalComp1>();
+            var comp1 = container.Resolve<TransactionalComponent1>();
 
             comp1.Create();
 

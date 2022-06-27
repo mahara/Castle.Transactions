@@ -6,7 +6,9 @@
   </facilities>
 
   <components>
-    <component id="mycomp" type="Castle.Facilities.AutoTx.Tests.TransactionalComp2, Castle.Facilities.AutoTx.Tests" isTransactional="true">
+    <component id="mycomp"
+               type="Castle.Facilities.AutoTx.Tests.TransactionalComponent2, Castle.Facilities.AutoTx.Tests"
+               isTransactional="true">
       <transaction>
         <method name="Save" />
         <method name="Create" />

@@ -25,7 +25,7 @@ internal class Program
     public static int Main(string[] args)
     {
         var result = new AutoRun(typeof(Program).Assembly)
-                     .Execute(args, new ExtendedTextWrapper(Console.Out), Console.In);
+                        .Execute(args, new ExtendedTextWrapper(Console.Out), Console.In);
         return result;
     }
 }

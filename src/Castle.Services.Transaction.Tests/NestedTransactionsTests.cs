@@ -102,7 +102,7 @@ namespace Castle.Services.Transaction.Tests
         public void NotSupportedAndNoActiveTransaction()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Suppress, IsolationLevel.Unspecified);
-            Assert.IsNull(root);
+            Assert.That(root, Is.Null);
         }
 
         [Test]

@@ -23,7 +23,7 @@ namespace Castle.Facilities.AutoTx.Tests
         void Create();
     }
 
-    public class TransactionalComp3 : ITransactionalService
+    public class TransactionalService : ITransactionalService
     {
         public void Save()
         {
