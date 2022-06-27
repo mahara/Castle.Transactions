@@ -74,10 +74,9 @@
 
   <ItemGroup>
     <Content Include="..\..\CHANGELOG.md" />
-    <Content Include="..\..\LICENSE">
-      <PackagePath></PackagePath>
-    </Content>
+    <Content Include="..\..\LICENSE" Pack="True" PackagePath="" />
     <Content Include="..\..\buildscripts\ASL - Apache Software Foundation License.txt" />
+    <Content Include="..\..\buildscripts\readme.txt" />
   </ItemGroup>
 
   <ItemGroup>
