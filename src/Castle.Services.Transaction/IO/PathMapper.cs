@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
@@ -52,7 +50,7 @@ namespace Castle.Services.Transaction.IO
                 return Path.GetFullPath(path);
             }
 
-            if (_function != null)
+            if (_function is not null)
             {
                 return _function(path);
             }
@@ -66,7 +64,8 @@ namespace Castle.Services.Transaction.IO
 
             if (path[0] == '~')
             {
-                path = path.Substring(1);
+                //path = path.Substring(1);
+                path = path[1..];
             }
 
             if (path == string.Empty)
@@ -76,7 +75,8 @@ namespace Castle.Services.Transaction.IO
 
             if (path[0] == Path.DirectorySeparatorChar)
             {
-                path = path.Substring(1);
+                //path = path.Substring(1);
+                path = path[1..];
             }
 
             return path == string.Empty ?
