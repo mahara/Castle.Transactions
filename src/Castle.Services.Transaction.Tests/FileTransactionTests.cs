@@ -14,11 +14,9 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
+#if NETFRAMEWORK
 using System.Transactions;
+#endif
 
 using Castle.Services.Transaction.IO;
 
@@ -29,6 +27,7 @@ using Path = Castle.Services.Transaction.IO.Path;
 namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
+    [Platform("Win")]
     public class FileTransactionTests
     {
         #region SetUp/Teardown
@@ -190,6 +189,15 @@ namespace Castle.Services.Transaction.Tests
 
         #region Ambient Transactions
 
+        //
+        //  NOTE:   .NET does not support cross-platform distributed transactions yet.
+        //          It will throw System.PlatformNotSupportedException: This platform does not support distributed transactions.
+        //          -   https://github.com/dotnet/runtime/issues/715
+        //              -   https://github.com/dotnet/runtime/pull/72051
+        //          -   https://github.com/dotnet/runtime/issues/71769
+        //
+
+#if NETFRAMEWORK
         [Test]
         public void Using_TransactionScope_IsDistributed_AlsoTestingStatusWhenRolledBack()
         {
@@ -215,6 +223,7 @@ namespace Castle.Services.Transaction.Tests
                 }
             }
         }
+#endif
 
         [Test]
         public void Using_NormalStates()

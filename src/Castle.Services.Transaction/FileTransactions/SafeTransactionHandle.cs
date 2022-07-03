@@ -14,10 +14,13 @@
 // limitations under the License.
 #endregion
 
-using System;
+#if NETFRAMEWORK
 using System.Runtime.ConstrainedExecution;
+#endif
 using System.Runtime.InteropServices;
+#if NETFRAMEWORK
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Win32.SafeHandles;
 
@@ -26,8 +29,10 @@ namespace Castle.Services.Transaction
     /// <summary>
     /// A safe file handle on the transaction resource.
     /// </summary>
+#if NETFRAMEWORK
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+#endif
     public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         public SafeTransactionHandle() :
@@ -39,7 +44,9 @@ namespace Castle.Services.Transaction
         /// Constructor for taking a pointer to a transaction.
         /// </summary>
         /// <param name="handle">The transactional handle.</param>
+#if NETFRAMEWORK
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+#endif
         public SafeTransactionHandle(IntPtr handle) :
             base(true)
         {
