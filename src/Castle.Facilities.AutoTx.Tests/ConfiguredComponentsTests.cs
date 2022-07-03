@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-
 using Castle.MicroKernel.Facilities;
 using Castle.Windsor;
 
@@ -62,7 +60,7 @@ namespace Castle.Facilities.AutoTx.Tests
             var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService2));
 
             Assert.That(metaInfo, Is.Not.Null);
-            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(3));
+            Assert.That(metaInfo.TransactionalMethods, Has.Count.EqualTo(3));
         }
 
         [Test]
@@ -89,7 +87,7 @@ namespace Castle.Facilities.AutoTx.Tests
             var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService21));
 
             Assert.That(metaInfo, Is.Not.Null);
-            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(4));
+            Assert.That(metaInfo.TransactionalMethods, Has.Count.EqualTo(4));
         }
 
         [Test]
@@ -102,7 +100,7 @@ namespace Castle.Facilities.AutoTx.Tests
             var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService1));
 
             Assert.That(metaInfo, Is.Not.Null);
-            Assert.That(metaInfo.TransactionalMethods.Count, Is.EqualTo(2));
+            Assert.That(metaInfo.TransactionalMethods, Has.Count.EqualTo(2));
         }
     }
 }
