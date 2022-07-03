@@ -83,20 +83,20 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var directory = _dllPath.CombineAssert("testing");
-            Console.WriteLine(string.Format("Directory \"{0}\"", directory));
+            var directoryPath = _dllPath.CombineAssert("testing");
+            Console.WriteLine(string.Format("Directory \"{0}\"", directoryPath));
             var toDirectory = _dllPath.CombineAssert("testing2");
 
-            var file = directory.Combine("file");
-            Assert.That(File.Exists(file), Is.False);
-            var file2 = directory.Combine("file2");
-            Assert.That(File.Exists(file2), Is.False);
+            var filePath = directoryPath.Combine("file");
+            Assert.That(File.Exists(filePath), Is.False);
+            var filePath2 = directoryPath.Combine("file2");
+            Assert.That(File.Exists(filePath2), Is.False);
 
-            File.WriteAllText(file, "hello world");
-            File.WriteAllText(file2, "hello world 2");
+            File.WriteAllText(filePath, "hello world");
+            File.WriteAllText(filePath2, "hello world 2");
 
-            _infosCreated.Add(file);
-            _infosCreated.Add(file2);
+            _infosCreated.Add(filePath);
+            _infosCreated.Add(filePath2);
             _infosCreated.Add(toDirectory.Combine("file2"));
             _infosCreated.Add(toDirectory.Combine("file"));
             _infosCreated.Add(toDirectory);
@@ -105,20 +105,25 @@ namespace Castle.Services.Transaction.Tests
             {
                 tx.Begin();
 
-                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False, "Should not exist before move");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False, "Should not exist before move");
+                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False,
+                            "Should not exist before move.");
+                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False,
+                            "Should not exist before move.");
 
-                (tx as IFileAdapter).Move(file, toDirectory); // Moving file to directory
-                (tx as IFileAdapter).Move(file2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
+                (tx as IFileAdapter).Move(filePath, toDirectory); // Moving file to directory
+                (tx as IFileAdapter).Move(filePath2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
 
-                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False, "Should not be visible to the outside");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False, "Should not be visible to the outside");
+                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False,
+                            "Should not be visible to the outside.");
+                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False,
+                            "Should not be visible to the outside.");
 
                 tx.Commit();
 
                 Assert.That(File.Exists(toDirectory.Combine("file")), Is.True,
                             "Should be visible to the outside now and since we tried to move it to an existing directory, it should put itself in that directory with its current name.");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.True, "Should be visible to the outside now.");
+                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.True,
+                            "Should be visible to the outside now.");
             }
 
             Assert.That(File.ReadAllText(toDirectory.Combine("file2")), Is.EqualTo("hello world 2"),
@@ -139,9 +144,9 @@ namespace Castle.Services.Transaction.Tests
             _infosCreated.Add(filePath);
 
             // Simply write something to to file.
-            using (var writer = File.CreateText(filePath))
+            using (var sw = File.CreateText(filePath))
             {
-                writer.WriteLine("Hello");
+                sw.WriteLine("Hello");
             }
 
             using (var tx = new FileTransaction())
@@ -175,9 +180,9 @@ namespace Castle.Services.Transaction.Tests
             _infosCreated.Add(filePath);
 
             // Simply write something to to file.
-            using (var wr = File.CreateText(filePath))
+            using (var sw = File.CreateText(filePath))
             {
-                wr.WriteLine("Hello");
+                sw.WriteLine("Hello");
             }
 
             using (var tx = new FileTransaction("Rollback Tx"))
@@ -186,8 +191,8 @@ namespace Castle.Services.Transaction.Tests
 
                 using (var fs = tx.Open(filePath, FileMode.Truncate))
                 {
-                    var str = new UTF8Encoding().GetBytes("Goodbye");
-                    fs.Write(str, 0, str.Length);
+                    var text = new UTF8Encoding().GetBytes("Goodbye");
+                    fs.Write(text, 0, text.Length);
                     fs.Flush();
                 }
 
@@ -207,25 +212,25 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var filepath = _testFixturePath.CombineAssert("temp").Combine("test");
-            if (File.Exists(filepath))
+            var filePath = _testFixturePath.CombineAssert("temp").Combine("test");
+            if (File.Exists(filePath))
             {
-                File.Delete(filepath);
+                File.Delete(filePath);
             }
 
-            _infosCreated.Add(filepath);
+            _infosCreated.Add(filePath);
 
             using (var tx = new FileTransaction("Commit Tx"))
             {
                 tx.Begin();
-                tx.WriteAllText(filepath, "Transactioned file.");
+                tx.WriteAllText(filePath, "Transactioned file.");
                 tx.Commit();
 
                 Assert.That(tx.Status, Is.EqualTo(TransactionStatus.Committed));
             }
 
-            Assert.That(File.Exists(filepath), "The file should exists after the transaction.");
-            Assert.That(File.ReadAllLines(filepath)[0], Is.EqualTo("Transactioned file."));
+            Assert.That(File.Exists(filePath), "The file should exists after the transaction.");
+            Assert.That(File.ReadAllLines(filePath)[0], Is.EqualTo("Transactioned file."));
         }
     }
 }

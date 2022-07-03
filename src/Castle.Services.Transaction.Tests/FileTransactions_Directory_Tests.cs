@@ -251,14 +251,14 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory.
-            var directory = _dllPath.CombineAssert("testing");
+            var directoryPath = _dllPath.CombineAssert("testing");
 
             // 2. Test it.
             using var tx = new FileTransaction("Can delete empty directory.");
             IDirectoryAdapter adapter = tx;
             tx.Begin();
 
-            Assert.That(adapter.Delete(directory, false), "Successfully deleted.");
+            Assert.That(adapter.Delete(directoryPath, false), "Successfully deleted.");
 
             tx.Commit();
         }
@@ -274,22 +274,22 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory.
-            var directory = _dllPath.Combine("testing");
-            Directory.CreateDirectory(directory);
-            Directory.CreateDirectory(directory.Combine("one"));
-            Directory.CreateDirectory(directory.Combine("two"));
-            Directory.CreateDirectory(directory.Combine("three"));
+            var directoryPath = _dllPath.Combine("testing");
+            Directory.CreateDirectory(directoryPath);
+            Directory.CreateDirectory(directoryPath.Combine("one"));
+            Directory.CreateDirectory(directoryPath.Combine("two"));
+            Directory.CreateDirectory(directoryPath.Combine("three"));
 
             // 2. Write contents.
-            File.WriteAllLines(ExtensionMethods.Combine(directory, "one").Combine("fileone"), new[] { "Hello world", "second line" });
-            File.WriteAllLines(ExtensionMethods.Combine(directory, "one").Combine("filetwo"), new[] { "two", "second line" });
-            File.WriteAllLines(ExtensionMethods.Combine(directory, "two").Combine("filethree"), new[] { "three", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "one").Combine("fileone"), new[] { "Hello world", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "one").Combine("filetwo"), new[] { "two", "second line" });
+            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "two").Combine("filethree"), new[] { "three", "second line" });
 
             // 3. Test it.
             using var tx = new FileTransaction();
             tx.Begin();
 
-            Assert.That((tx as IDirectoryAdapter).Delete(directory, true), Is.True);
+            Assert.That((tx as IDirectoryAdapter).Delete(directoryPath, true), Is.True);
 
             tx.Commit();
         }
@@ -305,23 +305,23 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory and file.
-            var directory = _dllPath.CombineAssert("testing");
-            var file = directory.Combine("file");
-            File.WriteAllText(file, "hello");
+            var directoryPath = _dllPath.CombineAssert("testing");
+            var filePath = directoryPath.Combine("file");
+            File.WriteAllText(filePath, "hello");
 
             // 2. Test it.
             using var tx = new FileTransaction("Can not delete non-empty directory");
             IDirectoryAdapter directoryAdapter = tx;
             tx.Begin();
 
-            Assert.That(directoryAdapter.Delete(directory, false),
+            Assert.That(directoryAdapter.Delete(directoryPath, false),
                         Is.False,
                         "Did not delete non-empty directory.");
 
             IFileAdapter fileAdapter = tx;
-            fileAdapter.Delete(file);
+            fileAdapter.Delete(filePath);
 
-            Assert.That(directoryAdapter.Delete(directory, false),
+            Assert.That(directoryAdapter.Delete(directoryPath, false),
                         "After deleting the file in the directory, the directory is also deleted.");
 
             tx.Commit();
