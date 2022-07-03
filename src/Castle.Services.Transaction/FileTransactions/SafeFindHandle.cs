@@ -14,15 +14,18 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.Runtime.InteropServices;
+#if NETFRAMEWORK
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Win32.SafeHandles;
 
 namespace Castle.Services.Transaction
 {
+#if NETFRAMEWORK
     [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+#endif
     internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal SafeFindHandle() :
