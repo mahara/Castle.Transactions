@@ -14,6 +14,9 @@
 // limitations under the License.
 #endregion
 
+#if NET5_0_OR_GREATER
+using System.Runtime.Versioning;
+#endif
 using System.Transactions;
 
 using Castle.Services.Transaction.IO;
@@ -24,6 +27,9 @@ namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
     [Platform("Win")]
+#if NET5_0_OR_GREATER
+    [SupportedOSPlatform("windows")]
+#endif
     public class FileTransaction_WithManager_Tests
     {
         private const string TestFixtureDirectoryName = nameof(FileTransaction_WithManager_Tests);
@@ -141,7 +147,7 @@ namespace Castle.Services.Transaction.Tests
             // Now we can dispose the main transaction.
             _transactionManager.Dispose(tx);
 
-            Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
             Assert.That(txF.IsDisposed);
         }
 
