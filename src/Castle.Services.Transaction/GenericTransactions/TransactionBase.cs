@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Transactions;
 
 using Castle.Core.Logging;
@@ -47,13 +44,13 @@ namespace Castle.Services.Transaction
         public virtual void Dispose()
         {
             _resources.Select(r => r as IDisposable)
-                      .Where(r => r != null)
+                      .Where(r => r is not null)
                       .ForEach(r => r.Dispose());
 
             _resources.Clear();
             _synchronizationObjects.Clear();
 
-            if (_ambientTransaction != null)
+            if (_ambientTransaction is not null)
             {
                 DisposeAmbientTransaction();
             }
@@ -185,7 +182,7 @@ namespace Castle.Services.Transaction
             {
                 if (!commitFailed)
                 {
-                    if (_ambientTransaction != null)
+                    if (_ambientTransaction is not null)
                     {
                         Logger.Debug($"Committing '{nameof(TransactionScope)}' (Ambient Transaction) (Transaction '{Name}').");
 
@@ -231,7 +228,7 @@ namespace Castle.Services.Transaction
                     return;
                 }
 
-                if (exceptionToThrow == null)
+                if (exceptionToThrow is null)
                 {
                     throw new RollbackResourceException(
                         "Unable to properly roll back all resources. " +
@@ -243,7 +240,7 @@ namespace Castle.Services.Transaction
             }
             finally
             {
-                if (_ambientTransaction != null)
+                if (_ambientTransaction is not null)
                 {
                     Logger.Debug($"Rolling back '{nameof(TransactionScope)}' (Ambient Transaction) (Transaction '{Name}').");
 
@@ -276,7 +273,7 @@ namespace Castle.Services.Transaction
 
         public virtual void Enlist(IResource resource)
         {
-            if (resource == null)
+            if (resource is null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
@@ -297,7 +294,7 @@ namespace Castle.Services.Transaction
 
         public virtual void RegisterSynchronization(ISynchronization synchronization)
         {
-            if (synchronization == null)
+            if (synchronization is null)
             {
                 throw new ArgumentNullException(nameof(synchronization));
             }
