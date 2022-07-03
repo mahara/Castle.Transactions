@@ -147,7 +147,7 @@ namespace Castle.Facilities.AutoTx
 
         private void AssertHasDirectories()
         {
-            if (!AllowAccessOutsideRootDirectory && RootDirectory == null)
+            if (!AllowAccessOutsideRootDirectory && RootDirectory is null)
             {
                 throw new FacilityException("You have to specify a root directory.");
             }
