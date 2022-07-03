@@ -15,17 +15,12 @@ REM limitations under the License.
 REM ****************************************************************************
 
 
-:INITIALIZE_ARGUMENTS
+:INITIALIZE_VARIABLES
 SET %1
-SET %2
-
 REM ECHO arg1 = %1
+SET %2
 REM ECHO arg2 = %2
 
-GOTO INITIALIZE_VARIABLES
-
-
-:INITIALIZE_VARIABLES
 SET CONFIGURATION="Release"
 SET BUILD_VERSION="1.0.0"
 
@@ -47,11 +42,8 @@ GOTO RESTORE_PACKAGES
 
 
 :RESTORE_PACKAGES
-dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
-dotnet restore .\src\Castle.Services.Transaction\Castle.Services.Transaction.csproj
-dotnet restore .\src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj
-dotnet restore .\src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj
-dotnet restore .\src\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.csproj
+dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln
+dotnet restore .\src\Castle.Transactions.sln
 
 GOTO BUILD
 
@@ -83,8 +75,7 @@ GOTO NUGET_EXPLICIT_VERSIONS
 
 :NUGET_EXPLICIT_VERSIONS
 
-.\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Services.Transaction"
-.\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Facilities.AutoTx"
+.\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle."
 
 
 
