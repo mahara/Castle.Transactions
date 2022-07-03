@@ -134,6 +134,60 @@ namespace Castle.Services.Transaction.Utilities
                 _ => throw new ArgumentOutOfRangeException(nameof(comparisonType), comparisonType, null)
             };
         }
+
+        /// <summary>
+        ///     Determines whether the <see cref="string" /> instance starts with the specified character.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <param name="value">The character to compare.</param>
+        /// <returns>
+        ///     <see langword="true" /> if <c>value</c> matches the beginning of this instance;
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
+        /// <remarks>
+        ///     This method performs an ordinal (case-sensitive and culture-insensitive) comparison.
+        ///
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.startswith" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWith(this string str, char value)
+        {
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            return str.Length > 0 && str[0] == value;
+        }
+
+        /// <summary>
+        ///     Determines whether the end of this <see cref="string" /> instance matches the specified character.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <param name="value">The character to compare to the character at the end of this instance.</param>
+        /// <returns>
+        ///     <see langword="true" /> if <c>value</c> matches the end of this instance;
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
+        /// <remarks>
+        ///     This method performs an ordinal (case-sensitive and culture-insensitive) comparison.
+        ///
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.endswith" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWith(this string str, char value)
+        {
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            return str.Length > 0 && str[^1] == value;
+        }
 #endif
     }
 }
