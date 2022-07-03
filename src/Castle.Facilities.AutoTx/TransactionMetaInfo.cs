@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 using Castle.Services.Transaction;
@@ -127,6 +125,10 @@ namespace Castle.Facilities.AutoTx
             return _transactionalInjectionMethods.Contains(method);
         }
 
+#if NET
+        //[Obsolete("Obsoletions.RemotingApisMessage, DiagnosticId = Obsoletions.RemotingApisDiagId, UrlFormat = Obsoletions.SharedUrlFormat")]
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;

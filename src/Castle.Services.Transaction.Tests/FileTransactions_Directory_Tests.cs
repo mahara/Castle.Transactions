@@ -14,11 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
 using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;
@@ -26,6 +21,7 @@ using NUnit.Framework;
 namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
+    [Platform("Win")]
     public class FileTransactions_Directory_Tests
     {
         private const string TestFixtureDirectoryName = nameof(FileTransactions_Directory_Tests);
