@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 namespace Castle.Services.Transaction
 {
     [Serializable]
@@ -49,7 +46,7 @@ namespace Castle.Services.Transaction
                 return true;
             }
 
-            if (!(obj is Activity activity))
+            if (obj is not Activity activity)
             {
                 return false;
             }

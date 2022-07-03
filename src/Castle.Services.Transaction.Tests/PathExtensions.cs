@@ -32,9 +32,9 @@ namespace Castle.Services.Transaction.Tests
         {
             var result = path1.Combine(path2);
 
-            if (!System.IO.Directory.Exists(result))
+            if (!Directory.Exists(result))
             {
-                System.IO.Directory.CreateDirectory(result);
+                Directory.CreateDirectory(result);
             }
 
             return result;

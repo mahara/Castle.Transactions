@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-
 using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction.IO
@@ -71,7 +69,7 @@ namespace Castle.Services.Transaction.IO
             {
                 foreach (var resource in currentTransaction.GetResources())
                 {
-                    if (!(resource is FileResourceAdapter))
+                    if (resource is not FileResourceAdapter)
                     {
                         continue;
                     }
