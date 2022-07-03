@@ -47,8 +47,7 @@ GOTO RESTORE_PACKAGES
 
 
 :RESTORE_PACKAGES
-REM dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
-dotnet restore .\buildscripts\BuildScripts.csproj
+dotnet restore .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
 dotnet restore .\src\Castle.Services.Transaction\Castle.Services.Transaction.csproj
 dotnet restore .\src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj
 dotnet restore .\src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj
@@ -64,7 +63,7 @@ REM ECHO Building "%config%" packages with version "%version%"...
 ECHO Building "%CONFIGURATION%" packages with version "%BUILD_VERSION%"...
 ECHO ---------------------------------------------------
 
-REM dotnet build .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln --no-restore
+dotnet build .\tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln --no-restore
 dotnet build Castle.Transactions.sln --configuration %CONFIGURATION% -property:APPVEYOR_BUILD_VERSION=%BUILD_VERSION% --no-restore
 
 GOTO TEST
@@ -79,13 +78,13 @@ ECHO ----------------
 dotnet test .\src\Castle.Services.Transaction.Tests --no-restore || exit /b 1
 dotnet test .\src\Castle.Facilities.AutoTx.Tests --no-restore || exit /b 1
 
-REM GOTO NUGET_EXPLICIT_VERSIONS
+GOTO NUGET_EXPLICIT_VERSIONS
 
 
-REM :NUGET_EXPLICIT_VERSIONS
+:NUGET_EXPLICIT_VERSIONS
 
-REM .\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Services.Transaction"
-REM .\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Facilities.AutoTx"
+.\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Services.Transaction"
+.\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "Castle.Facilities.AutoTx"
 
 
 
