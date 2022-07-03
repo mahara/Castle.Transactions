@@ -103,7 +103,7 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }
@@ -119,11 +119,11 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void FailingResource_TxStillRolledBack()
+        public void FailingResourceTransactionStillRolledBack()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }

@@ -54,7 +54,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void SynchronizationsAndRollback_RegistredAfter_CommitOrRollBack_AreStarted()
+        public void SynchronizationsAndRollbackRegisteredAfterCommitOrRollBackAreStarted()
         {
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
@@ -75,7 +75,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void DontStartResource_IfTransactionIsNotActive_WhenEnlisting()
+        public void DontStartResourceIfTransactionIsNotActiveWhenEnlisting()
         {
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
@@ -416,7 +416,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void TransactionResources_AreDisposed()
+        public void TransactionResourcesAreDisposed()
         {
             var transaction = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                                     IsolationLevel.Unspecified);
@@ -436,7 +436,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void ChildTransactions_AreAmbient()
+        public void ChildTransactionsAreAmbient()
         {
             _ = _transactionManager.CreateTransaction(TransactionScopeOption.Required,
                                                       IsolationLevel.Unspecified);

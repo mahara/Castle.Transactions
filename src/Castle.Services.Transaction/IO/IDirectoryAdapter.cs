@@ -42,7 +42,7 @@ namespace Castle.Services.Transaction.IO
         bool Exists(string path);
 
         /// <summary>
-        /// Deletes a folder recursively.
+        /// Deletes a directory recursively.
         /// </summary>
         /// <param name="path"></param>
         void Delete(string path);
@@ -51,10 +51,10 @@ namespace Castle.Services.Transaction.IO
         /// Deletes an empty directory.
         /// Non-empty directories will cause false to be returned.
         /// </summary>
-        /// <param name="path">The path to the folder to delete.</param>
+        /// <param name="path">The path to the directory to delete.</param>
         /// <param name="recursively">
         /// Whether to delete recursively or not.
-        /// When recursive, we delete all subfolders and files in the given directory as well.
+        /// When recursive, we delete all subdirectories and files in the given directory as well.
         /// If not recursive sub-directories and files will not be deleted.
         /// </param>
         /// <returns>Whether the delete was successful (i.e. the directory existed and was deleted).</returns>

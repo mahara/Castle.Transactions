@@ -81,7 +81,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void SameResourcesShared_BetweenParentAndChild_ParentsResponsibility()
+        public void SameResourcesSharedBetweenParentAndChildParentsResponsibility()
         {
             var resource = new ResourceImpl();
 
@@ -120,7 +120,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void NestedRollback_RollingAChildBack_TryingToCommitRoot_Fails()
+        public void NestedRollbackRollingAChildBackThenTryingToCommitRootThenFails()
         {
             void Method()
             {
@@ -182,7 +182,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void WhenOneResourceFails_OtherResourcesAreNotCommitted()
+        public void WhenOneResourceFailsThenOtherResourcesAreNotCommitted()
         {
             var first = new ResourceImpl();
             var rFailed = new ThrowsExceptionResource(true, false);
@@ -206,7 +206,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void SynchronizationsAndCommit_NestedTransaction()
+        public void SynchronizationsAndCommitWithNestedTransaction()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
             Assert.That(root is TalkactiveTransaction, Is.True);
@@ -232,7 +232,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void SynchronizationsAndRollback_NestedTransaction()
+        public void SynchronizationsAndRollbackWithNestedTransaction()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
             Assert.That(root is TalkactiveTransaction, Is.True);

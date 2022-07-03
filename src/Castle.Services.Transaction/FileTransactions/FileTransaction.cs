@@ -175,7 +175,7 @@ namespace Castle.Services.Transaction
 
             path = Path.NormDirSepChars(CleanPathEnd(path));
 
-            // We don't need to re-create existing folders.
+            // We don't need to re-create existing directories.
             if (((IDirectoryAdapter) this).Exists(path))
             {
                 return true;
@@ -232,7 +232,7 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Deletes a folder recursively.
+        /// Deletes a directory recursively.
         /// </summary>
         /// <param name="path">The directory path to start deleting at!</param>
         void IDirectoryAdapter.Delete(string path)
@@ -246,7 +246,7 @@ namespace Castle.Services.Transaction
 
             if (!RemoveDirectoryTransactedW(path, _TransactionHandle))
             {
-                throw new TransactionException("Unable to delete folder. See inner exception for details.",
+                throw new TransactionException("Unable to delete directory. See inner exception for details.",
                                                new Win32Exception(Marshal.GetLastWin32Error()));
             }
         }
@@ -348,10 +348,10 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Deletes an empty directory
         /// </summary>
-        /// <param name="path">The path to the folder to delete.</param>
+        /// <param name="path">The path to the directory to delete.</param>
         /// <param name="recursively">
         /// Whether to delete recursively or not.
-        /// When recursive, we delete all subfolders and files in the given
+        /// When recursive, we delete all subdirectories and files in the given
         /// directory as well.
         /// </param>
         bool IDirectoryAdapter.Delete(string path, bool recursively)
@@ -407,7 +407,7 @@ namespace Castle.Services.Transaction
 
         void IFileAdapter.Move(string filePath, string newFilePath)
         {
-            // case 1, the new file path is a folder
+            // Case 1, the new file path is a directory.
             if (((IDirectoryAdapter) this).Exists(newFilePath))
             {
                 MoveFileTransacted(filePath,
@@ -419,7 +419,7 @@ namespace Castle.Services.Transaction
                 return;
             }
 
-            // case 2, its not a folder, so assume it's a file.
+            // Case 2, its not a directory, so assume it's a file.
             MoveFileTransacted(filePath,
                                newFilePath,
                                IntPtr.Zero,

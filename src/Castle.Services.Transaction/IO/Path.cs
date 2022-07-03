@@ -24,12 +24,12 @@ namespace Castle.Services.Transaction.IO
     /// Utility class meant to replace the <see cref="System.IO.Path" /> class completely.
     /// This class handles these types of paths:
     /// <list>
-    /// <item>UNC network paths: \\server\folder</item>
-    /// <item>UNC-specified network paths: \\?\UNC\server\folder</item>
-    /// <item>IPv4 network paths: \\192.168.3.22\folder</item>
+    /// <item>UNC network paths: \\server\directory</item>
+    /// <item>UNC-specified network paths: \\?\UNC\server\directory</item>
+    /// <item>IPv4 network paths: \\192.168.3.22\directory</item>
     /// <item>Rooted paths: /dev/cdrom0</item>
-    /// <item>Rooted paths: C:\folder</item>
-    /// <item>UNC-rooted paths: \\?\C:\folder\file</item>
+    /// <item>Rooted paths: C:\directory</item>
+    /// <item>UNC-rooted paths: \\?\C:\directory\file</item>
     /// <item>Fully expanded IPv6 paths</item>
     /// </list>
     /// </summary>
@@ -214,7 +214,7 @@ namespace Castle.Services.Transaction.IO
         /// Removes the last directory/file off the path.
         ///
         /// For a path "/a/b/c" would return "/a/b"
-        /// or for "\\?\C:\folderA\folder\B\C\d.txt" would return "\\?\C:\folderA\folder\B\C"
+        /// or for "\\?\C:\directoryA\directory\B\C\d.txt" would return "\\?\C:\directoryA\directory\B\C"
         /// </summary>
         /// <param name="path">The path string to modify</param>
         /// <returns></returns>

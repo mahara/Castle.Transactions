@@ -23,7 +23,7 @@ namespace Castle.Services.Transaction.Tests
     public class MiscTests
     {
         [Test]
-        [Description("As we are working on the same folders, we don't want to run the tests concurrently.")]
+        [Description("As we are working on the same directories? We don't want to run the tests concurrently.")]
         [Ignore("TODO: Thread.CurrentThread.GetApartmentState() = MTA???")]
         public void CheckSTA()
         {

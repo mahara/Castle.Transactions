@@ -78,7 +78,7 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }
@@ -108,8 +108,8 @@ namespace Castle.Services.Transaction.Tests
                 Assert.That(File.Exists(toDirectory.Combine("file")), Is.False, "Should not exist before move");
                 Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False, "Should not exist before move");
 
-                (tx as IFileAdapter).Move(file, toDirectory); // moving file to folder
-                (tx as IFileAdapter).Move(file2, toDirectory.Combine("file2")); // moving file to folder+new file name.
+                (tx as IFileAdapter).Move(file, toDirectory); // Moving file to directory
+                (tx as IFileAdapter).Move(file2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
 
                 Assert.That(File.Exists(toDirectory.Combine("file")), Is.False, "Should not be visible to the outside");
                 Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False, "Should not be visible to the outside");
@@ -117,7 +117,7 @@ namespace Castle.Services.Transaction.Tests
                 tx.Commit();
 
                 Assert.That(File.Exists(toDirectory.Combine("file")), Is.True,
-                            "Should be visible to the outside now and since we tried to move it to an existing folder, it should put itself in that folder with its current name.");
+                            "Should be visible to the outside now and since we tried to move it to an existing directory, it should put itself in that directory with its current name.");
                 Assert.That(File.Exists(toDirectory.Combine("file2")), Is.True, "Should be visible to the outside now.");
             }
 
@@ -130,7 +130,7 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }
@@ -166,7 +166,7 @@ namespace Castle.Services.Transaction.Tests
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }
@@ -198,11 +198,11 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void CreateFileTranscationally_Commit()
+        public void CreateFileTransactionallyCommit()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
-                Assert.Ignore("TxF not supported");
+                Assert.Ignore("TxF not supported.");
 
                 return;
             }
