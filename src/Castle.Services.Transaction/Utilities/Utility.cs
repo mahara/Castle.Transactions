@@ -14,10 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-
 using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction
@@ -32,7 +28,7 @@ namespace Castle.Services.Transaction
                                             TEventArgs args)
             where TEventArgs : EventArgs
         {
-            if (handler == null)
+            if (handler is null)
             {
                 return;
             }
@@ -47,11 +43,11 @@ namespace Castle.Services.Transaction
 
         public static void AtomicRead(this ReaderWriterLockSlim @lock, Action action, bool upgradable)
         {
-            if (@lock == null)
+            if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
             }
-            if (action == null)
+            if (action is null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
@@ -84,11 +80,11 @@ namespace Castle.Services.Transaction
 
         public static T AtomicRead<T>(this ReaderWriterLockSlim @lock, Func<T> function)
         {
-            if (@lock == null)
+            if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
             }
-            if (function == null)
+            if (function is null)
             {
                 throw new ArgumentNullException(nameof(function));
             }
@@ -107,11 +103,11 @@ namespace Castle.Services.Transaction
 
         public static void AtomicWrite(this ReaderWriterLockSlim @lock, Action action)
         {
-            if (@lock == null)
+            if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
             }
-            if (action == null)
+            if (action is null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
@@ -133,11 +129,11 @@ namespace Castle.Services.Transaction
         /// </summary>
         public static void ForEach<TSource>(this IEnumerable<TSource> source, Action<TSource> action)
         {
-            if (source == null)
+            if (source is null)
             {
                 throw new ArgumentNullException(nameof(source));
             }
-            if (action == null)
+            if (action is null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
@@ -185,7 +181,7 @@ namespace Castle.Services.Transaction
             _exception = success ? null : exception;
         }
 
-        public Error Success(Action action)
+        public readonly Error Success(Action action)
         {
             if (_success)
             {
@@ -201,7 +197,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Error Exception(Action<Exception> action)
+        public readonly Error Exception(Action<Exception> action)
         {
             if (!_success)
             {

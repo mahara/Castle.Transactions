@@ -47,7 +47,7 @@ namespace Castle.Services.Transaction
 
         public virtual void Dispose(ITransaction transaction)
         {
-            if (transaction == null)
+            if (transaction is null)
             {
                 var message = "Tried to dispose a null transaction.";
                 throw new ArgumentNullException(nameof(transaction), message);
@@ -128,19 +128,19 @@ namespace Castle.Services.Transaction
 
             var currentTransaction = CurrentTransaction;
 
-            if (currentTransaction == null &&
-                (transactionMode == TransactionMode.Supported ||
-                 transactionMode == TransactionMode.NotSupported))
+            if (currentTransaction is null &&
+                (transactionMode is TransactionMode.Supported or
+                                    TransactionMode.NotSupported))
             {
                 return null;
             }
 
             TransactionBase transaction = null;
 
-            if (currentTransaction != null)
+            if (currentTransaction is not null)
             {
-                if (transactionMode == TransactionMode.Requires ||
-                    transactionMode == TransactionMode.Supported)
+                if (transactionMode is TransactionMode.Requires or
+                                       TransactionMode.Supported)
                 {
                     transaction = ((TransactionBase) currentTransaction).CreateChildTransaction();
 
@@ -148,7 +148,7 @@ namespace Castle.Services.Transaction
                 }
             }
 
-            if (transaction == null)
+            if (transaction is null)
             {
                 transaction = InstantiateTransaction(transactionMode, isolationLevel, isAmbient, isReadOnly);
 
