@@ -32,6 +32,7 @@ namespace Castle.Services.Transaction.Utilities
         ///     <see langword="true" /> if the <c>value</c> parameter occurs within this <see cref="string" /> instance, or if <c>value</c> is the empty string ("");
         ///     otherwise, <see langword="false" />.
         /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
         /// <remarks>
         ///     REFERENCES:
         ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.contains" />
@@ -67,6 +68,7 @@ namespace Castle.Services.Transaction.Utilities
         ///     <see langword="true" /> if the <c>value</c> parameter occurs within this <see cref="string" /> instance;
         ///     otherwise, <see langword="false" />.
         /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
         /// <remarks>
         ///     REFERENCES:
         ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.contains" />
@@ -82,6 +84,29 @@ namespace Castle.Services.Transaction.Utilities
             }
 
             return str.IndexOf(value.ToString(), comparisonType) >= 0;
+        }
+
+        /// <summary>
+        ///     Determines whether the end of this <see cref="string" /> instance matches the specified character.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <param name="value">The character to compare to the character at the end of this instance.</param>
+        /// <returns><see langword="true" /> if <c>value</c> matches the end of this instance; otherwise, <see langword="false" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
+        /// <remarks>
+        ///     This method performs an ordinal (case-sensitive and culture-insensitive) comparison.
+        ///
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.endswith" />
+        /// </remarks>
+        public static bool EndsWith(this string str, char value)
+        {
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            return str.EndsWith(value.ToString(), StringComparison.Ordinal);
         }
 #endif
     }

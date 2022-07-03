@@ -115,7 +115,7 @@ namespace Castle.Services.Transaction
                 Rollback();
             }
 
-            if (_transactionHandle != null && !_transactionHandle.IsInvalid)
+            if (_transactionHandle is not null && !_transactionHandle.IsInvalid)
             {
                 _transactionHandle.Dispose();
             }
@@ -161,7 +161,7 @@ namespace Castle.Services.Transaction
             var currentTransaction = System.Transactions.Transaction.Current;
 
             // We have a ongoing current transaction, join it!
-            if (currentTransaction != null)
+            if (currentTransaction is not null)
             {
                 var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(currentTransaction);
 
@@ -384,10 +384,9 @@ namespace Castle.Services.Transaction
 
             path = CleanPathEnd(path);
 
-            using (var handle = FindFirstFileTransacted(path, true))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(path, true);
+
+            return !handle.IsInvalid;
         }
 
         bool IFileAdapter.Exists(string filePath)
@@ -399,10 +398,9 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            using (var handle = FindFirstFileTransacted(filePath, false))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(filePath, false);
+
+            return !handle.IsInvalid;
         }
 
         string IDirectoryAdapter.GetFullPath(string path)
@@ -461,20 +459,18 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+            return reader.ReadToEnd();
         }
 
         public string ReadAllText(string filePath, Encoding encoding)
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), encoding))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
+
+            return reader.ReadToEnd();
         }
 
         /// <summary>
@@ -489,13 +485,12 @@ namespace Castle.Services.Transaction
             AssertState(TransactionStatus.Active);
 
             var exists = ((IFileAdapter) this).Exists(filePath);
-            using (var writer = new StreamWriter(Open(filePath,
-                                                      exists ? FileMode.Truncate : FileMode.OpenOrCreate,
-                                                      FileAccess.Write,
-                                                      FileShare.None)))
-            {
-                writer.Write(contents);
-            }
+            using var writer = new StreamWriter(Open(filePath,
+                                                     exists ? FileMode.Truncate : FileMode.OpenOrCreate,
+                                                     FileAccess.Write,
+                                                     FileShare.None));
+
+            writer.Write(contents);
         }
 
         #endregion
@@ -584,21 +579,21 @@ namespace Castle.Services.Transaction
         /// <returns></returns>
         private static NativeFileAccess TranslateFileAccess(FileAccess fileAccess)
         {
-            switch (fileAccess)
+            return fileAccess switch
             {
-                case FileAccess.Read:
-                    return NativeFileAccess.GenericRead;
+                FileAccess.Read =>
+                NativeFileAccess.GenericRead,
 
-                case FileAccess.Write:
-                    return NativeFileAccess.GenericWrite;
+                FileAccess.Write =>
+                NativeFileAccess.GenericWrite,
 
-                case FileAccess.ReadWrite:
-                    return NativeFileAccess.GenericRead |
-                           NativeFileAccess.GenericWrite;
+                FileAccess.ReadWrite =>
+                NativeFileAccess.GenericRead |
+                NativeFileAccess.GenericWrite,
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(fileAccess));
-            }
+                _ =>
+                throw new ArgumentOutOfRangeException(nameof(fileAccess))
+            };
         }
 
         /// <summary>
@@ -648,7 +643,7 @@ namespace Castle.Services.Transaction
 
             var doRecurse = true;
 
-            var addPrefix = !path.StartsWith(@"\\?\");
+            var addPrefix = !path.StartsWith(@"\\?\", StringComparison.Ordinal);
             var pathWithoutSuffix = addPrefix ?
                                     $@"\\?\{Path.GetFullPath(path)}" :
                                     Path.GetFullPath(path);
@@ -667,7 +662,7 @@ namespace Castle.Services.Transaction
 
                     if ((findData.dwFileAttributes & (uint) FileAttributes.Directory) != 0)
                     {
-                        if (findData.cFileName != "." && findData.cFileName != "..")
+                        if (findData.cFileName is not "." and not "..")
                         {
                             doRecurse &= DeleteRecursive(subPath);
                         }
@@ -870,8 +865,7 @@ namespace Castle.Services.Transaction
         /// Attributes for security interop.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1815:Override equals and operator equals on value types", Justification = "CA1815")]
-        public struct SECURITY_ATTRIBUTES
+        public record struct SECURITY_ATTRIBUTES
         {
             public int nLength;
             public IntPtr lpSecurityDescriptor;
@@ -1019,7 +1013,7 @@ namespace Castle.Services.Transaction
         {
             return FindFirstFileTransactedW(filePath,
                                             FINDEX_INFO_LEVELS.FindExInfoStandard,
-                                            out var data,
+                                            out _,
                                             directory ?
                                             FINDEX_SEARCH_OPS.FindExSearchLimitToDirectories :
                                             FINDEX_SEARCH_OPS.FindExSearchNameMatch,

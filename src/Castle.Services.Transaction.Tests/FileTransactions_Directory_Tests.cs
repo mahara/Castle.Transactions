@@ -135,14 +135,13 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var txF = new FileTransaction("not_distributed_transaction"))
-            {
-                txF.Begin();
+            using var txF = new FileTransaction("not_distributed_transaction");
 
-                Assert.That(txF.IsAmbient, Is.False);
+            txF.Begin();
 
-                txF.Commit();
-            }
+            Assert.That(txF.IsAmbient, Is.False);
+
+            txF.Commit();
         }
 
         [Test]
@@ -160,17 +159,16 @@ namespace Castle.Services.Transaction.Tests
             // http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
             // An attempt to open a search with a trailing backslash always fails.
             // --> So I need to make it succeed.
-            using (var txF = new FileTransaction())
-            {
-                txF.Begin();
+            using var txF = new FileTransaction();
 
-                var da = (IDirectoryAdapter) txF;
+            txF.Begin();
 
-                da.Create("something");
+            var da = (IDirectoryAdapter) txF;
 
-                Assert.That(da.Exists(@"something"));
-                Assert.That(da.Exists(@"something\"));
-            }
+            da.Create("something");
+
+            Assert.That(da.Exists(@"something"));
+            Assert.That(da.Exists(@"something\"));
         }
 
         [Test]
@@ -211,18 +209,17 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var txF = new FileTransaction("can_create_and_find_directory"))
-            {
-                txF.Begin();
+            using var txF = new FileTransaction("can_create_and_find_directory");
 
-                Assert.That(((IDirectoryAdapter) txF).Exists("something"), Is.False);
+            txF.Begin();
 
-                ((IDirectoryAdapter) txF).Create("something");
+            Assert.That(((IDirectoryAdapter) txF).Exists("something"), Is.False);
 
-                Assert.That(((IDirectoryAdapter) txF).Exists("something"));
+            ((IDirectoryAdapter) txF).Create("something");
 
-                txF.Rollback();
-            }
+            Assert.That(((IDirectoryAdapter) txF).Exists("something"));
+
+            txF.Rollback();
         }
 
         [Test]
@@ -267,16 +264,15 @@ namespace Castle.Services.Transaction.Tests
             var directoryPath = _testFixtureDirectoryPath.CombineAssert("testing");
 
             // 2. Test it.
-            using (var txF = new FileTransaction("can_delete_empty_directory"))
-            {
-                IDirectoryAdapter da = txF;
+            using var txF = new FileTransaction("can_delete_empty_directory");
 
-                txF.Begin();
+            IDirectoryAdapter da = txF;
 
-                Assert.That(da.Delete(directoryPath, false), "Successfully deleted.");
+            txF.Begin();
 
-                txF.Commit();
-            }
+            Assert.That(da.Delete(directoryPath, false), "Successfully deleted.");
+
+            txF.Commit();
         }
 
         [Test]
@@ -302,14 +298,13 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllLines(PathExtensions.Combine(directoryPath, "two").Combine("filethree"), new[] { "three", "second line" });
 
             // 3. Test them.
-            using (var txF = new FileTransaction())
-            {
-                txF.Begin();
+            using var txF = new FileTransaction();
 
-                Assert.That(((IDirectoryAdapter) txF).Delete(directoryPath, true));
+            txF.Begin();
 
-                txF.Commit();
-            }
+            Assert.That(((IDirectoryAdapter) txF).Delete(directoryPath, true));
+
+            txF.Commit();
         }
 
         [Test]
@@ -328,24 +323,23 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllText(filePath, "hello");
 
             // 2. Test them.
-            using (var txF = new FileTransaction("can_not_delete_non_empty_directory"))
-            {
-                IDirectoryAdapter da = txF;
+            using var txF = new FileTransaction("can_not_delete_non_empty_directory");
 
-                txF.Begin();
+            IDirectoryAdapter da = txF;
 
-                Assert.That(da.Delete(directoryPath, false),
-                            Is.False,
-                            "Did not delete non-empty directory.");
+            txF.Begin();
 
-                IFileAdapter fa = txF;
-                fa.Delete(filePath);
+            Assert.That(da.Delete(directoryPath, false),
+                        Is.False,
+                        "Did not delete non-empty directory.");
 
-                Assert.That(da.Delete(directoryPath, false),
-                            "After deleting the file in the directory, the directory is also deleted.");
+            IFileAdapter fa = txF;
+            fa.Delete(filePath);
 
-                txF.Commit();
-            }
+            Assert.That(da.Delete(directoryPath, false),
+                        "After deleting the file in the directory, the directory is also deleted.");
+
+            txF.Commit();
         }
     }
 }

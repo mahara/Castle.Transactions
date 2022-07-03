@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using Castle.Core;
@@ -47,10 +45,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="model">The model.</param>
         public override void ProcessModel(IKernel kernel, ComponentModel model)
         {
-            if (_metaInfoStore == null)
-            {
-                _metaInfoStore = kernel.Resolve<TransactionMetaInfoStore>();
-            }
+            _metaInfoStore ??= kernel.Resolve<TransactionMetaInfoStore>();
 
             if (IsMarkedTransactional(model.Configuration))
             {
@@ -113,9 +108,9 @@ namespace Castle.Facilities.AutoTx
 
             foreach (var service in model.Services)
             {
-                if (service == null ||
+                if (service is null ||
                     service.IsInterface ||
-                    (metaInfo = metaInfoStore.GetMetaInfoFor(model.Implementation)) == null ||
+                    (metaInfo = metaInfoStore.GetMetaInfoFor(model.Implementation)) is null ||
                      (problematicMethodNames = (from method in metaInfo.Methods
                                                 where !method.IsVirtual
                                                 select method.Name)
@@ -140,7 +135,8 @@ namespace Castle.Facilities.AutoTx
         /// <returns><see langword="true" /> if yes; otherwise, <see langword="false" />.</returns>
         private static bool IsMarkedTransactional(IConfiguration configuration)
         {
-            return configuration != null && "true" == configuration.Attributes["isTransactional"];
+            return configuration is not null &&
+                   configuration.Attributes["isTransactional"] == "true";
         }
 
         /// <summary>
@@ -152,7 +148,7 @@ namespace Castle.Facilities.AutoTx
         {
             var configuration = model.Configuration;
 
-            if (configuration != null && configuration.Children[Transaction_ConfigurationElementName] != null)
+            if (configuration is not null && configuration.Children[Transaction_ConfigurationElementName] is not null)
             {
                 throw new FacilityException(
                     $"The class '{model.Implementation.FullName}' has configured transaction in a child node, " +
@@ -169,7 +165,7 @@ namespace Castle.Facilities.AutoTx
             ComponentModel model,
             TransactionMetaInfoStore metaInfoStore)
         {
-            if (metaInfoStore.GetMetaInfoFor(model.Implementation) == null)
+            if (metaInfoStore.GetMetaInfoFor(model.Implementation) is null)
             {
                 return;
             }
