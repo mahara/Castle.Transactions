@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,18 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
-{
-    using Services.Transaction;
-    using Services.Transaction.IO;
+using System;
 
-    public interface ISomething
+using NUnit.Common;
+
+using NUnitLite;
+
+internal class Program
+{
+    public static int Main(string[] args)
     {
-        void A(ITransaction tx);
-        void B(ITransaction tx);
-        IDirectoryAdapter DA { get; }
-        IFileAdapter FA { get; }
+        var result = new AutoRun(typeof(Program).Assembly)
+                        .Execute(args, new ExtendedTextWrapper(Console.Out), Console.In);
+        return result;
     }
 }

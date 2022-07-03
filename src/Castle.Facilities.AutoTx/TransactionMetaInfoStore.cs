@@ -40,18 +40,13 @@ namespace Castle.Facilities.AutoTx
 
         private readonly IDictionary _typeToMetaInfo = new HybridDictionary();
 
-        #region MarshalByRefObject overrides
-
-        /// <summary>
-        /// Overrides the MBRO lifetime initialization.
-        /// </summary>
-        /// <returns>Null</returns>
+#if NET
+        [Obsolete]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;
         }
-
-        #endregion
 
         /// <summary>
         /// Creates meta-information from a type.

@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +22,11 @@ namespace Castle.Services.Transaction
     [Serializable]
     public class Activity : MarshalByRefObject
     {
-        private readonly Stack<ITransaction> _transactionStack = new Stack<ITransaction>(2);
-        private Guid _id = Guid.NewGuid();
+        private readonly Stack<ITransaction> _transactionStack = new(2);
+        private readonly Guid _id = Guid.NewGuid();
 
-        public ITransaction CurrentTransaction => _transactionStack.Count == 0 ? null : _transactionStack.Peek();
+        public ITransaction CurrentTransaction =>
+            _transactionStack.Count == 0 ? null : _transactionStack.Peek();
 
         public void Push(ITransaction transaction)
         {
@@ -44,7 +45,7 @@ namespace Castle.Services.Transaction
                 return true;
             }
 
-            if (!(obj is Activity activity))
+            if (obj is not Activity activity)
             {
                 return false;
             }

@@ -5,6 +5,7 @@
 ### All
 
 Breaking Changes:
+- Upgraded to .NET 6.0 and .NET Framework 4.8.
 - Replaced Castle.Services.Transaction.TransactionMode with System.Transactions.TransactionScopeOption.
 - Replaced Castle.Services.Transaction.IsolationMode with System.Transactions.IsolationLevel.
 - Renamed IsolationMode to IsolationLevel.

@@ -173,9 +173,9 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            path = Path.NormDirSepChars(CleanPathEnd(path));
+            path = Path.NormalizeDirectorySeparatorChars(CleanPathEnd(path));
 
-            // We don't need to re-create existing folders.
+            // We don't need to re-create existing directories.
             if (((IDirectoryAdapter) this).Exists(path))
             {
                 return true;
@@ -232,7 +232,7 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Deletes a folder recursively.
+        /// Deletes a directory recursively.
         /// </summary>
         /// <param name="path">The directory path to start deleting at!</param>
         void IDirectoryAdapter.Delete(string path)
@@ -246,7 +246,7 @@ namespace Castle.Services.Transaction
 
             if (!RemoveDirectoryTransactedW(path, _TransactionHandle))
             {
-                throw new TransactionException("Unable to delete folder. See inner exception for details.",
+                throw new TransactionException("Unable to delete directory. See inner exception for details.",
                                                new Win32Exception(Marshal.GetLastWin32Error()));
             }
         }
@@ -260,10 +260,8 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            using (var handle = FindFirstFileTransacted(filePath, false))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(filePath, false);
+            return !handle.IsInvalid;
         }
 
         /// <summary>
@@ -282,10 +280,8 @@ namespace Castle.Services.Transaction
 
             path = CleanPathEnd(path);
 
-            using (var handle = FindFirstFileTransacted(path, true))
-            {
-                return !handle.IsInvalid;
-            }
+            using var handle = FindFirstFileTransacted(path, true);
+            return !handle.IsInvalid;
         }
 
         string IDirectoryAdapter.GetFullPath(string dir)
@@ -352,10 +348,10 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Deletes an empty directory
         /// </summary>
-        /// <param name="path">The path to the folder to delete.</param>
+        /// <param name="path">The path to the directory to delete.</param>
         /// <param name="recursively">
         /// Whether to delete recursively or not.
-        /// When recursive, we delete all subfolders and files in the given
+        /// When recursive, we delete all subdirectories and files in the given
         /// directory as well.
         /// </param>
         bool IDirectoryAdapter.Delete(string path, bool recursively)
@@ -405,15 +401,13 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
+            return reader.ReadToEnd();
         }
 
         void IFileAdapter.Move(string filePath, string newFilePath)
         {
-            // case 1, the new file path is a folder
+            // Case 1, the new file path is a directory.
             if (((IDirectoryAdapter) this).Exists(newFilePath))
             {
                 MoveFileTransacted(filePath,
@@ -425,7 +419,7 @@ namespace Castle.Services.Transaction
                 return;
             }
 
-            // case 2, its not a folder, so assume it's a file.
+            // Case 2, its not a directory, so assume it's a file.
             MoveFileTransacted(filePath,
                                newFilePath,
                                IntPtr.Zero,
@@ -443,10 +437,8 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            using (var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return reader.ReadToEnd();
         }
 
         /// <summary>
@@ -462,10 +454,8 @@ namespace Castle.Services.Transaction
 
             var exists = ((IFileAdapter) this).Exists(path);
             var mode = exists ? FileMode.Truncate : FileMode.OpenOrCreate;
-            using (var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None)))
-            {
-                writer.Write(contents);
-            }
+            using var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None));
+            writer.Write(contents);
         }
 
         #endregion
@@ -501,7 +491,9 @@ namespace Castle.Services.Transaction
             GC.SuppressFinalize(this);
         }
 
+#if NETFRAMEWORK
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+#endif
         private void Dispose(bool disposing)
         {
             // No unmanaged code here, just return.
@@ -610,20 +602,13 @@ namespace Castle.Services.Transaction
         /// <returns></returns>
         private static NativeFileAccess TranslateFileAccess(FileAccess access)
         {
-            switch (access)
+            return access switch
             {
-                case FileAccess.Read:
-                    return NativeFileAccess.GenericRead;
-
-                case FileAccess.Write:
-                    return NativeFileAccess.GenericWrite;
-
-                case FileAccess.ReadWrite:
-                    return NativeFileAccess.GenericRead | NativeFileAccess.GenericWrite;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(access));
-            }
+                FileAccess.Read => NativeFileAccess.GenericRead,
+                FileAccess.Write => NativeFileAccess.GenericWrite,
+                FileAccess.ReadWrite => NativeFileAccess.GenericRead | NativeFileAccess.GenericWrite,
+                _ => throw new ArgumentOutOfRangeException(nameof(access)),
+            };
         }
 
         /// <summary>
@@ -700,7 +685,7 @@ namespace Castle.Services.Transaction
 
                     if ((findData.dwFileAttributes & (uint) FileAttributes.Directory) != 0)
                     {
-                        if (findData.cFileName != "." && findData.cFileName != "..")
+                        if (findData.cFileName is not "." and not "..")
                         {
                             ok &= DeleteRecursive(subPath);
                         }

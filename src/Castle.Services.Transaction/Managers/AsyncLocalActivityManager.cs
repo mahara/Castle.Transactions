@@ -21,11 +21,19 @@ namespace Castle.Services.Transaction
 
     public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        private readonly AsyncLocal<Activity> _data = new AsyncLocal<Activity>();
+        private readonly AsyncLocal<Activity> _data = new();
 
         public AsyncLocalActivityManager()
         {
             _data.Value = null;
+        }
+
+#if NET
+        [Obsolete]
+#endif
+        public override object InitializeLifetimeService()
+        {
+            return null;
         }
 
         public Activity CurrentActivity
@@ -42,11 +50,6 @@ namespace Castle.Services.Transaction
 
                 return activity;
             }
-        }
-
-        public override object InitializeLifetimeService()
-        {
-            return null;
         }
     }
 }

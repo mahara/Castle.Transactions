@@ -14,23 +14,18 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
+using System;
+
+using NUnit.Common;
+
+using NUnitLite;
+
+internal class Program
 {
-    public interface ITransactionalService
+    public static int Main(string[] args)
     {
-        void Save();
-
-        void Create();
-    }
-
-    public class TransactionalComp3 : ITransactionalService
-    {
-        public void Save()
-        {
-        }
-
-        public void Create()
-        {
-        }
+        var result = new AutoRun(typeof(Program).Assembly)
+                        .Execute(args, new ExtendedTextWrapper(Console.Out), Console.In);
+        return result;
     }
 }

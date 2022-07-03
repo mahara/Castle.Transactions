@@ -54,7 +54,8 @@ namespace Castle.Services.Transaction
             }
         }
 
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } =
+            NullLogger.Instance;
 
         /// <summary>
         /// Gets or sets the activity manager.
@@ -108,8 +109,13 @@ namespace Castle.Services.Transaction
 
                 if (isAmbient)
                 {
-#if MONO
-                    throw new NotSupportedException("Distributed transactions are not supported on Mono.");
+#if NET || MONO
+                    //
+                    // .NET does not support distributed transactions yet.
+                    // https://github.com/dotnet/runtime/issues/715
+                    // System.PlatformNotSupportedException : This platform does not support distributed transactions.
+                    //
+                    throw new PlatformNotSupportedException("Distributed transactions are not supported on .NET (yet) and Mono.");
 #else
                     transaction.CreateAmbientTransaction();
 #endif
@@ -225,10 +231,9 @@ namespace Castle.Services.Transaction
             Logger.DebugFormat("Transaction {0} disposed successfully", transaction.Name);
         }
 
-        /// <summary>
-        /// <see cref="MarshalByRefObject.InitializeLifetimeService" />.
-        /// </summary>
-        /// <returns>always null</returns>
+#if NET
+        [Obsolete]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;

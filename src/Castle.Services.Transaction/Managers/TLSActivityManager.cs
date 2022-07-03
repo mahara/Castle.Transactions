@@ -16,6 +16,7 @@
 
 namespace Castle.Services.Transaction
 {
+#if NETFRAMEWORK
     using System;
     using System.Threading;
 
@@ -23,7 +24,7 @@ namespace Castle.Services.Transaction
     {
         private const string Key = "Castle.Services.Transaction.TLSActivity";
 
-        private readonly object _lockObj = new object();
+        private readonly object _lockObj = new();
         private static readonly LocalDataStoreSlot _dataSlot;
 
         static TLSActivityManager()
@@ -31,7 +32,7 @@ namespace Castle.Services.Transaction
             _dataSlot = Thread.AllocateNamedDataSlot(Key);
         }
 
-        #region MarshalByRefObject
+    #region MarshalByRefObject
 
         /// <summary>
         /// Obtains a lifetime service object to control the lifetime policy for this instance.
@@ -45,7 +46,7 @@ namespace Castle.Services.Transaction
             return null;
         }
 
-        #endregion
+    #endregion
 
         /// <summary>
         /// Gets the current activity.
@@ -70,4 +71,5 @@ namespace Castle.Services.Transaction
             }
         }
     }
+#endif
 }

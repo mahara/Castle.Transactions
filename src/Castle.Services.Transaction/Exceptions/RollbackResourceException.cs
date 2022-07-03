@@ -25,7 +25,7 @@ namespace Castle.Services.Transaction
     [Serializable]
     public class RollbackResourceException : TransactionException
     {
-        private readonly List<Pair<IResource, Exception>> _failedResources = new List<Pair<IResource, Exception>>();
+        private readonly List<Pair<IResource, Exception>> _failedResources = new();
 
         public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources)
             : base(message, null)

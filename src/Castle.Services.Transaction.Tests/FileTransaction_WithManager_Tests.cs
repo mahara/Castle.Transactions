@@ -26,10 +26,9 @@ namespace Castle.Services.Transaction.Tests
     public class FileTransaction_WithManager_Tests
     {
         private string _directoryPath;
-
+        private string _filePath;
         // just if I'm curious and want to see that the file exists with my own eyes :p
         private bool _deleteAtEnd;
-        private string _filePath;
 
         private DefaultTransactionManager _transactionManager;
 
@@ -60,27 +59,27 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void TransactionResources_AreDisposed()
+        public void TransactionResourcesAreDisposed()
         {
-            var t = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
 
             var resource = new ResourceImpl();
 
-            t.Enlist(resource);
+            tx.Enlist(resource);
 
-            t.Begin();
+            tx.Begin();
 
             // lalala
 
-            t.Rollback();
+            tx.Rollback();
 
-            _transactionManager.Dispose(t);
+            _transactionManager.Dispose(tx);
 
             Assert.That(resource.WasDisposed);
         }
 
         [Test]
-        public void NestedFileTransaction_CanBeCommitted()
+        public void NestedFileTransactionCanBeCommitted()
         {
             if (Environment.OSVersion.Version.Major < 6)
             {
@@ -127,7 +126,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
-        public void UsingNestedTransaction_FileTransactionOnlyVotesToCommit()
+        public void UsingNestedTransactionFileTransactionOnlyVotesToCommit()
         {
             // TODO Implement proper exception handling when file transaction is voted to commit
         }

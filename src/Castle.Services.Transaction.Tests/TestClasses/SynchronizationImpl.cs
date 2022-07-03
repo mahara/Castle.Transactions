@@ -24,20 +24,20 @@ namespace Castle.Services.Transaction.Tests
         {
         }
 
+        public DateTime Before { get; private set; } =
+          DateTime.MinValue;
+
         public DateTime After { get; private set; } =
             DateTime.MinValue;
-
-        public DateTime Before { get; private set; } =
-            DateTime.MinValue;
-
-        public void AfterCompletion()
-        {
-            After = DateTime.Now;
-        }
 
         public void BeforeCompletion()
         {
             Before = DateTime.Now;
+        }
+
+        public void AfterCompletion()
+        {
+            After = DateTime.Now;
         }
     }
 }

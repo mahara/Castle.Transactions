@@ -24,12 +24,12 @@ namespace Castle.Services.Transaction.IO
     /// Utility class meant to replace the <see cref="System.IO.Path" /> class completely.
     /// This class handles these types of paths:
     /// <list>
-    /// <item>UNC network paths: \\server\folder</item>
-    /// <item>UNC-specified network paths: \\?\UNC\server\folder</item>
-    /// <item>IPv4 network paths: \\192.168.3.22\folder</item>
+    /// <item>UNC network paths: \\server\directory</item>
+    /// <item>UNC-specified network paths: \\?\UNC\server\directory</item>
+    /// <item>IPv4 network paths: \\192.168.3.22\directory</item>
     /// <item>Rooted paths: /dev/cdrom0</item>
-    /// <item>Rooted paths: C:\folder</item>
-    /// <item>UNC-rooted paths: \\?\C:\folder\file</item>
+    /// <item>Rooted paths: C:\directory</item>
+    /// <item>UNC-rooted paths: \\?\C:\directory\file</item>
     /// <item>Fully expanded IPv6 paths</item>
     /// </list>
     /// </summary>
@@ -84,12 +84,12 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("path was empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             if (ContainsInvalidChars(path))
             {
-                throw new ArgumentException("path contains invalid characters.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} contains invalid characters.", nameof(path));
             }
 
             return PathInfo.Parse(path).Root;
@@ -132,11 +132,11 @@ namespace Castle.Services.Transaction.IO
                 return string.Empty;
             }
 
-            return path.Substring(GetPathRoot(path).Length);
+            return path[GetPathRoot(path).Length..];
         }
 
         /// <summary>
-        /// Normalize all the directory separation chars.
+        /// Normalize all the directory separator chars.
         /// Also removes empty space in beginning and end of string.
         /// </summary>
         /// <param name="pathWithAlternatingChars"></param>
@@ -144,13 +144,13 @@ namespace Castle.Services.Transaction.IO
         /// The directory string path with all occurrances of the alternating chars
         /// replaced for that specified in <see cref="System.IO.Path.DirectorySeparatorChar" />
         /// </returns>
-        public static string NormDirSepChars(string pathWithAlternatingChars)
+        public static string NormalizeDirectorySeparatorChars(string pathWithAlternatingChars)
         {
             var sb = new StringBuilder();
 
             for (var i = 0; i < pathWithAlternatingChars.Length; i++)
             {
-                if ((pathWithAlternatingChars[i] == '\\') || (pathWithAlternatingChars[i] == '/'))
+                if (pathWithAlternatingChars[i] is '\\' or '/')
                 {
                     sb.Append(DirectorySeparatorChar);
                 }
@@ -194,12 +194,12 @@ namespace Castle.Services.Transaction.IO
 
             if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
             {
-                return System.IO.Path.GetFullPath(path.Substring(4));
+                return System.IO.Path.GetFullPath(path[4..]);
             }
 
             if (path.StartsWith("\\\\?\\UNC\\"))
             {
-                return System.IO.Path.GetFullPath(path.Substring(8));
+                return System.IO.Path.GetFullPath(path[8..]);
             }
 
             if (path.StartsWith("file:///"))
@@ -214,7 +214,7 @@ namespace Castle.Services.Transaction.IO
         /// Removes the last directory/file off the path.
         ///
         /// For a path "/a/b/c" would return "/a/b"
-        /// or for "\\?\C:\folderA\folder\B\C\d.txt" would return "\\?\C:\folderA\folder\B\C"
+        /// or for "\\?\C:\directoryA\directory\B\C\d.txt" would return "\\?\C:\directoryA\directory\B\C"
         /// </summary>
         /// <param name="path">The path string to modify</param>
         /// <returns></returns>
@@ -254,7 +254,7 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentException($"Could not find a path separator character in the path: \"{path}\".");
             }
 
-            var result = path.Substring(0, endsWithSlash ? secondLast : last);
+            var result = path[..(endsWithSlash ? secondLast : last)];
             return result == string.Empty ? new string(lastType, 1) : result;
         }
 
@@ -267,7 +267,7 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("path must not be null.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             if (path.EndsWith("/") || path.EndsWith("\\"))
@@ -282,7 +282,7 @@ namespace Castle.Services.Transaction.IO
             // ReSharper is wrong that you can transform this to a ternary operator.
             if ((strIndex = nonRoot.LastIndexOfAny(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar })) != -1)
             {
-                return nonRoot.Substring(strIndex + 1);
+                return nonRoot[(strIndex + 1)..];
             }
 
             return nonRoot;
@@ -297,7 +297,7 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
@@ -312,13 +312,13 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             var fn = GetFileName(path);
             var lastPeriod = fn.LastIndexOf('.');
 
-            return lastPeriod == -1 ? string.Empty : fn.Substring(lastPeriod + 1);
+            return lastPeriod == -1 ? string.Empty : fn[(lastPeriod + 1)..];
         }
 
         public static string GetFileNameWithoutExtension(string path)
@@ -331,7 +331,7 @@ namespace Castle.Services.Transaction.IO
             var filename = GetFileName(path);
             var lastPeriod = filename.LastIndexOf('.');
 
-            return lastPeriod == -1 ? filename : filename.Substring(0, lastPeriod);
+            return lastPeriod == -1 ? filename : filename[..lastPeriod];
         }
 
         public static string GetRandomFileName()

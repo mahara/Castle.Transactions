@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    public class TransactionalComp1
+    public class TransactionalComponent1
     {
         public virtual void Save()
         {
@@ -31,7 +31,7 @@ namespace Castle.Facilities.AutoTx.Tests
         }
     }
 
-    public class TransactionalComp2 : TransactionalComp1
+    public class TransactionalComponent2 : TransactionalComponent1
     {
         public virtual void SaveThat()
         {

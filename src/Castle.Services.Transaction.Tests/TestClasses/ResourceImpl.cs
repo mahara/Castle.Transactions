@@ -24,9 +24,9 @@ namespace Castle.Services.Transaction.Tests
 
         public bool Started { get; private set; }
 
-        public bool Rolledback { get; private set; }
-
         public bool Committed { get; private set; }
+
+        public bool Rolledback { get; private set; }
 
         #region IResource Members
 

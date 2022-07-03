@@ -39,11 +39,11 @@ namespace Castle.Facilities.AutoTx.Tests
             container.Register(Component.For<ITransactionManager>()
                                         .ImplementedBy<MockTransactionManager>()
                                         .Named("transactionmanager"));
-            container.Register(Component.For<ISomething>()
-                                        .ImplementedBy<AClass>()
+            container.Register(Component.For<ITransactionManagerService>()
+                                        .ImplementedBy<TransactionManagerService>()
                                         .Named("AClass"));
 
-            var something = container.Resolve<ISomething>();
+            var something = container.Resolve<ITransactionManagerService>();
 
             Assert.That(something, Is.Not.Null);
             Assert.That(something.DA, Is.Not.Null);
@@ -73,8 +73,8 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var transactionManager = container.Resolve<MockTransactionManager>("transactionmanager");
 
-            Assert.AreEqual(2, transactionManager.TransactionCount);
-            Assert.AreEqual(0, transactionManager.RolledBackCount);
+            Assert.That(transactionManager.TransactionCount, Is.EqualTo(2));
+            Assert.That(transactionManager.RolledBackCount, Is.EqualTo(0));
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace Castle.Facilities.AutoTx.Tests
         {
             var container = new WindsorContainer();
 
-            // these lines have been permuted
+            // These lines have been permuted.
             container.Register(Component.For<ITransactionManager>()
                                         .ImplementedBy<MockTransactionManager>()
                                         .Named("transactionmanager"));

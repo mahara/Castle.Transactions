@@ -31,14 +31,14 @@ namespace Castle.Facilities.AutoTx.Tests
         [Test]
         public void IsTransactionalMissing()
         {
-            void Method()
+            static void Method()
             {
-                new WindsorContainer("IsTransactionalMissing.xml");
+                _ = new WindsorContainer("IsTransactionalMissing.xml");
             }
 
             Assert.That(Method,
                         Throws.TypeOf<FacilityException>()
-                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
         }
 
         [Test]
@@ -48,8 +48,8 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-            Assert.IsNull(meta);
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent1));
+            Assert.That(meta, Is.Null);
         }
 
         [Test]
@@ -59,22 +59,22 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp1));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(3, meta.Methods.Count());
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent1));
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.Methods.Count(), Is.EqualTo(3));
         }
 
         [Test]
         public void HasInvalidMethod()
         {
-            void Method()
+            static void Method()
             {
-                new WindsorContainer("HasInvalidMethod.xml");
+                _ = new WindsorContainer("HasInvalidMethod.xml");
             }
 
             Assert.That(Method,
                         Throws.TypeOf<Exception>()
-                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComp1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
         }
 
         [Test]
@@ -84,9 +84,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp2));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(4, meta.Methods.Count());
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent2));
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.Methods.Count(), Is.EqualTo(4));
         }
 
         [Test]
@@ -96,9 +96,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComp3));
-            Assert.IsNotNull(meta);
-            Assert.AreEqual(2, meta.Methods.Count());
+            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalService));
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.Methods.Count(), Is.EqualTo(2));
         }
     }
 }

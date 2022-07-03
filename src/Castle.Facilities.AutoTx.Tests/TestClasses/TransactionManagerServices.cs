@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,18 @@ namespace Castle.Facilities.AutoTx.Tests
     using Services.Transaction;
     using Services.Transaction.IO;
 
-    [Transactional]
-    public class AClass : ISomething
+    public interface ITransactionManagerService
     {
-        public AClass(IDirectoryAdapter da, IFileAdapter fa)
+        IDirectoryAdapter DA { get; }
+        IFileAdapter FA { get; }
+        void A(ITransaction transaction);
+        void B(ITransaction transaction);
+    }
+
+    [Transactional]
+    public class TransactionManagerService : ITransactionManagerService
+    {
+        public TransactionManagerService(IDirectoryAdapter da, IFileAdapter fa)
         {
             DA = da;
             FA = fa;
@@ -35,15 +43,15 @@ namespace Castle.Facilities.AutoTx.Tests
         public IFileAdapter FA { get; }
 
         [Transaction]
-        public void A(ITransaction tx)
+        public void A(ITransaction transaction)
         {
-            Assert.That(tx, Is.Null);
+            Assert.That(transaction, Is.Null);
         }
 
         [Transaction, InjectTransaction]
-        public void B(ITransaction tx)
+        public void B(ITransaction transaction)
         {
-            Assert.That(tx, Is.Not.Null);
+            Assert.That(transaction, Is.Not.Null);
         }
     }
 }
