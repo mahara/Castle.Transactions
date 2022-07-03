@@ -141,7 +141,7 @@ namespace Castle.Services.Transaction.Tests
             // Now we can dispose the main transaction.
             _transactionManager.Dispose(tx);
 
-            Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
             Assert.That(txF.IsDisposed);
         }
 
