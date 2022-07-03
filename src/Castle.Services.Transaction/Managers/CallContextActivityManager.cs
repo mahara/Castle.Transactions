@@ -45,11 +45,11 @@ namespace Castle.Services.Transaction
 #if NETFRAMEWORK
                 Activity activity;
 
-                if ((activity = (Activity) CallContext.GetData(Name)) == null)
+                if ((activity = (Activity) CallContext.GetData(Name)) is null)
                 {
                     lock (_lock)
                     {
-                        if ((activity = (Activity) CallContext.GetData(Name)) == null)
+                        if ((activity = (Activity) CallContext.GetData(Name)) is null)
                         {
                             activity = new Activity();
 
