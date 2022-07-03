@@ -14,9 +14,9 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Text;
+
+using Castle.Services.Transaction.Utilities;
 
 namespace Castle.Services.Transaction.IO
 {
@@ -70,7 +70,7 @@ namespace Castle.Services.Transaction.IO
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
         public static bool IsRooted(string path)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -129,7 +129,7 @@ namespace Castle.Services.Transaction.IO
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
         public static string GetPathWithoutRoot(string path)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -139,7 +139,8 @@ namespace Castle.Services.Transaction.IO
                 return string.Empty;
             }
 
-            return path.Substring(GetPathRoot(path).Length);
+            //return path.Substring(GetPathRoot(path).Length);
+            return path[GetPathRoot(path).Length..];
         }
 
         /// <summary>
@@ -157,8 +158,7 @@ namespace Castle.Services.Transaction.IO
 
             for (var i = 0; i < pathWithAlternatingChars.Length; i++)
             {
-                if ((pathWithAlternatingChars[i] == '\\') ||
-                    (pathWithAlternatingChars[i] == '/'))
+                if (pathWithAlternatingChars[i] is '\\' or '/')
                 {
                     sb.Append(DirectorySeparatorChar);
                 }
@@ -189,22 +189,25 @@ namespace Castle.Services.Transaction.IO
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
         public static string GetFullPath(string path)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (path.StartsWith(@"\\?\") || path.StartsWith(@"\\.\"))
+            if (path.StartsWith(@"\\?\", StringComparison.Ordinal) ||
+                path.StartsWith(@"\\.\", StringComparison.Ordinal))
             {
-                return System.IO.Path.GetFullPath(path.Substring(4));
+                //return System.IO.Path.GetFullPath(path.Substring(4));
+                return System.IO.Path.GetFullPath(path[4..]);
             }
 
-            if (path.StartsWith(@"\\?\UNC\"))
+            if (path.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase))
             {
-                return System.IO.Path.GetFullPath(path.Substring(8));
+                //return System.IO.Path.GetFullPath(path.Substring(8));
+                return System.IO.Path.GetFullPath(path[8..]);
             }
 
-            if (path.StartsWith(@"file:///"))
+            if (path.StartsWith(@"file:///", StringComparison.OrdinalIgnoreCase))
             {
                 return new Uri(path).LocalPath;
             }
@@ -257,7 +260,8 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentException($"Could not find a path separator character in the path '{path}'.", nameof(path));
             }
 
-            var result = path.Substring(0, endsWithSlash ? secondLast : last);
+            //var result = path.Substring(0, endsWithSlash ? secondLast : last);
+            var result = path[..(endsWithSlash ? secondLast : last)];
             return result == string.Empty ? new string(lastType, 1) : result;
         }
 
@@ -268,7 +272,7 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
 
-            if (path.EndsWith("\\") || path.EndsWith("/"))
+            if (path.EndsWith('\\') || path.EndsWith('/'))
             {
                 return string.Empty;
             }
@@ -279,7 +283,8 @@ namespace Castle.Services.Transaction.IO
 
             if ((strIndex = result.LastIndexOfAny(DirectorySeparatorChars)) != -1)
             {
-                return result.Substring(strIndex + 1);
+                //return result.Substring(strIndex + 1);
+                return result[(strIndex + 1)..];
             }
 
             return result;
@@ -294,7 +299,8 @@ namespace Castle.Services.Transaction.IO
 
             var fileName = GetFileName(path);
             var lastPeriod = fileName.LastIndexOf('.');
-            return lastPeriod == -1 ? fileName : fileName.Substring(0, lastPeriod);
+            //return lastPeriod == -1 ? fileName : fileName.Substring(0, lastPeriod);
+            return lastPeriod == -1 ? fileName : fileName[..lastPeriod];
         }
 
         public static bool HasExtension(string path)
@@ -316,7 +322,8 @@ namespace Castle.Services.Transaction.IO
 
             var fileName = GetFileName(path);
             var lastPeriod = fileName.LastIndexOf('.');
-            return lastPeriod == -1 ? string.Empty : fileName.Substring(lastPeriod + 1);
+            //return lastPeriod == -1 ? string.Empty : fileName.Substring(lastPeriod + 1);
+            return lastPeriod == -1 ? string.Empty : fileName[(lastPeriod + 1)..];
         }
 
         public static string GetRandomFileName()
