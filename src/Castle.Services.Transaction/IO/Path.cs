@@ -136,7 +136,7 @@ namespace Castle.Services.Transaction.IO
         }
 
         /// <summary>
-        /// Normalize all the directory separation chars.
+        /// Normalize all the directory separator chars.
         /// Also removes empty space in beginning and end of string.
         /// </summary>
         /// <param name="pathWithAlternatingChars"></param>
@@ -144,7 +144,7 @@ namespace Castle.Services.Transaction.IO
         /// The directory string path with all occurrances of the alternating chars
         /// replaced for that specified in <see cref="System.IO.Path.DirectorySeparatorChar" />
         /// </returns>
-        public static string NormDirSepChars(string pathWithAlternatingChars)
+        public static string NormalizeDirectorySeparatorChars(string pathWithAlternatingChars)
         {
             var sb = new StringBuilder();
 
@@ -265,9 +265,9 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (path == string.Empty)
+            if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("path must not be null.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be null or empty.", nameof(path));
             }
 
             if (path.EndsWith("/") || path.EndsWith("\\"))

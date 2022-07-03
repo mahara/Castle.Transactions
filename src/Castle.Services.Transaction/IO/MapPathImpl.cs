@@ -62,7 +62,7 @@ namespace Castle.Services.Transaction.IO
                 return _function(path);
             }
 
-            path = Path.NormDirSepChars(path);
+            path = Path.NormalizeDirectorySeparatorChars(path);
 
             if (path == string.Empty)
             {

@@ -173,7 +173,7 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            path = Path.NormDirSepChars(CleanPathEnd(path));
+            path = Path.NormalizeDirectorySeparatorChars(CleanPathEnd(path));
 
             // We don't need to re-create existing directories.
             if (((IDirectoryAdapter) this).Exists(path))
