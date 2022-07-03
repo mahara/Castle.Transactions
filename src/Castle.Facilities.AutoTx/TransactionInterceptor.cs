@@ -14,7 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.Reflection;
 
 using Castle.Core;
@@ -82,7 +81,7 @@ namespace Castle.Facilities.AutoTx
                 method = invocation.Method;
             }
 
-            if (_metaInfo == null || !_metaInfo.IsMethodTransactional(method))
+            if (_metaInfo is null || !_metaInfo.IsMethodTransactional(method))
             {
                 invocation.Proceed();
 
@@ -96,7 +95,7 @@ namespace Castle.Facilities.AutoTx
                                                         attribute.IsDistributed,
                                                         attribute.IsReadOnly);
 
-            if (transaction == null)
+            if (transaction is null)
             {
                 invocation.Proceed();
 

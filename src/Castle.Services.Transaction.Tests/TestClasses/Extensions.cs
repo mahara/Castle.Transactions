@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System.IO;
-
 namespace Castle.Services.Transaction.Tests
 {
     public static class PathExtensions

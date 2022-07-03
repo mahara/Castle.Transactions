@@ -57,7 +57,7 @@ namespace Castle.Facilities.AutoTx
 
         private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type implementation)
         {
-            if (implementation == null ||
+            if (implementation is null ||
                 implementation == typeof(object) ||
                 implementation == typeof(MarshalByRefObject))
             {
