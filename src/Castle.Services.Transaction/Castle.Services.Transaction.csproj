@@ -21,7 +21,9 @@
 
   <ItemGroup>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
   </ItemGroup>
 
 </Project>
