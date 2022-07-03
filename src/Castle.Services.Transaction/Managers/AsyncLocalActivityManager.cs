@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Threading;
-
 namespace Castle.Services.Transaction
 {
     public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
@@ -53,6 +50,10 @@ namespace Castle.Services.Transaction
             }
         }
 
+#if NET
+        //[Obsolete("Obsoletions.RemotingApisMessage, DiagnosticId = Obsoletions.RemotingApisDiagId, UrlFormat = Obsoletions.SharedUrlFormat")]
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;
