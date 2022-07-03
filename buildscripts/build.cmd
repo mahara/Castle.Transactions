@@ -34,7 +34,7 @@ GOTO build
 
 :build
 dotnet build ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.sln
-dotnet build Castle.Transactions.sln -c %Configuration%
+dotnet build Castle.Transactions.sln --configuration %Configuration%
 GOTO test
 
 :test
