@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.IO;
-
 using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;
@@ -33,7 +30,11 @@ namespace Castle.Services.Transaction.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+#if NET
+            var assemblyFilePath = AppDomain.CurrentDomain.BaseDirectory;
+#else
             var assemblyFilePath = Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase);
+#endif
             _testFixtureRootDirectoryPath = Path.GetPathWithoutLastSegment(assemblyFilePath);
 
             // TODO: Remove this workaround in future NUnit3TestAdapter version (4.x).
@@ -61,6 +62,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void IsInAllowedDirectoryReturnsFalseIfConstraintAndOutside()
         {
             var da = new DirectoryAdapter(new PathMapper(), true, _testFixtureRootDirectoryPath);
@@ -72,6 +74,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void IsInAllowedDirectoryReturnsTrueForInside()
         {
             var da = new DirectoryAdapter(new PathMapper(), true, _testFixtureRootDirectoryPath);
