@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System.Threading;
-
 using NUnit.Framework;
 
 namespace Castle.Services.Transaction.Tests

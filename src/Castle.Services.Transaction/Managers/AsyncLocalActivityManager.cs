@@ -28,11 +28,11 @@ namespace Castle.Services.Transaction
             {
                 Activity activity;
 
-                if ((activity = _data.Value) == null)
+                if ((activity = _data.Value) is null)
                 {
                     lock (_lock)
                     {
-                        if ((activity = _data.Value) == null)
+                        if ((activity = _data.Value) is null)
                         {
                             activity = _data.Value = new Activity();
                         }

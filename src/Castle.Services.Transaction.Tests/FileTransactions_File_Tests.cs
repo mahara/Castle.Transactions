@@ -14,6 +14,9 @@
 // limitations under the License.
 #endregion
 
+#if NET5_0_OR_GREATER
+using System.Runtime.Versioning;
+#endif
 using System.Text;
 
 using Castle.Services.Transaction.IO;
@@ -24,6 +27,9 @@ namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
     [Platform("Win")]
+#if NET5_0_OR_GREATER
+    [SupportedOSPlatform("windows")]
+#endif
     public class FileTransactions_File_Tests
     {
         private const string TestFixtureDirectoryName = nameof(FileTransactions_File_Tests);

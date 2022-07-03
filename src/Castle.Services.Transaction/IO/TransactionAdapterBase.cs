@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-
 using Castle.Core.Logging;
 
 namespace Castle.Services.Transaction.IO
@@ -71,7 +69,7 @@ namespace Castle.Services.Transaction.IO
             {
                 foreach (var resource in currentTransaction.GetResources())
                 {
-                    if (!(resource is FileResourceAdapter))
+                    if (resource is not FileResourceAdapter)
                     {
                         continue;
                     }
@@ -83,7 +81,12 @@ namespace Castle.Services.Transaction.IO
 
                 if (!OnlyJoinExisting)
                 {
+                    //
+                    //  TODO:   Refactor this to allow platform-independent implementation.
+                    //
+#pragma warning disable CA1416 // Validate platform compatibility
                     transaction = new FileTransaction("autocreated_file_transaction");
+#pragma warning restore CA1416 // Validate platform compatibility
                     currentTransaction.Enlist(new FileResourceAdapter(transaction));
 
                     return true;
