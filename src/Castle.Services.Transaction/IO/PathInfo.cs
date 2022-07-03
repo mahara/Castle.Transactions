@@ -14,7 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -24,8 +23,7 @@ namespace Castle.Services.Transaction.IO
     /// Path data holder.
     /// Invariant: no fields nor properties are null after constructor.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1815:Override equals and operator equals on value types", Justification = "CA1815")]
-    public struct PathInfo
+    public record struct PathInfo
     {
         private const string RegexPattern =
             @"(?<root>
@@ -70,7 +68,7 @@ namespace Castle.Services.Transaction.IO
 
         public static PathInfo Parse(string path)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -243,7 +241,7 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         public string DirectoryAndFile { get; }
 
-        public PathType Type
+        public readonly PathType Type
         {
             get
             {
@@ -279,7 +277,7 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Returns whether <see cref="Root" /> is not an empty string.
         /// </summary>
-        public bool IsRooted => Root != string.Empty;
+        public readonly bool IsRooted => Root != string.Empty;
 
         /// <summary>
         /// Returns whether the current <see cref="PathInfo" /> is a valid parent of the child path info passed as argument.
@@ -287,7 +285,7 @@ namespace Castle.Services.Transaction.IO
         /// <param name="child">The path info to verify.</param>
         /// <returns>Whether it is true that the current path info is a parent of child.</returns>
         /// <exception cref="NotSupportedException">If this instance of path info and child aren't rooted.</exception>
-        public bool IsParentOf(PathInfo child)
+        public readonly bool IsParentOf(PathInfo child)
         {
             if (Root == string.Empty || child.Root == string.Empty)
             {
@@ -339,7 +337,7 @@ namespace Castle.Services.Transaction.IO
         /// Only works for two rooted paths with same root.
         /// Does NOT cover all edge cases, please verify its intended results yourself.
         /// </remarks>
-        public string RemoveParameterFromRoot(PathInfo other)
+        public readonly string RemoveParameterFromRoot(PathInfo other)
         {
             if (Root != other.Root)
             {
@@ -357,8 +355,9 @@ namespace Castle.Services.Transaction.IO
                 return string.Empty;
             }
 
-            return DirectoryAndFile.Substring(other.DirectoryAndFile.Length)
-                                   .TrimStart(Path.DirectorySeparatorChars);
+            //return DirectoryAndFile.Substring(other.DirectoryAndFile.Length)
+            //                       .TrimStart(Path.DirectorySeparatorChars);
+            return DirectoryAndFile[other.DirectoryAndFile.Length..].TrimStart(Path.DirectorySeparatorChars);
         }
     }
 }

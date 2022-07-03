@@ -118,16 +118,15 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var txF = new FileTransaction())
-            {
-                txF.Begin();
+            using var txF = new FileTransaction();
 
-                txF.SetRollbackOnly();
+            txF.Begin();
 
-                Assert.Throws<TransactionException>(
-                    txF.Commit,
-                    "Should not be able to commit after rollback is set.");
-            }
+            txF.SetRollbackOnly();
+
+            Assert.Throws<TransactionException>(
+                txF.Commit,
+                "Should not be able to commit after rollback is set.");
         }
 
         [Test]
@@ -140,31 +139,30 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var txF = new FileTransaction())
+            using var txF = new FileTransaction();
+
+            txF.Enlist(new R());
+
+            txF.Begin();
+
+            try
             {
-                txF.Enlist(new R());
-
-                txF.Begin();
-
                 try
                 {
-                    try
-                    {
-                        txF.Rollback();
+                    txF.Rollback();
 
-                        Assert.Fail("Tests is wrong or the transaction doesn't rollback resources.");
-                    }
-                    catch (Exception)
-                    {
-                    }
-
-                    Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
+                    Assert.Fail("Tests is wrong or the transaction doesn't rollback resources.");
                 }
-                catch (RollbackResourceException rex)
+                catch (Exception)
                 {
-                    // Good.
-                    Assert.That(rex.FailedResources[0].Item1, Is.InstanceOf<R>());
                 }
+
+                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
+            }
+            catch (RollbackResourceException rex)
+            {
+                // Good.
+                Assert.That(rex.FailedResources[0].Item1, Is.InstanceOf<R>());
             }
         }
 
@@ -177,12 +175,11 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ThrowsInvalidStateOnCreate()
         {
-            using (var txF = new FileTransaction())
-            {
-                Assert.Throws<TransactionException>(
-                    () => ((IDirectoryAdapter) txF).Create("lol"),
-                    "The transaction hasn't begun; throws.");
-            }
+            using var txF = new FileTransaction();
+
+            Assert.Throws<TransactionException>(
+                () => ((IDirectoryAdapter) txF).Create("lol"),
+                "The transaction hasn't begun; throws.");
         }
 
         #endregion
@@ -210,17 +207,16 @@ namespace Castle.Services.Transaction.Tests
 
             using (new TransactionScope())
             {
-                using (var txF = new FileTransaction())
-                {
-                    txF.Begin();
+                using var txF = new FileTransaction();
 
-                    Assert.That(txF.IsAmbient);
+                txF.Begin();
 
-                    txF.Rollback();
+                Assert.That(txF.IsAmbient);
 
-                    Assert.That(txF.IsRollbackOnlySet);
-                    Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
-                }
+                txF.Rollback();
+
+                Assert.That(txF.IsRollbackOnlySet);
+                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
             }
         }
 #endif
@@ -235,18 +231,17 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var txF = new FileTransaction())
-            {
-                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.NoTransaction));
+            using var txF = new FileTransaction();
 
-                txF.Begin();
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.NoTransaction));
 
-                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Active));
+            txF.Begin();
 
-                txF.Commit();
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Active));
 
-                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
-            }
+            txF.Commit();
+
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
         }
 
         #endregion
@@ -272,25 +267,24 @@ namespace Castle.Services.Transaction.Tests
             File.WriteAllText(filePath, "I should also be moved.");
             _pathsCreated.Add(filePath);
 
-            using (var txF = new FileTransaction("can_move_directory"))
-            {
-                txF.Begin();
+            using var txF = new FileTransaction("can_move_directory");
 
-                ((IDirectoryAdapter) txF).Move(directoryPath1, directoryPath2);
+            txF.Begin();
 
-                Assert.That(Directory.Exists(directoryPath2), Is.False,
-                            "The directory should not yet exist.");
+            ((IDirectoryAdapter) txF).Move(directoryPath1, directoryPath2);
 
-                txF.Commit();
+            Assert.That(Directory.Exists(directoryPath2), Is.False,
+                        "The directory should not yet exist.");
 
-                Assert.That(Directory.Exists(directoryPath2),
-                            "Now after committing it should.");
+            txF.Commit();
 
-                _pathsCreated.Add(directoryPath2);
+            Assert.That(Directory.Exists(directoryPath2),
+                        "Now after committing it should.");
 
-                Assert.That(File.Exists(directoryPath2.Combine(Path.GetFileName(filePath))),
-                            "And so should the file in the directory.");
-            }
+            _pathsCreated.Add(directoryPath2);
+
+            Assert.That(File.Exists(directoryPath2.Combine(Path.GetFileName(filePath))),
+                        "And so should the file in the directory.");
         }
 
         #endregion
@@ -321,23 +315,22 @@ namespace Castle.Services.Transaction.Tests
                 try
                 {
                     // ...modify the file...
-                    using (var fs = File.OpenWrite("abc"))
-                    {
-                        Console.WriteLine("t2 start");
-                        Console.Out.Flush();
+                    using var fs = File.OpenWrite("abc");
 
-                        // ...before the transacted thread does.
-                        t2_started.Set();
+                    Console.WriteLine("t2 start");
+                    Console.Out.Flush();
 
-                        Console.WriteLine("t2 wait for t1 to start");
-                        Console.Out.Flush();
+                    // ...before the transacted thread does.
+                    t2_started.Set();
 
-                        t1_started.WaitOne();
+                    Console.WriteLine("t2 wait for t1 to start");
+                    Console.Out.Flush();
 
-                        fs.Write(new byte[] { 0x1 }, 0, 1);
+                    t1_started.WaitOne();
 
-                        fs.Close();
-                    }
+                    fs.Write(new byte[] { 0x1 }, 0, 1);
+
+                    fs.Close();
                 }
                 catch (Exception ex)
                 {
@@ -368,10 +361,9 @@ namespace Castle.Services.Transaction.Tests
                     Console.WriteLine("t1 started");
 
                     // The transacted thread should receive ERROR_TRANSACTIONAL_CONFLICT, but it gets permission denied.
-                    using (var fs = ((IFileAdapter) txF).Create("abc"))
-                    {
-                        fs.WriteByte(0x2);
-                    }
+                    using var fs = ((IFileAdapter) txF).Create("abc");
+
+                    fs.WriteByte(0x2);
                 }
                 finally
                 {
@@ -384,7 +376,7 @@ namespace Castle.Services.Transaction.Tests
                 txF.Commit();
             }
 
-            if (exception != null)
+            if (exception is not null)
             {
                 Console.WriteLine(exception);
 
