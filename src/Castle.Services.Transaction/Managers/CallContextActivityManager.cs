@@ -14,26 +14,32 @@
 // limitations under the License.
 #endregion
 
-using System;
+#if NETFRAMEWORK
 using System.Runtime.Remoting.Messaging;
+#endif
 
 namespace Castle.Services.Transaction
 {
     public class CallContextActivityManager : MarshalByRefObject, IActivityManager
     {
+#if NETFRAMEWORK
         private const string Name = "Castle.Services.Transaction.Activity";
 
         private readonly object _lock = new();
+#endif
 
         public CallContextActivityManager()
         {
+#if NETFRAMEWORK
             CallContext.SetData(Name, null);
+#endif
         }
 
         public Activity CurrentActivity
         {
             get
             {
+#if NETFRAMEWORK
                 Activity activity;
 
                 if ((activity = (Activity) CallContext.GetData(Name)) is null)
@@ -50,9 +56,17 @@ namespace Castle.Services.Transaction
                 }
 
                 return activity;
+#else
+                var message = "'CallContext' is not supported on .NET (Core).";
+                throw new PlatformNotSupportedException(message);
+#endif
             }
         }
 
+#if NET
+        //[Obsolete("Obsoletions.RemotingApisMessage, DiagnosticId = Obsoletions.RemotingApisDiagId, UrlFormat = Obsoletions.SharedUrlFormat")]
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         public override object InitializeLifetimeService()
         {
             return null;

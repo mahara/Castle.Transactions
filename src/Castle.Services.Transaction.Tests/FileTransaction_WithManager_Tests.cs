@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.IO;
 using System.Transactions;
 
 using NUnit.Framework;
@@ -23,6 +21,7 @@ using NUnit.Framework;
 namespace Castle.Services.Transaction.Tests
 {
     [TestFixture]
+    [Platform("Win")]
     public class FileTransaction_WithManager_Tests
     {
         private string _testFixtureRootDirectoryPath;

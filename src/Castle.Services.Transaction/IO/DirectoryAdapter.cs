@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.IO;
-
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
