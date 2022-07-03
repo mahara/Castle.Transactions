@@ -14,17 +14,18 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if NETFRAMEWORK
 using System.Security.Permissions;
+#endif
 using System.Text;
 using System.Transactions;
 
 using Castle.Services.Transaction.IO;
+#if NETFRAMEWORK
+using Castle.Services.Transaction.Utilities;
+#endif
 
 using Microsoft.Win32.SafeHandles;
 
@@ -90,7 +91,9 @@ namespace Castle.Services.Transaction
             GC.SuppressFinalize(this);
         }
 
+#if NETFRAMEWORK
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+#endif
         private void Dispose(bool disposing)
         {
             // No unmanaged code here, just return.
@@ -235,8 +238,8 @@ namespace Castle.Services.Transaction
 
             var currentPath = path;
             while (!((IDirectoryAdapter) this).Exists(currentPath) &&
-                   (currentPath.Contains(System.IO.Path.DirectorySeparatorChar) ||
-                    currentPath.Contains(System.IO.Path.AltDirectorySeparatorChar)))
+                   (currentPath.Contains(System.IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) ||
+                    currentPath.Contains(System.IO.Path.AltDirectorySeparatorChar, StringComparison.Ordinal)))
             {
                 currentPath = Path.GetPathWithoutLastSegment(currentPath);
 
