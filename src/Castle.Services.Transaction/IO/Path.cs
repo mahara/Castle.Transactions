@@ -84,12 +84,12 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("path was empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             if (ContainsInvalidChars(path))
             {
-                throw new ArgumentException("path contains invalid characters.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} contains invalid characters.", nameof(path));
             }
 
             return PathInfo.Parse(path).Root;
@@ -265,9 +265,9 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (string.IsNullOrEmpty(path))
+            if (path == string.Empty)
             {
-                throw new ArgumentException($"{nameof(path)} must not be null or empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             if (path.EndsWith("/") || path.EndsWith("\\"))
@@ -297,7 +297,7 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
@@ -312,7 +312,7 @@ namespace Castle.Services.Transaction.IO
 
             if (path == string.Empty)
             {
-                throw new ArgumentException("Path musn't be empty.", nameof(path));
+                throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
             var fn = GetFileName(path);
