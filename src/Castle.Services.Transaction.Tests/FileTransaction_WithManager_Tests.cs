@@ -90,13 +90,13 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.That(_transactionManager.CurrentTransaction, Is.Null);
 
-            var stdTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-            stdTx.Begin();
+            var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            tx.Begin();
 
             Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
-            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(stdTx));
+            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(tx));
 
-            // invocation.Proceed() in interceptor
+            // invocation.Proceed() in Interceptor
 
             var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
             Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
@@ -110,16 +110,16 @@ namespace Castle.Services.Transaction.Tests
             txF.WriteAllText(_filePath, "Hello world");
 
             childTx.Commit();
-            stdTx.Commit();
+            tx.Commit();
 
             Assert.That(File.Exists(_filePath));
             Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo("Hello world"));
 
-            // first we need to dispose the child transaction.
+            // First we need to dispose the child transaction.
             _transactionManager.Dispose(childTx);
 
-            // now we can dispose the main transaction.
-            _transactionManager.Dispose(stdTx);
+            // Now we can dispose the main transaction.
+            _transactionManager.Dispose(tx);
 
             Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
             Assert.That(txF.IsDisposed);
@@ -128,7 +128,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void UsingNestedTransactionFileTransactionOnlyVotesToCommit()
         {
-            // TODO Implement proper exception handling when file transaction is voted to commit
+            // TODO: Implement proper exception handling when file transaction is voted to commit.
         }
 
         [Test]

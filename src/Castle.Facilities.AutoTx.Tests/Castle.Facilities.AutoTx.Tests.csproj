@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\buildscripts\common.props"></Import>
+
   <PropertyGroup>
     <TargetFrameworks>net6.0;net48</TargetFrameworks>
   </PropertyGroup>
-
-  <Import Project="..\..\buildscripts\common.props"></Import>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>

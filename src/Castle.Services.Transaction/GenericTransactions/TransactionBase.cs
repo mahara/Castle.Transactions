@@ -54,7 +54,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         public virtual string Name =>
             string.IsNullOrEmpty(InnerName) ?
-            $"Transaction ##{GetHashCode()}" :
+            $"Transaction #{GetHashCode()}" :
             InnerName;
 
         /// <summary>
@@ -361,7 +361,7 @@ namespace Castle.Services.Transaction
                 }
 
                 throw new TransactionException(
-                    string.Format("State failure; should have been {0} but was {1}.",
+                    string.Format("State failure; should have been {0}, but was {1}.",
                                   status,
                                   Status));
             }

@@ -132,14 +132,14 @@ namespace Castle.Facilities.AutoTx
 
                 if (transaction.IsRollbackOnlySet)
                 {
-                    Logger.DebugFormat("Rolling back transaction {0}", transaction.GetHashCode());
+                    Logger.DebugFormat("Rolling back transaction \"{0}\".", transaction.Name);
 
                     rolledback = true;
                     transaction.Rollback();
                 }
                 else
                 {
-                    Logger.DebugFormat("Committing transaction {0}", transaction.GetHashCode());
+                    Logger.DebugFormat("Committing transaction \"{0}\".", transaction.Name);
 
                     transaction.Commit();
                 }
@@ -151,7 +151,7 @@ namespace Castle.Facilities.AutoTx
 
                 if (Logger.IsFatalEnabled)
                 {
-                    Logger.Fatal("Fatal error during transaction processing", ex);
+                    Logger.Fatal("Fatal error during transaction processing.", ex);
                 }
 
                 throw;
@@ -162,7 +162,7 @@ namespace Castle.Facilities.AutoTx
                 {
                     if (Logger.IsDebugEnabled)
                     {
-                        Logger.DebugFormat("Rolling back transaction {0} due to exception on method {2}.{1}", transaction.GetHashCode(), methodInfo.Name, methodInfo.DeclaringType.Name);
+                        Logger.DebugFormat("Rolling back transaction \"{0}\" due to exception on method {2}.{1}.", transaction.Name, methodInfo.Name, methodInfo.DeclaringType.Name);
                     }
 
                     transaction.Rollback();

@@ -172,10 +172,10 @@ namespace Castle.Services.Transaction
 
         private void AssertModeSupported(TransactionScopeOption mode)
         {
-            var ctx = CurrentTransaction;
+            var transaction = CurrentTransaction;
 
             if (mode == TransactionScopeOption.Suppress &&
-                ctx != null && ctx.Status == TransactionStatus.Active)
+                transaction != null && transaction.Status == TransactionStatus.Active)
             {
                 var message = "There is a transaction active and the transaction mode " +
                               "explicit says that no transaction is supported for this context.";
@@ -204,11 +204,11 @@ namespace Castle.Services.Transaction
                 throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction.");
             }
 
-            Logger.DebugFormat("Trying to dispose transaction {0}.", transaction.Name);
+            Logger.DebugFormat("Trying to dispose transaction \"{0}\".", transaction.Name);
 
             if (CurrentTransaction != transaction)
             {
-                throw new ArgumentException("Tried to dispose a transaction that is not on the current active transaction",
+                throw new ArgumentException("Tried to dispose a transaction that is not on the current active transaction.",
                                             nameof(transaction));
             }
 
@@ -228,7 +228,7 @@ namespace Castle.Services.Transaction
 
             TransactionDisposed.Fire(this, new TransactionEventArgs(transaction));
 
-            Logger.DebugFormat("Transaction {0} disposed successfully", transaction.Name);
+            Logger.DebugFormat("Transaction \"{0}\" disposed successfully.", transaction.Name);
         }
 
 #if NET
