@@ -38,7 +38,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             Assert.That(Method,
                         Throws.TypeOf<FacilityException>()
-                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has configured transaction in a child node but has not specified istransaction=\"true\" on the component node."));
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has configured transaction in a child node but has not specified isTransaction=\"true\" on the component node."));
         }
 
         [Test]

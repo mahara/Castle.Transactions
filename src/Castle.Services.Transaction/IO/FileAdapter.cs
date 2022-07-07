@@ -38,15 +38,16 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="constrainToSpecifiedDir"></param>
-        /// <param name="specifiedDir"></param>
-        public FileAdapter(bool constrainToSpecifiedDir, string specifiedDir) : base(constrainToSpecifiedDir, specifiedDir)
+        /// <param name="constrainToSpecifiedDirectory"></param>
+        /// <param name="specifiedDirectory"></param>
+        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory)
+            : base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
             if (Logger.IsDebugEnabled)
             {
-                if (constrainToSpecifiedDir)
+                if (constrainToSpecifiedDirectory)
                 {
-                    Logger.Debug(string.Format("FileAdapter constructor, constraining to dir: {0}", specifiedDir));
+                    Logger.Debug(string.Format("FileAdapter constructor, constraining to directory: {0}.", specifiedDirectory));
                 }
                 else
                 {
@@ -55,31 +56,7 @@ namespace Castle.Services.Transaction.IO
             }
         }
 
-        /// <summary>
-        /// Creates a new file from the given path for ReadWrite,
-        /// different depending on whether we're in a transaction or not.
-        /// </summary>
-        /// <param name="path">Path to create file at.</param>
-        /// <returns>A filestream for the path.</returns>
-        public FileStream Create(string path)
-        {
-            AssertAllowed(path);
-
-#if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return (tx as IFileAdapter).Create(path);
-            }
-#endif
-
-            return File.Create(path);
-        }
-
-        /// <summary>
-        /// Returns whether the specified file exists or not.
-        /// </summary>
-        /// <param name="filePath">The file path.</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public bool Exists(string filePath)
         {
             AssertAllowed(filePath);
@@ -87,13 +64,20 @@ namespace Castle.Services.Transaction.IO
 #if !MONO
             if (HasTransaction(out var tx))
             {
-                return (tx as IFileAdapter).Exists(filePath);
+                return ((IFileAdapter) tx).Exists(filePath);
             }
 #endif
 
             return File.Exists(filePath);
         }
 
+        /// <inheritdoc />
+        public string ReadAllText(string path)
+        {
+            return ReadAllText(path, Encoding.UTF8);
+        }
+
+        /// <inheritdoc />
         public string ReadAllText(string path, Encoding encoding)
         {
             AssertAllowed(path);
@@ -108,16 +92,7 @@ namespace Castle.Services.Transaction.IO
             return File.ReadAllText(path, encoding);
         }
 
-        public void Move(string originalFilePath, string newFilePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ReadAllText(string path)
-        {
-            return ReadAllText(path, Encoding.UTF8);
-        }
-
+        /// <inheritdoc />
         public void WriteAllText(string path, string contents)
         {
             AssertAllowed(path);
@@ -126,6 +101,7 @@ namespace Castle.Services.Transaction.IO
             if (HasTransaction(out var tx))
             {
                 tx.WriteAllText(path, contents);
+
                 return;
             }
 #endif
@@ -133,21 +109,22 @@ namespace Castle.Services.Transaction.IO
             File.WriteAllText(path, contents);
         }
 
-        public void Delete(string filePath)
+        /// <inheritdoc />
+        public FileStream Create(string path)
         {
-            AssertAllowed(filePath);
+            AssertAllowed(path);
 
 #if !MONO
             if (HasTransaction(out var tx))
             {
-                (tx as IFileAdapter).Delete(filePath);
-                return;
+                return ((IFileAdapter) tx).Create(path);
             }
 #endif
 
-            File.Delete(filePath);
+            return File.Create(path);
         }
 
+        /// <inheritdoc />
         public FileStream Open(string filePath, FileMode mode)
         {
             AssertAllowed(filePath);
@@ -162,6 +139,7 @@ namespace Castle.Services.Transaction.IO
             return File.Open(filePath, mode);
         }
 
+        /// <inheritdoc />
         public int WriteStream(string toFilePath, Stream fromStream)
         {
             var offset = 0;
@@ -172,11 +150,35 @@ namespace Castle.Services.Transaction.IO
                 while ((read = fromStream.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     fs.Write(buffer, 0, read);
+
                     offset += read;
                 }
             }
 
             return offset;
+        }
+
+        /// <inheritdoc />
+        public void Delete(string filePath)
+        {
+            AssertAllowed(filePath);
+
+#if !MONO
+            if (HasTransaction(out var tx))
+            {
+                ((IFileAdapter) tx).Delete(filePath);
+
+                return;
+            }
+#endif
+
+            File.Delete(filePath);
+        }
+
+        /// <inheritdoc />
+        public void Move(string originalFilePath, string newFilePath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

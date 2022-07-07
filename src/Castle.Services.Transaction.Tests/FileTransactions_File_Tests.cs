@@ -110,8 +110,8 @@ namespace Castle.Services.Transaction.Tests
                 Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False,
                             "Should not exist before move.");
 
-                (tx as IFileAdapter).Move(filePath, toDirectory); // Moving file to directory
-                (tx as IFileAdapter).Move(filePath2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
+                ((IFileAdapter) tx).Move(filePath, toDirectory); // Moving file to directory.
+                ((IFileAdapter) tx).Move(filePath2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
 
                 Assert.That(File.Exists(toDirectory.Combine("file")), Is.False,
                             "Should not be visible to the outside.");
@@ -153,10 +153,10 @@ namespace Castle.Services.Transaction.Tests
             {
                 tx.Begin();
 
-                using (var fs = (tx as IFileAdapter).Create(filePath))
+                using (var fs = ((IFileAdapter) tx).Create(filePath))
                 {
-                    var str = new UTF8Encoding().GetBytes("Goodbye");
-                    fs.Write(str, 0, str.Length);
+                    var bytes = new UTF8Encoding().GetBytes("Goodbye");
+                    fs.Write(bytes, 0, bytes.Length);
                     fs.Flush();
                 }
 

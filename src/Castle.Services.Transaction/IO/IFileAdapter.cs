@@ -25,11 +25,26 @@ namespace Castle.Services.Transaction.IO
     public interface IFileAdapter
     {
         /// <summary>
-        /// Create a new file transactionally.
+        /// Reads all text from a file as part of a transaction.
         /// </summary>
-        /// <param name="filePath">The path, where to create the file.</param>
-        /// <returns>A handle pointing to the file.</returns>
-        FileStream Create(string filePath);
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        string ReadAllText(string filePath);
+
+        /// <summary>
+        /// Reads all text from a file as part of a transaction using the specified encoding.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        string ReadAllText(string filePath, Encoding encoding);
+
+        /// <summary>
+        /// Writes text to a file as part of a transaction.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="text"></param>
+        void WriteAllText(string filePath, string text);
 
         /// <summary>
         /// Returns whether the specified file exists or not.
@@ -39,30 +54,17 @@ namespace Castle.Services.Transaction.IO
         bool Exists(string filePath);
 
         /// <summary>
-        /// Reads all text from a file as part of a transaction.
+        /// Create a new file transactionally.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        string ReadAllText(string filePath);
-
-        /// <summary>
-        /// Writes text to a file as part of a transaction.
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="contents"></param>
-        void WriteAllText(string filePath, string contents);
-
-        /// <summary>
-        /// Deletes a file as part of a transaction.
-        /// </summary>
-        /// <param name="filePath"></param>
-        void Delete(string filePath);
+        /// <param name="filePath">The path, where to create the file.</param>
+        /// <returns>A handle pointing to the file.</returns>
+        FileStream Create(string filePath);
 
         /// <summary>
         /// Opens a file with RW access.
         /// </summary>
         /// <param name="filePath"></param>
-        /// <param name="mode">The file mode, which specifies </param>
+        /// <param name="mode"></param>
         /// <returns></returns>
         FileStream Open(string filePath, FileMode mode);
 
@@ -75,12 +77,10 @@ namespace Castle.Services.Transaction.IO
         int WriteStream(string toFilePath, Stream fromStream);
 
         /// <summary>
-        /// Reads all text in a file and returns the string of it.
+        /// Deletes a file as part of a transaction.
         /// </summary>
         /// <param name="filePath"></param>
-        /// <param name="encoding"></param>
-        /// <returns></returns>
-        string ReadAllText(string filePath, Encoding encoding);
+        void Delete(string filePath);
 
         /// <summary>
         /// Moves a file from one path to another.
@@ -93,7 +93,7 @@ namespace Castle.Services.Transaction.IO
         /// </code>
         /// </summary>
         /// <param name="filePath">
-        /// The original file path. It can't be null nor can it point to a directory.
+        /// The original file path. It can't be null, nor can it point to a directory.
         /// </param>
         /// <param name="newFilePath">The new location of the file.</param>
         void Move(string filePath, string newFilePath);

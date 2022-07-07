@@ -20,7 +20,7 @@ namespace Castle.Services.Transaction.Tests
 
     using NUnit.Framework;
 
-    public class MiscTests
+    public class MiscellaneousTests
     {
         [Test]
         [Description("As we are working on the same directories? We don't want to run the tests concurrently.")]

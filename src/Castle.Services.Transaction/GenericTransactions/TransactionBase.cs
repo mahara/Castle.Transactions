@@ -28,7 +28,7 @@ namespace Castle.Services.Transaction
     public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDisposable
     {
         private readonly IList<IResource> _resources = new List<IResource>();
-        private readonly IList<ISynchronization> _syncInfo = new List<ISynchronization>();
+        private readonly IList<ISynchronization> _synchronizationItems = new List<ISynchronization>();
 
         protected readonly string InnerName;
 
@@ -49,54 +49,36 @@ namespace Castle.Services.Transaction
         public ILogger Logger { get; set; } =
             NullLogger.Instance;
 
-        /// <summary>
-        /// Gets the name of the transaction.
-        /// </summary>
+        /// <inheritdoc />
         public virtual string Name =>
             string.IsNullOrEmpty(InnerName) ?
             $"Transaction #{GetHashCode()}" :
             InnerName;
 
-        /// <summary>
-        /// Gets the mode of the transaction.
-        /// </summary>
+        /// <inheritdoc />
         public TransactionScopeOption Mode { get; }
 
-        /// <summary>
-        /// Gets the isolation level of the transaction.
-        /// </summary>
+        /// <inheritdoc />
         public IsolationLevel IsolationLevel { get; }
 
-        /// <summary>
-        /// <see cref="ITransaction.IsAmbient" />.
-        /// </summary>
+        /// <inheritdoc />
         public abstract bool IsAmbient { get; protected set; }
 
-        /// <summary>
-        /// <see cref="ITransaction.IsReadOnly" />.
-        /// </summary>
+        /// <inheritdoc />
         public abstract bool IsReadOnly { get; protected set; }
 
-        /// <summary>
-        /// Gets the current transaction status.
-        /// </summary>
+        /// <inheritdoc />
         public TransactionStatus Status { get; private set; }
 
-        /// <summary>
-        /// Gets whether rollback only is set.
-        /// </summary>
+        /// <inheritdoc />
         public virtual bool IsRollbackOnlySet =>
             !_canCommit;
 
-        /// <summary>
-        /// Gets whether the transaction is a child transaction or not.
-        /// </summary>
+        /// <inheritdoc />
         public virtual bool IsChildTransaction =>
             false;
 
-        /// <summary>
-        /// Transaction context. Can be used by applications.
-        /// </summary>
+        /// <inheritdoc />
         public IDictionary Context { get; private set; }
 
         public ChildTransaction CreateChildTransaction()
@@ -115,7 +97,7 @@ namespace Castle.Services.Transaction
                       .ForEach(r => r.Dispose());
 
             _resources.Clear();
-            _syncInfo.Clear();
+            _synchronizationItems.Clear();
 
             if (_ambientTransaction != null)
             {
@@ -127,9 +109,7 @@ namespace Castle.Services.Transaction
 
         #region ITransaction Members
 
-        /// <summary>
-        /// See <see cref="ITransaction.Begin" />.
-        /// </summary>
+        /// <inheritdoc />
         public virtual void Begin()
         {
             AssertState(TransactionStatus.NoTransaction);
@@ -160,9 +140,7 @@ namespace Castle.Services.Transaction
             }
         }
 
-        /// <summary>
-        /// Succeed the transaction, persisting the modifications.
-        /// </summary>
+        /// <inheritdoc />
         public virtual void Commit()
         {
             if (!_canCommit)
@@ -178,7 +156,7 @@ namespace Castle.Services.Transaction
 
             try
             {
-                _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
+                _synchronizationItems.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
                 foreach (var r in _resources)
                 {
@@ -194,7 +172,7 @@ namespace Castle.Services.Transaction
 
                         commitFailed = true;
 
-                        Logger.ErrorFormat($"Resource state: {r}.");
+                        Logger.ErrorFormat($"Resource: {r}.");
 
                         throw new CommitResourceException("Transaction could not commit because of a failed resource.", ex, r);
                     }
@@ -221,14 +199,12 @@ namespace Castle.Services.Transaction
                         DisposeAmbientTransaction();
                     }
 
-                    _syncInfo.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
+                    _synchronizationItems.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
                 }
             }
         }
 
-        /// <summary>
-        /// See <see cref="ITransaction.Rollback" />.
-        /// </summary>
+        /// <inheritdoc />
         public virtual void Rollback()
         {
             AssertState(TransactionStatus.Active);
@@ -240,7 +216,7 @@ namespace Castle.Services.Transaction
 
             Exception toThrow = null;
 
-            _syncInfo.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
+            _synchronizationItems.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
             Logger.TryLogFail(InnerRollback)
                   .Exception(ex => toThrow = ex);
@@ -273,14 +249,11 @@ namespace Castle.Services.Transaction
                     DisposeAmbientTransaction();
                 }
 
-                _syncInfo.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
+                _synchronizationItems.ForEach(s => Logger.TryLogFail(s.AfterCompletion));
             }
         }
 
-        /// <summary>
-        /// Signals that this transaction can only be rolledback.
-        /// This is used when the transaction is not being managed by the callee.
-        /// </summary>
+        /// <inheritdoc />
         public virtual void SetRollbackOnly()
         {
             _canCommit = false;
@@ -290,10 +263,16 @@ namespace Castle.Services.Transaction
 
         #region Resources
 
-        /// <summary>
-        /// Register a participant on the transaction.
-        /// </summary>
-        /// <param name="resource" />
+        /// <inheritdoc />
+        public IEnumerable<IResource> Resources()
+        {
+            foreach (var resource in _resources.ToList())
+            {
+                yield return resource;
+            }
+        }
+
+        /// <inheritdoc />
         public virtual void Enlist(IResource resource)
         {
             if (resource == null)
@@ -314,11 +293,7 @@ namespace Castle.Services.Transaction
             _resources.Add(resource);
         }
 
-        /// <summary>
-        /// Registers a synchronization object that will be invoked
-        /// prior and after the transaction completion (commit or rollback).
-        /// </summary>
-        /// <param name="synchronization" />
+        /// <inheritdoc />
         public virtual void RegisterSynchronization(ISynchronization synchronization)
         {
             if (synchronization == null)
@@ -326,20 +301,12 @@ namespace Castle.Services.Transaction
                 throw new ArgumentNullException(nameof(synchronization));
             }
 
-            if (_syncInfo.Contains(synchronization))
+            if (_synchronizationItems.Contains(synchronization))
             {
                 return;
             }
 
-            _syncInfo.Add(synchronization);
-        }
-
-        public IEnumerable<IResource> Resources()
-        {
-            foreach (var resource in _resources.ToList())
-            {
-                yield return resource;
-            }
+            _synchronizationItems.Add(synchronization);
         }
 
         #endregion
@@ -384,17 +351,17 @@ namespace Castle.Services.Transaction
         /// </summary>
         protected abstract void InnerRollback();
 
-        private void DisposeAmbientTransaction()
-        {
-            _ambientTransaction.Dispose();
-            _ambientTransaction = null;
-        }
-
         public void CreateAmbientTransaction()
         {
             _ambientTransaction = new TransactionScope();
 
-            Logger.DebugFormat("Created a TransactionScope (Ambient Transaction) for '{0}'.", Name);
+            Logger.DebugFormat($"Created a {nameof(TransactionScope)} (Ambient Transaction) for '{Name}'.");
+        }
+
+        private void DisposeAmbientTransaction()
+        {
+            _ambientTransaction.Dispose();
+            _ambientTransaction = null;
         }
     }
 }

@@ -26,9 +26,8 @@ namespace Castle.Services.Transaction
     public sealed class TransactionAttribute : Attribute
     {
         /// <summary>
-        /// Declares unspecified values for transaction and isolation, which
-        /// means that the transaction manager will use the default values
-        /// for them
+        /// Declares the required transaction mode, but omits the isolation level,
+        /// which means that the transaction manager will use the default values for them.
         /// </summary>
         public TransactionAttribute()
             : this(TransactionScopeOption.Required, IsolationLevel.Unspecified)
@@ -36,9 +35,8 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Declares the transaction mode, but omits the isolation,
-        /// which means that the transaction manager should use the
-        /// default value for it.
+        /// Declares the transaction mode, but omits the isolation level,
+        /// which means that the transaction manager should use the default value for it.
         /// </summary>
         /// <param name="mode"></param>
         public TransactionAttribute(TransactionScopeOption mode)
@@ -47,9 +45,8 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Declares both the transaction mode and isolation
-        /// desired for this method. The transaction manager should
-        /// obey the declaration.
+        /// Declares both the transaction mode and isolation level desired for this method.
+        /// The transaction manager should obey the declaration.
         /// </summary>
         /// <param name="mode"></param>
         /// <param name="isolationLevel"></param>
@@ -60,12 +57,12 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Returns the <see cref="Mode" />
+        /// Returns the <see cref="TransactionScopeOption" />.
         /// </summary>
         public TransactionScopeOption Mode { get; }
 
         /// <summary>
-        /// Returns the <see cref="IsolationLevel" />
+        /// Returns the <see cref="IsolationLevel" />.
         /// </summary>
         public IsolationLevel IsolationLevel { get; }
 

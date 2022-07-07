@@ -106,7 +106,7 @@ namespace Castle.Facilities.AutoTx
         /// </summary>
         /// <param name="model">The model.</param>
         /// <param name="store">The store.</param>
-        private void Validate(ComponentModel model, TransactionMetaInfoStore store)
+        private static void Validate(ComponentModel model, TransactionMetaInfoStore store)
         {
             TransactionMetaInfo meta;
 
@@ -132,7 +132,7 @@ namespace Castle.Facilities.AutoTx
                 string.Format(
                     "The class {0} wants to use transaction interception, " +
                     "however the methods must be marked as virtual in order to do so. " +
-                    "Please correct the following methods: {1}",
+                    "Please correct the following methods: {1}.",
                     model.Implementation.FullName,
                     string.Join(", ", problematicMethods.ToArray())));
         }
@@ -144,7 +144,7 @@ namespace Castle.Facilities.AutoTx
         /// <returns>
         /// <c>true</c> if yes; otherwise, <c>false</c>.
         /// </returns>
-        private bool IsMarkedWithTransactional(IConfiguration configuration)
+        private static bool IsMarkedWithTransactional(IConfiguration configuration)
         {
             return configuration != null && "true" == configuration.Attributes["isTransactional"];
         }
@@ -154,7 +154,7 @@ namespace Castle.Facilities.AutoTx
         /// configured for methods, the component node has <c>istransaction="true"</c> attribute
         /// </summary>
         /// <param name="model">The model.</param>
-        private void AssertThereNoTransactionOnConfig(ComponentModel model)
+        private static void AssertThereNoTransactionOnConfig(ComponentModel model)
         {
             var configuration = model.Configuration;
 
@@ -163,7 +163,7 @@ namespace Castle.Facilities.AutoTx
                 throw new FacilityException(
                     string.Format(
                         "The class {0} has configured transaction in a child node " +
-                        "but has not specified istransaction=\"true\" on the component node.",
+                        "but has not specified isTransaction=\"true\" on the component node.",
                         model.Implementation.FullName));
             }
         }
@@ -177,7 +177,6 @@ namespace Castle.Facilities.AutoTx
                                                                 TransactionMetaInfoStore store)
         {
             var meta = store.GetMetaFor(model.Implementation);
-
             if (meta == null)
             {
                 return;

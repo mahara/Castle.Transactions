@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright 2004-2022 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ namespace Castle.Facilities.AutoTx
     using System;
 
     /// <summary>
-    /// Tells the kernel to give the transaction instace to the method as a parameter.
+    /// Tells the kernel to give the transaction instance to the method as a parameter.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class InjectTransactionAttribute : Attribute

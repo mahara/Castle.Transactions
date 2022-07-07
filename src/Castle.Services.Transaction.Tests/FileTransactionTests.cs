@@ -165,7 +165,7 @@ namespace Castle.Services.Transaction.Tests
         {
             using var tx = new FileTransaction();
             Assert.Throws(typeof(TransactionException),
-                          () => (tx as IDirectoryAdapter).Create("lol"),
+                          () => ((IDirectoryAdapter) tx).Create("lol"),
                           "The transaction hasn't begun, throws.");
         }
 
@@ -247,7 +247,7 @@ namespace Castle.Services.Transaction.Tests
             using var tx = new FileTransaction("Moving Tx");
             tx.Begin();
 
-            (tx as IDirectoryAdapter).Move(dir1, dir2);
+            ((IDirectoryAdapter) tx).Move(dir1, dir2);
 
             Assert.That(Directory.Exists(dir2), Is.False, "The directory should not yet exist.");
 
@@ -324,7 +324,7 @@ namespace Castle.Services.Transaction.Tests
                     Console.WriteLine("t1 started");
 
                     // The transacted thread should receive ERROR_TRANSACTIONAL_CONFLICT, but it gets permission denied.
-                    using var fs = (tx as IFileAdapter).Create("abb");
+                    using var fs = ((IFileAdapter) tx).Create("abb");
                     fs.WriteByte(0x2);
                 }
                 finally

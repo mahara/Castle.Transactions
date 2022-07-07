@@ -90,7 +90,7 @@ namespace Castle.Services.Transaction.Tests
             using (var tx = new FileTransaction())
             {
                 tx.Begin();
-                (tx as IDirectoryAdapter).Create(directoryPath);
+                ((IDirectoryAdapter) tx).Create(directoryPath);
             }
 
             Assert.That(!Directory.Exists(directoryPath));
@@ -109,7 +109,7 @@ namespace Castle.Services.Transaction.Tests
             using (var tx = new FileTransaction())
             {
                 tx.Begin();
-                var adapter = tx as IDirectoryAdapter;
+                var adapter = (IDirectoryAdapter) tx;
 
                 Assert.That(adapter.Exists("/hahaha"), Is.False);
                 Assert.That(adapter.Exists("another_non_existent"), Is.False);
@@ -157,7 +157,7 @@ namespace Castle.Services.Transaction.Tests
             using var tx = new FileTransaction();
             tx.Begin();
 
-            var adapter = tx as IDirectoryAdapter;
+            var adapter = (IDirectoryAdapter) tx;
             adapter.Create("something");
 
             Assert.That(adapter.Exists("something"));
@@ -181,7 +181,7 @@ namespace Castle.Services.Transaction.Tests
             {
                 tx.Begin();
 
-                (tx as IDirectoryAdapter).Create(directoryPath);
+                ((IDirectoryAdapter) tx).Create(directoryPath);
 
                 tx.Commit();
             }
@@ -204,11 +204,11 @@ namespace Castle.Services.Transaction.Tests
             using var tx = new FileTransaction("s");
             tx.Begin();
 
-            Assert.That((tx as IDirectoryAdapter).Exists("something"), Is.False);
+            Assert.That(((IDirectoryAdapter) tx).Exists("something"), Is.False);
 
-            (tx as IDirectoryAdapter).Create("something");
+            ((IDirectoryAdapter) tx).Create("something");
 
-            Assert.That((tx as IDirectoryAdapter).Exists("something"));
+            Assert.That(((IDirectoryAdapter) tx).Exists("something"));
 
             tx.Rollback();
         }
@@ -230,7 +230,7 @@ namespace Castle.Services.Transaction.Tests
             {
                 tx.Begin();
 
-                (tx as IDirectoryAdapter).Create(directoryPath);
+                ((IDirectoryAdapter) tx).Create(directoryPath);
 
                 tx.Commit();
             }
@@ -289,7 +289,7 @@ namespace Castle.Services.Transaction.Tests
             using var tx = new FileTransaction();
             tx.Begin();
 
-            Assert.That((tx as IDirectoryAdapter).Delete(directoryPath, true), Is.True);
+            Assert.That(((IDirectoryAdapter) tx).Delete(directoryPath, true), Is.True);
 
             tx.Commit();
         }

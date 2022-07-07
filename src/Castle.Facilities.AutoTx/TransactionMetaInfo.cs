@@ -130,10 +130,9 @@ namespace Castle.Facilities.AutoTx
         private bool IsGenericMethodTransactional(MethodInfo info)
         {
             var atts = info.GetCustomAttributes(typeof(TransactionAttribute), true);
-
-            if (atts.Length != 0)
+            if (atts.Length > 0)
             {
-                Add(info, atts[0] as TransactionAttribute);
+                Add(info, (TransactionAttribute) atts[0]);
 
                 return true;
             }

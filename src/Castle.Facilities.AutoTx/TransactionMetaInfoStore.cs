@@ -34,7 +34,11 @@ namespace Castle.Facilities.AutoTx
     /// </summary>
     public class TransactionMetaInfoStore : MarshalByRefObject
     {
-        private static readonly BindingFlags BindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        private static readonly BindingFlags BindingFlags =
+            BindingFlags.Instance |
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.DeclaredOnly;
         private static readonly string TransactionModeAttribute = "transactionMode";
         private static readonly string IsolationLevelAttribute = "isolationLevel";
 
@@ -74,13 +78,13 @@ namespace Castle.Facilities.AutoTx
             foreach (var method in methods)
             {
                 var attributes = method.GetCustomAttributes(typeof(TransactionAttribute), true);
-                if (attributes.Length != 0)
+                if (attributes.Length > 0)
                 {
-                    metaInfo.Add(method, attributes[0] as TransactionAttribute);
+                    metaInfo.Add(method, (TransactionAttribute) attributes[0]);
 
                     // Only add the method as transaction injection if we also have specified a transaction attribute.
                     attributes = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
-                    if (attributes.Length != 0)
+                    if (attributes.Length > 0)
                     {
                         metaInfo.AddInjection(method);
                     }
@@ -93,7 +97,7 @@ namespace Castle.Facilities.AutoTx
         /// <summary>
         /// Create meta-information from the configuration about what methods should be overridden.
         /// </summary>
-        public TransactionMetaInfo CreateMetaFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration config)
+        public TransactionMetaInfo CreateMetaFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration facilityConfiguration)
         {
             var metaInfo = GetMetaFor(implementation);
 
@@ -104,8 +108,8 @@ namespace Castle.Facilities.AutoTx
 
             foreach (var method in methods)
             {
-                var transactionMode = config.Attributes[TransactionModeAttribute];
-                var isolationLevel = config.Attributes[IsolationLevelAttribute];
+                var transactionMode = facilityConfiguration.Attributes[TransactionModeAttribute];
+                var isolationLevel = facilityConfiguration.Attributes[IsolationLevelAttribute];
 
                 var mode = ObtainTransactionMode(implementation, method, transactionMode);
                 var level = ObtainIsolationLevel(implementation, method, isolationLevel);
@@ -150,7 +154,7 @@ namespace Castle.Facilities.AutoTx
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                                            "The possible values are {4}",
+                                            "The possible values are {4}.",
                                             implementation.FullName,
                                             method.Name,
                                             mode,
@@ -177,7 +181,7 @@ namespace Castle.Facilities.AutoTx
 
                 var message = string.Format("The configuration for the class {0}, " +
                                             "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                                            "The possible values are {4}",
+                                            "The possible values are {4}.",
                                             implementation.FullName,
                                             method.Name,
                                             level,

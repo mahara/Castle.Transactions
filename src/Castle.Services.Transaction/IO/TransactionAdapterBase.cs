@@ -79,14 +79,14 @@ namespace Castle.Services.Transaction.IO
                         continue;
                     }
 
-                    transaction = (resource as FileResourceAdapter).Transaction;
+                    transaction = ((FileResourceAdapter) resource).Transaction;
 
                     return true;
                 }
 
                 if (!OnlyJoinExisting)
                 {
-                    transaction = new FileTransaction("Autocreated File Transaction");
+                    transaction = new FileTransaction("Auto-created File Transaction");
                     TransactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
 
                     return true;
@@ -105,7 +105,7 @@ namespace Castle.Services.Transaction.IO
 
             var tentativePath = PathInfo.Parse(path);
 
-            // if the given non-root is empty, we are looking at a relative path
+            // If the given non-root is empty, we are looking at a relative path.
             if (string.IsNullOrEmpty(tentativePath.Root))
             {
                 return true;
@@ -113,14 +113,14 @@ namespace Castle.Services.Transaction.IO
 
             var specifiedPath = PathInfo.Parse(_specifiedDirectory);
 
-            // they must be on the same drive.
+            // They must be on the same drive.
             if (!string.IsNullOrEmpty(tentativePath.DriveLetter)
                 && specifiedPath.DriveLetter != tentativePath.DriveLetter)
             {
                 return false;
             }
 
-            // we do not allow access to directories outside of the specified directory.
+            // We do not allow access to directories outside of the specified directory.
             return specifiedPath.IsParentOf(tentativePath);
         }
 

@@ -277,14 +277,13 @@ namespace Castle.Services.Transaction.IO
         }
 
         /// <summary>
-        /// Returns whether <see cref="Root" /> is not an empty string.
+        /// Checks whether <see cref="Root" /> is not an empty string.
         /// </summary>
         public bool IsRooted =>
             Root != string.Empty;
 
         /// <summary>
-        /// Returns whether the current PathInfo is a valid parent of the child path info
-        /// passed as argument.
+        /// Checks whether the current PathInfo is a valid parent of the child path info passed as argument.
         /// </summary>
         /// <param name="child">The path info to verify</param>
         /// <returns>Whether it is true that the current path info is a parent of child.</returns>
@@ -302,20 +301,30 @@ namespace Castle.Services.Transaction.IO
             {
                 case PathType.Device:
                     OK &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
+
                     break;
+
                 case PathType.Server:
                     OK &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
+
                     break;
+
                 case PathType.IPv4:
                     OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
+
                     break;
+
                 case PathType.IPv6:
                     OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
+
                     break;
+
                 case PathType.Relative:
                     throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
+
                 case PathType.Drive:
                     OK &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
+
                     break;
             }
 

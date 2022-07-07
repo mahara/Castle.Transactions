@@ -43,7 +43,7 @@ namespace Castle.Services.Transaction
     /// </remarks>
     public sealed class FileTransaction : TransactionBase, IFileTransaction
     {
-        private SafeTransactionHandle _TransactionHandle;
+        private SafeTransactionHandle _transactionHandle;
 
         #region Constructors
 
@@ -67,17 +67,13 @@ namespace Castle.Services.Transaction
 
         #region ITransaction Members
 
-        // This isn't really relevant with the current architecture
+        // This isn't really relevant with the current architecture.
 
-        /// <summary>
-        /// Gets the name of the transaction.
-        /// </summary>
+        /// <inheritdoc />
         public override string Name =>
-            InnerName ?? $"FtX #{GetHashCode()}";
+            InnerName ?? $"TxF #{GetHashCode()}";
 
-        /// <summary>
-        /// Gets whether the transaction is a distributed transaction.
-        /// </summary>
+        /// <inheritdoc />
         public override bool IsAmbient { get; protected set; }
 
         /// <summary>
@@ -93,26 +89,26 @@ namespace Castle.Services.Transaction
 
         protected override void InnerBegin()
         {
-            // we have a ongoing current transaction, join it!
+            // We have a ongoing current transaction, join it!
             if (Transaction.Current != null)
             {
                 var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(Transaction.Current);
 
                 kTx.GetHandle(out var handle);
 
-                // even though _TransactionHandle can already contain a handle if this thread
-                // had been yielded just before setting this reference, the "safe"-ness of the wrapper should
-                // not dispose the other handle which is now removed
-                _TransactionHandle = handle;
+                // Even though _transactionHandle can already contain a handle
+                // if this thread had been yielded just before setting this reference,
+                // the "safe"-ness of the wrapper should not dispose the other handle which is now removed.
+                _transactionHandle = handle;
 
                 IsAmbient = true;
             }
             else
             {
-                _TransactionHandle = CreateTransaction($"Transaction: {InnerName}");
+                _transactionHandle = CreateTransaction($"Transaction ({InnerName})");
             }
 
-            if (!_TransactionHandle.IsInvalid)
+            if (!_transactionHandle.IsInvalid)
             {
                 return;
             }
@@ -124,7 +120,7 @@ namespace Castle.Services.Transaction
 
         protected override void InnerCommit()
         {
-            if (CommitTransaction(_TransactionHandle))
+            if (CommitTransaction(_transactionHandle))
             {
                 return;
             }
@@ -134,22 +130,72 @@ namespace Castle.Services.Transaction
 
         protected override void InnerRollback()
         {
-            if (!RollbackTransaction(_TransactionHandle))
+            if (!RollbackTransaction(_transactionHandle))
             {
                 throw new TransactionException("Rollback failed.",
                                                Marshal.GetExceptionForHR(Marshal.GetLastWin32Error()));
             }
         }
 
-        private Exception GetLastException()
+        private static Exception GetLastException()
         {
             return Marshal.GetExceptionForHR(Marshal.GetLastWin32Error());
         }
 
         #endregion
 
-        #region IFileAdapter & IDirectoryAdapter >> Ambiguous Members
+        #region IFileAdapter & IDirectoryAdapter -> Ambiguous Members
 
+        /// <inheritdoc />
+        string IDirectoryAdapter.GetFullPath(string dir)
+        {
+            if (dir == null)
+            {
+                throw new ArgumentNullException(nameof(dir));
+            }
+
+            AssertState(TransactionStatus.Active);
+
+            return GetFullPathNameTransacted(dir);
+        }
+
+        /// <inheritdoc />
+        string IDirectoryAdapter.MapPath(string path)
+        {
+            throw new NotSupportedException("Implemented on the directory adapter.");
+        }
+
+        /// <inheritdoc />
+        bool IFileAdapter.Exists(string filePath)
+        {
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
+            AssertState(TransactionStatus.Active);
+
+            using var handle = FindFirstFileTransacted(filePath, false);
+            return !handle.IsInvalid;
+        }
+
+        /// <inheritdoc />
+        bool IDirectoryAdapter.Exists(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            AssertState(TransactionStatus.Active);
+
+            path = CleanPathEnd(path);
+
+            using var handle = FindFirstFileTransacted(path, true);
+            return !handle.IsInvalid;
+        }
+
+        /// <inheritdoc />
         FileStream IFileAdapter.Create(string path)
         {
             if (path == null)
@@ -162,8 +208,7 @@ namespace Castle.Services.Transaction
             return Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
         }
 
-        /// <summary>Creates a directory at the path given.</summary>
-        /// <param name="path">The path to create the directory at.</param>
+        /// <inheritdoc />
         bool IDirectoryAdapter.Create(string path)
         {
             if (path == null)
@@ -201,9 +246,10 @@ namespace Castle.Services.Transaction
             {
                 if (!CreateDirectoryTransacted(nonExistent.Pop()))
                 {
+                    var message = string.Format("Failed to create directory \"{1}\" at path \"{0}\". " +
+                                                "See inner exception for more details.", path, current);
                     var win32Exception = new Win32Exception(Marshal.GetLastWin32Error());
-                    throw new TransactionException(string.Format("Failed to create directory \"{1}\" at path \"{0}\". "
-                                                                 + "See inner exception for more details.", path, current),
+                    throw new TransactionException(message,
                                                    win32Exception);
                 }
             }
@@ -211,10 +257,7 @@ namespace Castle.Services.Transaction
             return false;
         }
 
-        /// <summary>
-        /// Deletes a file as part of a transaction
-        /// </summary>
-        /// <param name="filePath"></param>
+        /// <inheritdoc />
         void IFileAdapter.Delete(string filePath)
         {
             if (filePath == null)
@@ -224,17 +267,14 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            if (!DeleteFileTransactedW(filePath, _TransactionHandle))
+            if (!DeleteFileTransactedW(filePath, _transactionHandle))
             {
                 var win32Exception = new Win32Exception(Marshal.GetLastWin32Error());
                 throw new TransactionException("Unable to perform transacted file delete.", win32Exception);
             }
         }
 
-        /// <summary>
-        /// Deletes a directory recursively.
-        /// </summary>
-        /// <param name="path">The directory path to start deleting at!</param>
+        /// <inheritdoc />
         void IDirectoryAdapter.Delete(string path)
         {
             if (path == null)
@@ -244,63 +284,14 @@ namespace Castle.Services.Transaction
 
             AssertState(TransactionStatus.Active);
 
-            if (!RemoveDirectoryTransactedW(path, _TransactionHandle))
+            if (!RemoveDirectoryTransactedW(path, _transactionHandle))
             {
                 throw new TransactionException("Unable to delete directory. See inner exception for details.",
                                                new Win32Exception(Marshal.GetLastWin32Error()));
             }
         }
 
-        bool IFileAdapter.Exists(string filePath)
-        {
-            if (filePath == null)
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-
-            AssertState(TransactionStatus.Active);
-
-            using var handle = FindFirstFileTransacted(filePath, false);
-            return !handle.IsInvalid;
-        }
-
-        /// <summary>
-        /// Checks whether the path exists.
-        /// </summary>
-        /// <param name="path">Path to check.</param>
-        /// <returns>True if it exists, false otherwise.</returns>
-        bool IDirectoryAdapter.Exists(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            AssertState(TransactionStatus.Active);
-
-            path = CleanPathEnd(path);
-
-            using var handle = FindFirstFileTransacted(path, true);
-            return !handle.IsInvalid;
-        }
-
-        string IDirectoryAdapter.GetFullPath(string dir)
-        {
-            if (dir == null)
-            {
-                throw new ArgumentNullException(nameof(dir));
-            }
-
-            AssertState(TransactionStatus.Active);
-
-            return GetFullPathNameTransacted(dir);
-        }
-
-        string IDirectoryAdapter.MapPath(string path)
-        {
-            throw new NotSupportedException("Implemented on the directory adapter.");
-        }
-
+        /// <inheritdoc />
         void IDirectoryAdapter.Move(string path, string newPath)
         {
             if (path == null)
@@ -345,34 +336,56 @@ namespace Castle.Services.Transaction
 
         #region IDirectoryAdapter Members
 
-        /// <summary>
-        /// Deletes an empty directory
-        /// </summary>
-        /// <param name="path">The path to the directory to delete.</param>
-        /// <param name="recursively">
-        /// Whether to delete recursively or not.
-        /// When recursive, we delete all subdirectories and files in the given
-        /// directory as well.
-        /// </param>
+        /// <inheritdoc />
         bool IDirectoryAdapter.Delete(string path, bool recursively)
         {
             AssertState(TransactionStatus.Active);
 
             return recursively
                        ? DeleteRecursive(path)
-                       : RemoveDirectoryTransactedW(path, _TransactionHandle);
+                       : RemoveDirectoryTransactedW(path, _transactionHandle);
         }
 
         #endregion
 
         #region IFileAdapter Members
 
-        /// <summary>
-        /// Opens a file with RW access.
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="mode">The file mode, which specifies </param>
-        /// <returns></returns>
+        /// <inheritdoc />
+        public string ReadAllText(string path)
+        {
+            AssertState(TransactionStatus.Active);
+
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return reader.ReadToEnd();
+        }
+
+        /// <inheritdoc />
+        public string ReadAllText(string path, Encoding encoding)
+        {
+            AssertState(TransactionStatus.Active);
+
+            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
+            return reader.ReadToEnd();
+        }
+
+        /// <inheritdoc />
+        public void WriteAllText(string path, string text)
+        {
+            AssertState(TransactionStatus.Active);
+
+            var exists = ((IFileAdapter) this).Exists(path);
+            var mode = exists ? FileMode.Truncate : FileMode.OpenOrCreate;
+            using var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None));
+            writer.Write(text);
+        }
+
+        /// <inheritdoc />
+        int IFileAdapter.WriteStream(string toFilePath, Stream fromStream)
+        {
+            throw new NotSupportedException("Use the file adapter instead.");
+        }
+
+        /// <inheritdoc />
         public FileStream Open(string filePath, FileMode mode)
         {
             if (filePath == null)
@@ -383,28 +396,7 @@ namespace Castle.Services.Transaction
             return Open(filePath, mode, FileAccess.ReadWrite, FileShare.None);
         }
 
-        /// <summary>
-        /// DO NOT USE: Implemented in the file adapter: <see cref="FileAdapter" />.
-        /// </summary>
-        int IFileAdapter.WriteStream(string toFilePath, Stream fromStream)
-        {
-            throw new NotSupportedException("Use the file adapter instead.");
-        }
-
-        /// <summary>
-        /// Reads all text in a file and returns the string of it.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="encoding"></param>
-        /// <returns></returns>
-        public string ReadAllText(string path, Encoding encoding)
-        {
-            AssertState(TransactionStatus.Active);
-
-            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
-            return reader.ReadToEnd();
-        }
-
+        /// <inheritdoc />
         void IFileAdapter.Move(string filePath, string newFilePath)
         {
             // Case 1, the new file path is a directory.
@@ -415,7 +407,8 @@ namespace Castle.Services.Transaction
                                    IntPtr.Zero,
                                    IntPtr.Zero,
                                    MoveFileFlags.CopyAllowed,
-                                   _TransactionHandle);
+                                   _transactionHandle);
+
                 return;
             }
 
@@ -425,37 +418,7 @@ namespace Castle.Services.Transaction
                                IntPtr.Zero,
                                IntPtr.Zero,
                                MoveFileFlags.CopyAllowed,
-                               _TransactionHandle);
-        }
-
-        /// <summary>
-        /// Reads all text from a file as part of a transaction
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public string ReadAllText(string path)
-        {
-            AssertState(TransactionStatus.Active);
-
-            using var reader = new StreamReader(Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
-            return reader.ReadToEnd();
-        }
-
-        /// <summary>
-        /// Writes text to a file as part of a transaction.
-        /// If the file already contains data, first truncates the file
-        /// and then writes all contents in the string to the file.
-        /// </summary>
-        /// <param name="path">Path to write to</param>
-        /// <param name="contents">Contents of the file after writing to it.</param>
-        public void WriteAllText(string path, string contents)
-        {
-            AssertState(TransactionStatus.Active);
-
-            var exists = ((IFileAdapter) this).Exists(path);
-            var mode = exists ? FileMode.Truncate : FileMode.OpenOrCreate;
-            using var writer = new StreamWriter(Open(path, mode, FileAccess.Write, FileShare.None));
-            writer.Write(contents);
+                               _transactionHandle);
         }
 
         #endregion
@@ -514,9 +477,9 @@ namespace Castle.Services.Transaction
                 Rollback();
             }
 
-            if (_TransactionHandle != null && !_TransactionHandle.IsInvalid)
+            if (_transactionHandle != null && !_transactionHandle.IsInvalid)
             {
-                _TransactionHandle.Dispose();
+                _transactionHandle.Dispose();
             }
 
             IsDisposed = true;
@@ -529,8 +492,8 @@ namespace Castle.Services.Transaction
         // ReSharper disable InconsistentNaming
         // ReSharper disable UnusedMember.Local
 
-        // overview here: http://msdn.microsoft.com/en-us/library/aa964885(VS.85).aspx
-        // helper: http://www.improve.dk/blog/2009/02/14/utilizing-transactional-ntfs-through-dotnet
+        // Overview here: http://msdn.microsoft.com/en-us/library/aa964885(VS.85).aspx
+        // Helper: http://www.improve.dk/blog/2009/02/14/utilizing-transactional-ntfs-through-dotnet
 
         #region Helper methods
 
@@ -554,7 +517,7 @@ namespace Castle.Services.Transaction
                                                    TranslateFileMode(mode),
                                                    0,
                                                    IntPtr.Zero,
-                                                   _TransactionHandle,
+                                                   _transactionHandle,
                                                    IntPtr.Zero,
                                                    IntPtr.Zero);
 
@@ -627,7 +590,7 @@ namespace Castle.Services.Transaction
             return CreateDirectoryTransactedW(templatePath,
                                               dirPath,
                                               IntPtr.Zero,
-                                              _TransactionHandle);
+                                              _transactionHandle);
         }
 
         private bool CreateDirectoryTransacted(string dirPath)
@@ -648,8 +611,8 @@ namespace Castle.Services.Transaction
             }
 
             return RecurseFiles(path,
-                                file => DeleteFileTransactedW(file, _TransactionHandle),
-                                dir => RemoveDirectoryTransactedW(dir, _TransactionHandle));
+                                file => DeleteFileTransactedW(file, _transactionHandle),
+                                dir => RemoveDirectoryTransactedW(dir, _transactionHandle));
         }
 
         private bool RecurseFiles(string path,
@@ -709,23 +672,23 @@ namespace Castle.Services.Transaction
          *    __in   HANDLE hTransaction
          *  );
          */
-        private string GetFullPathNameTransacted(string dirOrFilePath)
+        private string GetFullPathNameTransacted(string directoryOrFilePath)
         {
             var sb = new StringBuilder(512);
 
         retry:
             var p = IntPtr.Zero;
-            var res = GetFullPathNameTransactedW(dirOrFilePath,
+            var res = GetFullPathNameTransactedW(directoryOrFilePath,
                                                  sb.Capacity,
                                                  sb,
                                                  ref p, // here we can check if it's a file or not.
-                                                 _TransactionHandle);
+                                                 _transactionHandle);
 
             if (res == 0) // failure
             {
                 throw new TransactionException(
                     string.Format("Could not get full path for \"{0}\", see inner exception for details.",
-                                  dirOrFilePath),
+                                  directoryOrFilePath),
                     Marshal.GetExceptionForHR(Marshal.GetLastWin32Error()));
             }
 
@@ -863,7 +826,6 @@ namespace Castle.Services.Transaction
             WriteThrough = 0x8
         }
 
-
         /// <summary>
         /// Attributes for security interop.
         /// </summary>
@@ -875,7 +837,7 @@ namespace Castle.Services.Transaction
             public int bInheritHandle;
         }
 
-        // The CharSet must match the CharSet of the corresponding PInvoke signature
+        // The CharSet must match the CharSet of the corresponding PInvoke signature.
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         private struct WIN32_FIND_DATA
         {
@@ -1069,7 +1031,6 @@ namespace Castle.Services.Transaction
 
         private SafeFindHandle FindFirstFileTransacted(string filePath, bool directory)
         {
-
 #if MONO
             uint caseSensitive = 0x1;
 #else
@@ -1081,7 +1042,7 @@ namespace Castle.Services.Transaction
                                             directory
                                                 ? FINDEX_SEARCH_OPS.FindExSearchLimitToDirectories
                                                 : FINDEX_SEARCH_OPS.FindExSearchNameMatch,
-                                            IntPtr.Zero, caseSensitive, _TransactionHandle);
+                                            IntPtr.Zero, caseSensitive, _transactionHandle);
         }
 
         private SafeFindHandle FindFirstFileTransactedW(string lpFileName,
@@ -1091,10 +1052,10 @@ namespace Castle.Services.Transaction
                                             out lpFindFileData,
                                             FINDEX_SEARCH_OPS.FindExSearchNameMatch,
                                             IntPtr.Zero, 0,
-                                            _TransactionHandle);
+                                            _transactionHandle);
         }
 
-        // not transacted
+        // Not transacted.
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool FindNextFile(SafeFindHandle hFindFile,
                                                 out WIN32_FIND_DATA lpFindFileData);

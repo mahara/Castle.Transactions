@@ -82,6 +82,20 @@ namespace Castle.Services.Transaction
         IEnumerable<IResource> Resources();
 
         /// <summary>
+        /// Register a participant on the transaction.
+        /// </summary>
+        /// <param name="resource"></param>
+        void Enlist(IResource resource);
+
+        /// <summary>
+        /// Registers a synchronization object that will be invoked
+        /// prior and after the transaction completion (commit or rollback).
+        /// </summary>
+        /// <param name="synchronization"></param>
+        /// <exception cref="ArgumentNullException">If the parameter is null.</exception>
+        void RegisterSynchronization(ISynchronization synchronization);
+
+        /// <summary>
         /// Starts the transaction.
         /// Implementors should activate the apropriate resources
         /// in order to start the underlying transaction.
@@ -125,19 +139,5 @@ namespace Castle.Services.Transaction
         /// This is used when the transaction is not being managed by the callee.
         /// </summary>
         void SetRollbackOnly();
-
-        /// <summary>
-        /// Register a participant on the transaction.
-        /// </summary>
-        /// <param name="resource"></param>
-        void Enlist(IResource resource);
-
-        /// <summary>
-        /// Registers a synchronization object that will be invoked
-        /// prior and after the transaction completion (commit or rollback).
-        /// </summary>
-        /// <param name="synchronization"></param>
-        /// <exception cref="ArgumentNullException">If the parameter is null.</exception>
-        void RegisterSynchronization(ISynchronization synchronization);
     }
 }

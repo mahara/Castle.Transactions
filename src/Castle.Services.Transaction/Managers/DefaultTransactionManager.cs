@@ -143,16 +143,16 @@ namespace Castle.Services.Transaction
                                                        bool ambient,
                                                        bool readOnly)
         {
-            var t = new TalkactiveTransaction(mode, isolationLevel, ambient, readOnly)
+            var tx = new TalkactiveTransaction(mode, isolationLevel, ambient, readOnly)
             {
                 Logger = Logger.CreateChildLogger(nameof(TalkactiveTransaction))
             };
 
-            t.TransactionCompleted += CompletedHandler;
-            t.TransactionRolledBack += RolledBackHandler;
-            t.TransactionFailed += FailedHandler;
+            tx.TransactionCompleted += CompletedHandler;
+            tx.TransactionRolledBack += RolledBackHandler;
+            tx.TransactionFailed += FailedHandler;
 
-            return t;
+            return tx;
         }
 
         private void CompletedHandler(object sender, TransactionEventArgs e)
@@ -214,16 +214,16 @@ namespace Castle.Services.Transaction
 
             _activityManager.CurrentActivity.Pop();
 
-            if (transaction is IDisposable)
+            if (transaction is IDisposable disposable)
             {
-                (transaction as IDisposable).Dispose();
+                disposable.Dispose();
             }
 
-            if (transaction is IEventPublisher)
+            if (transaction is IEventPublisher publisher)
             {
-                (transaction as IEventPublisher).TransactionCompleted -= CompletedHandler;
-                (transaction as IEventPublisher).TransactionRolledBack -= RolledBackHandler;
-                (transaction as IEventPublisher).TransactionFailed -= FailedHandler;
+                publisher.TransactionCompleted -= CompletedHandler;
+                publisher.TransactionRolledBack -= RolledBackHandler;
+                publisher.TransactionFailed -= FailedHandler;
             }
 
             TransactionDisposed.Fire(this, new TransactionEventArgs(transaction));
