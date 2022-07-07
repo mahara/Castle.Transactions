@@ -17,9 +17,7 @@
 namespace Castle.Facilities.AutoTx
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Reflection;
     using System.Transactions;
 
@@ -30,7 +28,7 @@ namespace Castle.Facilities.AutoTx
     using Services.Transaction;
 
     /// <summary>
-    /// Pendent
+    /// A store for <see cref="TransactionMetaInfo" />.
     /// </summary>
     public class TransactionMetaInfoStore : MarshalByRefObject
     {
@@ -42,7 +40,7 @@ namespace Castle.Facilities.AutoTx
         private static readonly string TransactionModeAttribute = "transactionMode";
         private static readonly string IsolationLevelAttribute = "isolationLevel";
 
-        private readonly IDictionary _typeToMetaInfo = new HybridDictionary();
+        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = new();
 
 #if NET
         [Obsolete]
@@ -55,13 +53,13 @@ namespace Castle.Facilities.AutoTx
         /// <summary>
         /// Creates meta-information from a type.
         /// </summary>
-        public TransactionMetaInfo CreateMetaFromType(Type implementation)
+        public TransactionMetaInfo CreateMetaInfoFromType(Type implementation)
         {
             var metaInfo = new TransactionMetaInfo();
 
             PopulateMetaInfoFromType(metaInfo, implementation);
 
-            Register(implementation, metaInfo);
+            RegisterMetaInfo(implementation, metaInfo);
 
             return metaInfo;
         }
@@ -97,9 +95,9 @@ namespace Castle.Facilities.AutoTx
         /// <summary>
         /// Create meta-information from the configuration about what methods should be overridden.
         /// </summary>
-        public TransactionMetaInfo CreateMetaFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration facilityConfiguration)
+        public TransactionMetaInfo CreateMetaInfoFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration facilityConfiguration)
         {
-            var metaInfo = GetMetaFor(implementation);
+            var metaInfo = GetMetaInfoFor(implementation);
 
             if (metaInfo == null)
             {
@@ -111,33 +109,35 @@ namespace Castle.Facilities.AutoTx
                 var transactionMode = facilityConfiguration.Attributes[TransactionModeAttribute];
                 var isolationLevel = facilityConfiguration.Attributes[IsolationLevelAttribute];
 
-                var mode = ObtainTransactionMode(implementation, method, transactionMode);
-                var level = ObtainIsolationLevel(implementation, method, isolationLevel);
+                var mode = GetTransactionMode(implementation, method, transactionMode);
+                var level = GetIsolationLevel(implementation, method, isolationLevel);
 
                 metaInfo.Add(method, new TransactionAttribute(mode, level));
             }
 
-            Register(implementation, metaInfo);
+            RegisterMetaInfo(implementation, metaInfo);
 
             return metaInfo;
         }
 
         /// <summary>
-        /// Gets the meta-data for the implementation.
+        /// Gets the meta-information for the implementation.
         /// </summary>
         /// <param name="implementation"></param>
         /// <returns></returns>
-        public TransactionMetaInfo GetMetaFor(Type implementation)
+        public TransactionMetaInfo GetMetaInfoFor(Type implementation)
         {
-            return (TransactionMetaInfo) _typeToMetaInfo[implementation];
+            _typeToMetaInfo.TryGetValue(implementation, out var metaInfo);
+
+            return metaInfo;
         }
 
-        private void Register(Type implementation, TransactionMetaInfo metaInfo)
+        private void RegisterMetaInfo(Type implementation, TransactionMetaInfo metaInfo)
         {
             _typeToMetaInfo[implementation] = metaInfo;
         }
 
-        private static TransactionScopeOption ObtainTransactionMode(Type implementation, MethodInfo method, string mode)
+        private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string mode)
         {
             if (mode == null)
             {
@@ -164,7 +164,7 @@ namespace Castle.Facilities.AutoTx
             }
         }
 
-        private static IsolationLevel ObtainIsolationLevel(Type implementation, MethodInfo method, string level)
+        private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string level)
         {
             if (level == null)
             {

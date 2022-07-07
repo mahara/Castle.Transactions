@@ -37,7 +37,7 @@ namespace Castle.Facilities.AutoTx
     {
         private static readonly string TransactionNodeName = "transaction";
 
-        private TransactionMetaInfoStore _metaStore;
+        private TransactionMetaInfoStore _metaInfoStore;
 
         /// <summary>
         /// Tries to obtain transaction configuration based on the component configuration
@@ -47,9 +47,9 @@ namespace Castle.Facilities.AutoTx
         /// <param name="model">The model.</param>
         public override void ProcessModel(IKernel kernel, ComponentModel model)
         {
-            if (_metaStore == null)
+            if (_metaInfoStore == null)
             {
-                _metaStore = kernel.Resolve<TransactionMetaInfoStore>();
+                _metaInfoStore = kernel.Resolve<TransactionMetaInfoStore>();
             }
 
             if (IsMarkedWithTransactional(model.Configuration))
@@ -63,20 +63,20 @@ namespace Castle.Facilities.AutoTx
                 ConfigureBasedOnAttributes(model);
             }
 
-            Validate(model, _metaStore);
+            Validate(model, _metaInfoStore);
 
-            AddTransactionInterceptorIfIsTransactional(model, _metaStore);
+            AddTransactionInterceptorIfIsTransactional(model, _metaInfoStore);
         }
 
         /// <summary>
-        /// Tries to configure the ComponentModel based on attributes.
+        /// Tries to configure the <see cref="ComponentModel" /> based on attributes.
         /// </summary>
         /// <param name="model">The model.</param>
         private void ConfigureBasedOnAttributes(ComponentModel model)
         {
             if (model.Implementation.IsDefined(typeof(TransactionalAttribute), true))
             {
-                _metaStore.CreateMetaFromType(model.Implementation);
+                _metaInfoStore.CreateMetaInfoFromType(model.Implementation);
             }
         }
 
@@ -90,7 +90,7 @@ namespace Castle.Facilities.AutoTx
         }
 
         /// <summary>
-        /// Processes the meta information available on the component configuration.
+        /// Processes the meta-information available on the component configuration.
         /// (overrides MethodMetaInspector.ProcessMeta)
         /// </summary>
         /// <param name="model">The model.</param>
@@ -98,7 +98,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="metaModel">The meta model.</param>
         protected override void ProcessMeta(ComponentModel model, IList<MethodInfo> methods, MethodMetaModel metaModel)
         {
-            _metaStore.CreateMetaFromConfig(model.Implementation, methods, metaModel.ConfigNode);
+            _metaInfoStore.CreateMetaInfoFromConfig(model.Implementation, methods, metaModel.ConfigNode);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="store">The store.</param>
         private static void Validate(ComponentModel model, TransactionMetaInfoStore store)
         {
-            TransactionMetaInfo meta;
+            TransactionMetaInfo metaInfo;
 
             var problematicMethods = new List<string>();
 
@@ -116,9 +116,9 @@ namespace Castle.Facilities.AutoTx
             {
                 if (service == null
                     || service.IsInterface
-                    || (meta = store.GetMetaFor(model.Implementation)) == null
+                    || (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null
                     || (problematicMethods = (
-                                                 from method in meta.Methods
+                                                 from method in metaInfo.Methods
                                                  where !method.IsVirtual
                                                  select method.Name
                                              ).ToList()
@@ -138,7 +138,7 @@ namespace Castle.Facilities.AutoTx
         }
 
         /// <summary>
-        /// Determines whether the configuration has <c>istransaction="true"</c> attribute.
+        /// Determines whether the configuration has <c>isTransaction="true"</c> attribute.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>
@@ -146,12 +146,13 @@ namespace Castle.Facilities.AutoTx
         /// </returns>
         private static bool IsMarkedWithTransactional(IConfiguration configuration)
         {
-            return configuration != null && "true" == configuration.Attributes["isTransactional"];
+            return configuration != null
+                && configuration.Attributes["isTransactional"] == "true";
         }
 
         /// <summary>
         /// Asserts that if there are transaction behavior
-        /// configured for methods, the component node has <c>istransaction="true"</c> attribute
+        /// configured for methods, the component node has <c>isTransaction="true"</c> attribute
         /// </summary>
         /// <param name="model">The model.</param>
         private static void AssertThereNoTransactionOnConfig(ComponentModel model)
@@ -169,15 +170,15 @@ namespace Castle.Facilities.AutoTx
         }
 
         /// <summary>
-        /// Associates the transaction interceptor with the ComponentModel.
+        /// Associates the transaction interceptor with the <see cref="ComponentModel" />.
         /// </summary>
         /// <param name="model">The model.</param>
-        /// <param name="store">The meta information store.</param>
+        /// <param name="store">The meta-information store.</param>
         private void AddTransactionInterceptorIfIsTransactional(ComponentModel model,
                                                                 TransactionMetaInfoStore store)
         {
-            var meta = store.GetMetaFor(model.Implementation);
-            if (meta == null)
+            var metaInfo = store.GetMetaInfoFor(model.Implementation);
+            if (metaInfo == null)
             {
                 return;
             }

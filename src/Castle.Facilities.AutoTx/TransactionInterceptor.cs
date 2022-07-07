@@ -38,7 +38,7 @@ namespace Castle.Facilities.AutoTx
     public class TransactionInterceptor : IInterceptor, IOnBehalfAware
     {
         private readonly IKernel _kernel;
-        private readonly TransactionMetaInfoStore _infoStore;
+        private readonly TransactionMetaInfoStore _metaInfoStore;
 
         private TransactionMetaInfo _metaInfo;
 
@@ -46,11 +46,11 @@ namespace Castle.Facilities.AutoTx
         /// Initializes a new instance of the <see cref="TransactionInterceptor" /> class.
         /// </summary>
         /// <param name="kernel">The kernel.</param>
-        /// <param name="infoStore">The info store.</param>
-        public TransactionInterceptor(IKernel kernel, TransactionMetaInfoStore infoStore)
+        /// <param name="metaInfoStore">The meta-information store.</param>
+        public TransactionInterceptor(IKernel kernel, TransactionMetaInfoStore metaInfoStore)
         {
             _kernel = kernel;
-            _infoStore = infoStore;
+            _metaInfoStore = metaInfoStore;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="target">The target's ComponentModel</param>
         public void SetInterceptedComponentModel(ComponentModel target)
         {
-            _metaInfo = _infoStore.GetMetaFor(target.Implementation);
+            _metaInfo = _metaInfoStore.GetMetaInfoFor(target.Implementation);
         }
 
         #endregion

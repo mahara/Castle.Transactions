@@ -48,7 +48,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent1));
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
             Assert.That(meta, Is.Null);
         }
 
@@ -59,7 +59,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent1));
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
             Assert.That(meta, Is.Not.Null);
             Assert.That(meta.Methods.Count(), Is.EqualTo(3));
         }
@@ -84,7 +84,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalComponent2));
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent2));
             Assert.That(meta, Is.Not.Null);
             Assert.That(meta.Methods.Count(), Is.EqualTo(4));
         }
@@ -96,9 +96,9 @@ namespace Castle.Facilities.AutoTx.Tests
 
             var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-            var meta = metaInfoStore.GetMetaFor(typeof(TransactionalService));
-            Assert.That(meta, Is.Not.Null);
-            Assert.That(meta.Methods.Count(), Is.EqualTo(2));
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService));
+            Assert.That(metaInfo, Is.Not.Null);
+            Assert.That(metaInfo.Methods.Count(), Is.EqualTo(2));
         }
     }
 }

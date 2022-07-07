@@ -58,7 +58,7 @@ namespace Castle.Facilities.AutoTx
         public string RootFolder { get; set; }
 
         /// <summary>
-        /// Registers the interceptor component, the metainfo store and
+        /// Registers the interceptor component, the meta-information store, and
         /// adds a contributor to the ModelBuilder
         /// </summary>
         protected override void Init()
@@ -68,8 +68,8 @@ namespace Castle.Facilities.AutoTx
             Kernel.Register(
                 // Transient components (e.g.: TransactionInterceptor) don't need to be named.
                 Component.For<TransactionInterceptor>(),
-                Component.For<TransactionMetaInfoStore>().Named("transaction.MetaInfoStore"),
-                Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mappath")
+                Component.For<TransactionMetaInfoStore>().Named("transaction.metaInfoStore"),
+                Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mapPath")
                 );
 
             RegisterAdapters();
@@ -83,7 +83,6 @@ namespace Castle.Facilities.AutoTx
                 Kernel.Resolve<IMapPath>(),
                 !AllowAccessOutsideRootFolder,
                 RootFolder);
-
             Kernel.Register(Component.For<IDirectoryAdapter>().Named("directory.adapter").
                             Instance(directoryAdapter));
 
