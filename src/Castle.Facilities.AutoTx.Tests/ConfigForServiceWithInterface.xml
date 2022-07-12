@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <configuration>
   <facilities>
@@ -8,7 +8,8 @@
   <components>
     <component id="mycomp"
                service="Castle.Facilities.AutoTx.Tests.ITransactionalService, Castle.Facilities.AutoTx.Tests"
-               type="Castle.Facilities.AutoTx.Tests.TransactionalService, Castle.Facilities.AutoTx.Tests" isTransactional="true">
+               type="Castle.Facilities.AutoTx.Tests.TransactionalService, Castle.Facilities.AutoTx.Tests"
+               isTransactional="true">
       <transaction>
         <method name="Save" />
         <method name="Create" />
