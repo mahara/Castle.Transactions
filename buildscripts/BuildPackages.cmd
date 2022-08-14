@@ -15,6 +15,9 @@ REM limitations under the License.
 REM ****************************************************************************
 
 
+SET %1
+SET %2
+
 SET BUILD_CONFIGURATION=Release
 SET BUILD_VERSION=1.0.0
 
@@ -58,17 +61,15 @@ ECHO ------------------------------------
 ECHO Running .NET (net6.0) Unit Tests
 ECHO ------------------------------------
 
-dotnet ".\src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Services.Transaction.Tests.dll" --work ".\build" --result "Castle.Services.Transaction.Tests-Net-TestResults.xml;format=nunit3" || EXIT /B 1
-dotnet ".\src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Facilities.AutoTx.Tests.dll" --work ".\build" --result "Castle.Facilities.AutoTx.Tests-Net-TestResults.xml;format=nunit3" || EXIT /B 1
+dotnet test ".\src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Services.Transaction.Tests.dll" --results-directory ".\build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests-Net-TestResults.xml;format=nunit3" || EXIT /B 1
+dotnet test ".\src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Facilities.AutoTx.Tests.dll" --results-directory ".\build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests-Net-TestResults.xml;format=nunit3" || EXIT /B 1
 
 ECHO --------------------------------------------
 ECHO Running .NET Framework (net48) Unit Tests
 ECHO --------------------------------------------
 
-SET "NUNIT_CONSOLE_PATH=%UserProfile%\.nuget\packages\nunit.consolerunner\3.15.2\tools\nunit3-console.exe"
-
-%NUNIT_CONSOLE_PATH% ".\src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Services.Transaction.Tests.exe" --work ".\build" --result "Castle.Services.Transaction.Tests-NetFramework-TestResults.xml;format=nunit3" || EXIT /B 1
-%NUNIT_CONSOLE_PATH% ".\src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Facilities.AutoTx.Tests.exe" --work ".\build" --result "Castle.Facilities.AutoTx.Tests-NetFramework-TestResults.xml;format=nunit3" || EXIT /B 1
+dotnet test ".\src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Services.Transaction.Tests.exe" --results-directory ".\build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests-NetFramework-TestResults.xml;format=nunit3" || EXIT /B 1
+dotnet test ".\src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Facilities.AutoTx.Tests.exe" --results-directory ".\build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests-NetFramework-TestResults.xml;format=nunit3" || EXIT /B 1
 
 
 
