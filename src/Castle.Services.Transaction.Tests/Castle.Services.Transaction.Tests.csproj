@@ -16,20 +16,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-    <PackageReference Include="System.Net.Primitives" Version="4.3.1" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.2.0" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Castle.Core-log4net" Version="4.4.1" />
     <PackageReference Include="Castle.Core-NLog" Version="4.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
+    <PackageReference Include="NUnit.Console" Version="3.15.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="NUnitLite" Version="3.13.3" />
     <PackageReference Include="NunitXml.TestLogger" Version="3.0.117" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="System.Net.Primitives" Version="4.3.1" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
   </ItemGroup>
@@ -56,19 +57,11 @@
   -->
   <Target Name="CopyConfigurationFiles" AfterTargets="AfterBuild">
     <!-- Command Line (dotnet test) -->
-    <Copy SourceFiles="config\net\App.config"
-          DestinationFiles="$(OutDir)\testhost.dll.config"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Copy SourceFiles="config\netfx\App.config"
-          DestinationFiles="$(OutDir)\testhost.dll.config"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Copy SourceFiles="config\net\App.config" DestinationFiles="$(OutDir)\testhost.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Copy SourceFiles="config\netfx\App.config" DestinationFiles="$(OutDir)\testhost.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <!-- Visual Studio Test Explorer -->
-    <Copy SourceFiles="config\net\App.config"
-          DestinationFiles="$(OutDir)\testhost.x86.dll.config"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Copy SourceFiles="config\netfx\App.config"
-          DestinationFiles="$(OutDir)\testhost.x86.dll.config"
-          Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Copy SourceFiles="config\net\App.config" DestinationFiles="$(OutDir)\testhost.x86.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <Copy SourceFiles="config\netfx\App.config" DestinationFiles="$(OutDir)\testhost.x86.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </Target>
 
 </Project>
