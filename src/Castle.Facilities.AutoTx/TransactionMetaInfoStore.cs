@@ -99,10 +99,7 @@ namespace Castle.Facilities.AutoTx
         {
             var metaInfo = GetMetaInfoFor(implementation);
 
-            if (metaInfo == null)
-            {
-                metaInfo = new TransactionMetaInfo();
-            }
+            metaInfo ??= new TransactionMetaInfo();
 
             foreach (var method in methods)
             {

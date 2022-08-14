@@ -47,10 +47,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="model">The model.</param>
         public override void ProcessModel(IKernel kernel, ComponentModel model)
         {
-            if (_metaInfoStore == null)
-            {
-                _metaInfoStore = kernel.Resolve<TransactionMetaInfoStore>();
-            }
+            _metaInfoStore ??= kernel.Resolve<TransactionMetaInfoStore>();
 
             if (IsMarkedWithTransactional(model.Configuration))
             {
