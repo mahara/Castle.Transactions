@@ -17,9 +17,9 @@ REM ****************************************************************************
 
 ECHO.
 
-SET "PACKAGES_FOLDER_PATH=.\build"
-SET "NEV_BIN_FOLDER_PATH=.\tools\Explicit.NuGet.Versions\bin"
-SET "NEV_OBJ_FOLDER_PATH=.\tools\Explicit.NuGet.Versions\obj"
+SET "PACKAGES_FOLDER_PATH=build"
+SET "NEV_BIN_FOLDER_PATH=tools\Explicit.NuGet.Versions\bin"
+SET "NEV_OBJ_FOLDER_PATH=tools\Explicit.NuGet.Versions\obj"
 
 dotnet clean %1 --configuration Debug
 dotnet clean %1 --configuration Release

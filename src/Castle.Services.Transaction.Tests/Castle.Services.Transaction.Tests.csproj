@@ -4,13 +4,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net48</TargetFrameworks>
+
+    <OutputType>Exe</OutputType>
+    <StartupObject>Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <StartupObject>Program</StartupObject>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
     <AssemblyName>Castle.Services.Transaction.Tests</AssemblyName>
     <RootNamespace>Castle.Services.Transaction.Tests</RootNamespace>
 
