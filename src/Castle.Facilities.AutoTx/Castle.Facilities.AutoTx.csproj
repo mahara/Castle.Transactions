@@ -7,16 +7,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>Castle.Facilities.AutoTx</PackageId>
-    <Title>Castle.Facilities.AutoTx</Title>
-    <Description>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</Description>
-    <PackageTags>castle, transactions, autotx, autotransaction</PackageTags>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- remove once tools are truly ready for NuGet's new 'license' element -->
     <NoWarn>$(NoWarn);NU5125</NoWarn>
+
     <AssemblyName>Castle.Facilities.AutoTx</AssemblyName>
     <RootNamespace>Castle.Facilities.AutoTx</RootNamespace>
+
+    <Title>Castle.Facilities.AutoTx</Title>
+    <Description>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</Description>
+
+    <PackageId>Castle.Facilities.AutoTx</PackageId>
+    <PackageTags>castle, transactions, autotx, autotransaction</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
