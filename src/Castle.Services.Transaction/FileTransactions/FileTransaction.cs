@@ -20,7 +20,6 @@ namespace Castle.Services.Transaction
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
-    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Security.Permissions;
     using System.Text;
@@ -236,8 +235,8 @@ namespace Castle.Services.Transaction
                     current.Contains(System.IO.Path.AltDirectorySeparatorChar, StringComparison.Ordinal)))
 #else
             while (!((IDirectoryAdapter) this).Exists(current) &&
-                   (current.Contains(System.IO.Path.DirectorySeparatorChar) ||
-                    current.Contains(System.IO.Path.AltDirectorySeparatorChar)))
+                   (current.IndexOf(System.IO.Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) >= 0 ||
+                    current.IndexOf(System.IO.Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) >= 0))
 #endif
             {
                 current = Path.GetPathWithoutLastBit(current);

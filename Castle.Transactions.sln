@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
@@ -10,8 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Castle Build", "Castle Buil
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
+		buildscripts\build.cmd = buildscripts\build.cmd
 		build.sh = build.sh
 		BuildPackages.cmd = BuildPackages.cmd
+		buildscripts\BuildPackages.cmd = buildscripts\BuildPackages.cmd
 		CHANGELOG.md = CHANGELOG.md
 		CleanPackages.cmd = CleanPackages.cmd
 		buildscripts\common.props = buildscripts\common.props
@@ -21,6 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Castle Build", "Castle Buil
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{13AAE277-43FC-4F9B-B234-74EC67671964}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Services.Transaction", "src\Castle.Services.Transaction\Castle.Services.Transaction.csproj", "{C975C2E4-F615-4B05-8AD2-D505EFD212BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Services.Transaction.Tests", "src\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.csproj", "{0410ABF3-5BCE-4124-BA8B-80B82064A4C8}"
@@ -28,11 +34,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Facilities.AutoTx", "src\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj", "{0D149CF8-9CD7-4381-9D2B-075BC0D20853}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Facilities.AutoTx.Tests", "src\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.csproj", "{B757FC8A-DD68-401F-BD54-25D19317D257}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{13AAE277-43FC-4F9B-B234-74EC67671964}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build.yml = .github\workflows\build.yml
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
