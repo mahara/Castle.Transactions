@@ -27,19 +27,19 @@ namespace Castle.Services.Transaction
     {
         private readonly List<Pair<IResource, Exception>> _failedResources = new();
 
-        public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources)
-            : base(message, null)
+        public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources) :
+            base(message, null)
         {
             _failedResources.AddRange(failedResources);
         }
 
-        public RollbackResourceException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        public RollbackResourceException(SerializationInfo info, StreamingContext context) :
+            base(info, context)
         {
         }
 
-        public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources)
-            : base(info, context)
+        public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources) :
+            base(info, context)
         {
             _failedResources.AddRange(failedResources);
         }

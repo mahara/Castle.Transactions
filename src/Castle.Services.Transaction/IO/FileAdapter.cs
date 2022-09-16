@@ -40,8 +40,8 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="constrainToSpecifiedDirectory"></param>
         /// <param name="specifiedDirectory"></param>
-        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory)
-            : base(constrainToSpecifiedDirectory, specifiedDirectory)
+        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory) :
+            base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
             if (Logger.IsDebugEnabled)
             {

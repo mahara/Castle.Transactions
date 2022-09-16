@@ -58,8 +58,8 @@ namespace Castle.Services.Transaction
         /// Constructor for the file transaction.
         /// </summary>
         /// <param name="name">The name of the transaction.</param>
-        public FileTransaction(string name)
-            : base(name, TransactionScopeOption.Required, IsolationLevel.ReadCommitted)
+        public FileTransaction(string name) :
+            base(name, TransactionScopeOption.Required, IsolationLevel.ReadCommitted)
         {
         }
 
@@ -230,9 +230,15 @@ namespace Castle.Services.Transaction
             nonExistent.Push(path);
 
             var current = path;
-            while (!((IDirectoryAdapter) this).Exists(current)
-                   && (current.Contains(System.IO.Path.DirectorySeparatorChar)
-                       || current.Contains(System.IO.Path.AltDirectorySeparatorChar)))
+#if NET
+            while (!((IDirectoryAdapter) this).Exists(current) &&
+                   (current.Contains(System.IO.Path.DirectorySeparatorChar, StringComparison.Ordinal) ||
+                    current.Contains(System.IO.Path.AltDirectorySeparatorChar, StringComparison.Ordinal)))
+#else
+            while (!((IDirectoryAdapter) this).Exists(current) &&
+                   (current.Contains(System.IO.Path.DirectorySeparatorChar) ||
+                    current.Contains(System.IO.Path.AltDirectorySeparatorChar)))
+#endif
             {
                 current = Path.GetPathWithoutLastBit(current);
 
@@ -341,9 +347,9 @@ namespace Castle.Services.Transaction
         {
             AssertState(TransactionStatus.Active);
 
-            return recursively
-                       ? DeleteRecursive(path)
-                       : RemoveDirectoryTransactedW(path, _transactionHandle);
+            return recursively ?
+                   DeleteRecursive(path) :
+                   RemoveDirectoryTransactedW(path, _transactionHandle);
         }
 
         #endregion
@@ -1039,9 +1045,9 @@ namespace Castle.Services.Transaction
 
             return FindFirstFileTransactedW(filePath,
                                             FINDEX_INFO_LEVELS.FindExInfoStandard, out var data,
-                                            directory
-                                                ? FINDEX_SEARCH_OPS.FindExSearchLimitToDirectories
-                                                : FINDEX_SEARCH_OPS.FindExSearchNameMatch,
+                                            directory ?
+                                            FINDEX_SEARCH_OPS.FindExSearchLimitToDirectories :
+                                            FINDEX_SEARCH_OPS.FindExSearchNameMatch,
                                             IntPtr.Zero, caseSensitive, _transactionHandle);
         }
 

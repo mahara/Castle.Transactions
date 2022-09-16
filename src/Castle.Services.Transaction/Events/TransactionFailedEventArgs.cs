@@ -18,8 +18,8 @@ namespace Castle.Services.Transaction
 {
     public sealed class TransactionFailedEventArgs : TransactionEventArgs
     {
-        public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception)
-            : base(transaction)
+        public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception) :
+            base(transaction)
         {
             Exception = exception;
         }

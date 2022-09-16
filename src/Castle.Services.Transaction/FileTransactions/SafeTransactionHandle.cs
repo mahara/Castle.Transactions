@@ -36,8 +36,8 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public SafeTransactionHandle()
-            : base(true)
+        public SafeTransactionHandle() :
+            base(true)
         {
         }
 
@@ -48,8 +48,8 @@ namespace Castle.Services.Transaction
 #if NETFRAMEWORK
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 #endif
-        public SafeTransactionHandle(IntPtr handle)
-            : base(true)
+        public SafeTransactionHandle(IntPtr handle) :
+            base(true)
         {
             base.handle = handle;
         }

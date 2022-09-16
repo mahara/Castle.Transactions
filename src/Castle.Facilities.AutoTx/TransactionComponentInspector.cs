@@ -111,15 +111,14 @@ namespace Castle.Facilities.AutoTx
 
             foreach (var service in model.Services)
             {
-                if (service == null
-                    || service.IsInterface
-                    || (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null
-                    || (problematicMethods = (
-                                                 from method in metaInfo.Methods
-                                                 where !method.IsVirtual
-                                                 select method.Name
-                                             ).ToList()
-                       ).Count == 0)
+                if (service == null ||
+                    service.IsInterface ||
+                    (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null ||
+                     (problematicMethods = (from method in metaInfo.Methods
+                                            where !method.IsVirtual
+                                            select method.Name)
+                                           .ToList())
+                     .Count == 0)
                 {
                     return;
                 }
@@ -143,8 +142,8 @@ namespace Castle.Facilities.AutoTx
         /// </returns>
         private static bool IsMarkedWithTransactional(IConfiguration configuration)
         {
-            return configuration != null
-                && configuration.Attributes["isTransactional"] == "true";
+            return configuration != null &&
+                   configuration.Attributes["isTransactional"] == "true";
         }
 
         /// <summary>

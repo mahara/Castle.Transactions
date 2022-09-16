@@ -27,13 +27,13 @@ namespace Castle.Services.Transaction
 #endif
     internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        internal SafeFindHandle()
-            : base(true)
+        internal SafeFindHandle() :
+            base(true)
         {
         }
 
-        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
-            : base(ownsHandle)
+        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle) :
+            base(ownsHandle)
         {
             SetHandle(preExistingHandle);
         }

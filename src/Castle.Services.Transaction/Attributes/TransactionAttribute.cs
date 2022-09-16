@@ -29,8 +29,8 @@ namespace Castle.Services.Transaction
         /// Declares the required transaction mode, but omits the isolation level,
         /// which means that the transaction manager will use the default values for them.
         /// </summary>
-        public TransactionAttribute()
-            : this(TransactionScopeOption.Required, IsolationLevel.Unspecified)
+        public TransactionAttribute() :
+            this(TransactionScopeOption.Required, IsolationLevel.Unspecified)
         {
         }
 
@@ -39,8 +39,8 @@ namespace Castle.Services.Transaction
         /// which means that the transaction manager should use the default value for it.
         /// </summary>
         /// <param name="mode"></param>
-        public TransactionAttribute(TransactionScopeOption mode)
-            : this(mode, IsolationLevel.Unspecified)
+        public TransactionAttribute(TransactionScopeOption mode) :
+            this(mode, IsolationLevel.Unspecified)
         {
         }
 

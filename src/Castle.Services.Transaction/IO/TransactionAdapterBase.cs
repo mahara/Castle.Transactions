@@ -114,8 +114,8 @@ namespace Castle.Services.Transaction.IO
             var specifiedPath = PathInfo.Parse(_specifiedDirectory);
 
             // They must be on the same drive.
-            if (!string.IsNullOrEmpty(tentativePath.DriveLetter)
-                && specifiedPath.DriveLetter != tentativePath.DriveLetter)
+            if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
+                specifiedPath.DriveLetter != tentativePath.DriveLetter)
             {
                 return false;
             }

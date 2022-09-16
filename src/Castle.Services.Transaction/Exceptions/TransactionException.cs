@@ -26,8 +26,8 @@ namespace Castle.Services.Transaction
         /// Initializes a new instance of the <see cref="TransactionException" /> class.
         /// </summary>
         /// <param name="message">The message.</param>
-        public TransactionException(string message)
-            : base(message)
+        public TransactionException(string message) :
+            base(message)
         {
         }
 
@@ -36,8 +36,8 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="innerException">The inner exception.</param>
-        public TransactionException(string message, Exception innerException)
-            : base(message, innerException)
+        public TransactionException(string message, Exception innerException) :
+            base(message, innerException)
         {
         }
 
@@ -48,8 +48,8 @@ namespace Castle.Services.Transaction
         /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> that contains contextual information about the source or destination.</param>
         /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"></see> is zero (0).</exception>
         /// <exception cref="T:System.ArgumentNullException">The info parameter is null.</exception>
-        public TransactionException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        public TransactionException(SerializationInfo info, StreamingContext context) :
+            base(info, context)
         {
         }
     }
