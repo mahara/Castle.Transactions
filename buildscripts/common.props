@@ -78,4 +78,20 @@
     <Compile Include="..\..\buildscripts\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
   </ItemGroup>
 
+
+
+  <Target Name="DeepCleanProjectAfterClean" AfterTargets="Clean">
+    <Message Text="Deep cleaning project $(MSBuildProjectName) on cleaning..." />
+
+    <!--
+      https://stackoverflow.com/questions/1088593/how-to-clean-visual-studio-bin-and-obj-folders
+    -->
+    <!-- bin -->
+    <RemoveDir Directories="$(ProjectDir)$(OutputPath)" ContinueOnError="true" />
+
+    <!-- obj -->
+    <RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)$(Configuration)\" ContinueOnError="true" />
+
+  </Target>
+
 </Project>

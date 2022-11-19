@@ -41,14 +41,10 @@
     <ProjectReference Include="..\Castle.Services.Transaction\Castle.Services.Transaction.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <None Include="config\net\App.config" Link="App.config" />
-    <None Remove="config\netfx\App.config" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <None Remove="config\net\App.config" />
-    <None Include="config\netfx\App.config" Link="App.config" />
+  <ItemGroup>
+    <None Include="App.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 
@@ -57,12 +53,13 @@
     https://stackoverflow.com/questions/55541912/using-an-app-config-file-with-nunit3-in-a-net-core-console-app
   -->
   <Target Name="CopyConfigurationFiles" AfterTargets="AfterBuild">
+
     <!-- Command Line (dotnet test) -->
-    <Copy SourceFiles="config\net\App.config" DestinationFiles="$(OutDir)\testhost.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Copy SourceFiles="config\netfx\App.config" DestinationFiles="$(OutDir)\testhost.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Copy SourceFiles="App.config" DestinationFiles="$(OutDir)\testhost.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+
     <!-- Visual Studio Test Explorer -->
-    <Copy SourceFiles="config\net\App.config" DestinationFiles="$(OutDir)\testhost.x86.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
-    <Copy SourceFiles="config\netfx\App.config" DestinationFiles="$(OutDir)\testhost.x86.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Copy SourceFiles="App.config" DestinationFiles="$(OutDir)\testhost.x86.dll.config" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+
   </Target>
 
 </Project>
