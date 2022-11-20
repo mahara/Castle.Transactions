@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\buildscripts\Build.props"></Import>
-  <Import Project="..\..\buildscripts\Build.References.props"></Import>
-
   <PropertyGroup>
     <TargetFrameworks>$(LibTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
@@ -17,7 +14,7 @@
     <PackageId>Castle.Facilities.AutoTx</PackageId>
     <PackageDescription>Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx)</PackageDescription>
     <PackageTags>Castle; Transactions; AutoTx; AutoTransaction</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
   </PropertyGroup>
 
   <ItemGroup>
