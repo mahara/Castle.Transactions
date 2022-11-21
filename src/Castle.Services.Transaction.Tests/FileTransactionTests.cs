@@ -14,7 +14,7 @@
 // limitations under the License.
 #endregion
 
-#if NETFRAMEWORK
+#if NET7_0_OR_GREATER || NETFRAMEWORK
 using System.Transactions;
 #endif
 
@@ -187,14 +187,15 @@ namespace Castle.Services.Transaction.Tests
         #region Ambient Transactions
 
         //
-        //  NOTE:   .NET does not support cross-platform distributed transactions yet.
-        //          It will throw System.PlatformNotSupportedException: This platform does not support distributed transactions.
+        //  NOTE:   .NET starts to support Windows-only distributed transactions since .NET 7.0.
+        //          Otherwise, it will throw System.PlatformNotSupportedException: This platform does not support distributed transactions.
         //          -   https://github.com/dotnet/runtime/issues/715
         //              -   https://github.com/dotnet/runtime/pull/72051
         //          -   https://github.com/dotnet/runtime/issues/71769
+        //          -   https://github.com/dotnet/runtime/issues/80777
         //
 
-#if NETFRAMEWORK
+#if NET7_0_OR_GREATER || NETFRAMEWORK
         [Test]
         public void Using_TransactionScope_IsDistributed_AlsoTestingStatusWhenRolledBack()
         {
