@@ -8,6 +8,11 @@
 Improvements:
 - Added support for **`.NET 7.0`**.
 
+### Castle.Services.Transaction
+
+Breaking Changes:
+- EXPERIMENTAL: Enabled implicit distributed transactions by default on Windows for **`.NET 7.0`** and later versions.
+
 
 ## 5.3.0 (2022-09-17)
 
