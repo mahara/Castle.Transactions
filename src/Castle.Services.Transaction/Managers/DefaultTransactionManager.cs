@@ -42,6 +42,25 @@ namespace Castle.Services.Transaction
             _activityManager = activityManager ??
                                throw new ArgumentNullException(nameof(activityManager));
 
+            //
+            //  NOTE:   .NET starts to support Windows-only distributed transactions since .NET 7.0.
+            //          Otherwise, it will throw System.PlatformNotSupportedException: This platform does not support distributed transactions.
+            //          -   https://github.com/dotnet/runtime/issues/715
+            //              -   https://github.com/dotnet/runtime/pull/72051
+            //          -   https://github.com/dotnet/runtime/issues/71769
+            //          -   https://github.com/dotnet/runtime/issues/80777
+            //
+
+#if NET7_0_OR_GREATER
+            //
+            //  NOTE:   EXPERIMENTAL: Enable implicit distributed transactions by default on Windows.
+            //
+            if (OperatingSystem.IsWindows())
+            {
+                TransactionManager.ImplicitDistributedTransactions = true;
+            }
+#endif
+
             Logger.Debug($"'{nameof(DefaultTransactionManager)}' created.");
         }
 
