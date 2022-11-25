@@ -35,7 +35,8 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
         /// </summary>
-        public DefaultTransactionManager() : this(new AsyncLocalActivityManager())
+        public DefaultTransactionManager() :
+            this(new AsyncLocalActivityManager())
         {
         }
 
@@ -54,8 +55,7 @@ namespace Castle.Services.Transaction
             }
         }
 
-        public ILogger Logger { get; set; } =
-            NullLogger.Instance;
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Gets or sets the activity manager.
@@ -111,7 +111,7 @@ namespace Castle.Services.Transaction
                 {
 #if NET || MONO
                     //
-                    // .NET does not support distributed transactions yet.
+                    // .NET does not fully support distributed transactions yet.
                     // https://github.com/dotnet/runtime/issues/715
                     // System.PlatformNotSupportedException : This platform does not support distributed transactions.
                     //

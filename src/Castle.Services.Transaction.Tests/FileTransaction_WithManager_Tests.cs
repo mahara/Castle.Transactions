@@ -134,7 +134,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void BugWhenResourceFailsAndTransactionCommits()
         {
-            _ = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
         }
     }
 }
