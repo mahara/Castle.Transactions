@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="[4.4.1,5)" />
     <PackageReference Include="Castle.Windsor" Version="[5.1.2,6)" />
+    <PackageReference Include="LiquidTestReports.Markdown" Version="1.0.9" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
