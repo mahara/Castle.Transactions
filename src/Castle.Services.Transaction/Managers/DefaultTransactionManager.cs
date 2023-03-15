@@ -232,7 +232,7 @@ namespace Castle.Services.Transaction
         }
 
 #if NET
-        [Obsolete]
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
 #endif
         public override object InitializeLifetimeService()
         {
