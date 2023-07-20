@@ -114,7 +114,7 @@ namespace Castle.Services.Transaction.Tests
             tx.SetRollbackOnly();
 
             Assert.Throws(typeof(TransactionException),
-                          () => tx.Commit(),
+                          tx.Commit,
                           "Should not be able to commit after rollback is set.");
         }
 
@@ -150,7 +150,7 @@ namespace Castle.Services.Transaction.Tests
             catch (RollbackResourceException rex)
             {
                 // Good.
-                Assert.That(rex.FailedResources[0].First, Is.InstanceOf(typeof(R)));
+                Assert.That(rex.FailedResources[0].Item1, Is.InstanceOf(typeof(R)));
             }
         }
 

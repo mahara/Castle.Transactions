@@ -22,7 +22,6 @@ namespace Castle.Services.Transaction
     using System.Linq;
     using System.Transactions;
 
-    using Castle.Core;
     using Castle.Core.Logging;
 
     public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDisposable
@@ -212,7 +211,7 @@ namespace Castle.Services.Transaction
             Status = TransactionStatus.RolledBack;
             _canCommit = false;
 
-            var failures = new List<Pair<IResource, Exception>>();
+            var failures = new List<(IResource, Exception)>();
 
             Exception toThrow = null;
 

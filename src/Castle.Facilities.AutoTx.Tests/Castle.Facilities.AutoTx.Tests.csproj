@@ -15,20 +15,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="[4.4.1,5)" />
-    <PackageReference Include="Castle.Windsor" Version="[5.1.2,6)" />
+    <PackageReference Include="Castle.Core" Version="[5.1.1,6)" />
+    <PackageReference Include="Castle.Windsor" Version="[6,7)" />
     <PackageReference Include="LiquidTestReports.Markdown" Version="1.0.9" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.6.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="NUnitLite" Version="3.13.3" />
-    <PackageReference Include="NunitXml.TestLogger" Version="3.0.131" />
+    <PackageReference Include="NunitXml.TestLogger" Version="3.1.15" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net6.0'">
   </ItemGroup>

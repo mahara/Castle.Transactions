@@ -22,8 +22,6 @@ namespace Castle.Services.Transaction
 
     using Castle.Core.Logging;
 
-    using Core;
-
     /// <summary>
     /// Utility class for whatever is needed to make the code better.
     /// </summary>
@@ -174,9 +172,9 @@ namespace Castle.Services.Transaction
             }
         }
 
-        public static Pair<T, T2> And<T, T2>(this T first, T2 second)
+        public static (T1, T2) And<T1, T2>(this T1 first, T2 second)
         {
-            return new Pair<T, T2>(first, second);
+            return (first, second);
         }
     }
 
@@ -197,8 +195,8 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
+        /// Takes a lambda what to do if the result failed.
+        /// Returns the result so that it can be managed in whatever way is needed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
@@ -227,7 +225,7 @@ namespace Castle.Services.Transaction
     /// Error monad
     /// </summary>
     /// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
-    internal struct Error<T>
+    internal readonly struct Error<T>
     {
         private readonly Exception _exception;
         private readonly bool _success;
@@ -241,8 +239,8 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
-        /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
+        /// Takes a lambda what to do if the result failed.
+        /// Returns the result so that it can be managed in whatever way is needed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
