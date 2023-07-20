@@ -74,6 +74,3 @@ for:
   artifacts:
   - path: build\*.nupkg
     name: net
-
-
-

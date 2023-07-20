@@ -17,31 +17,28 @@ REM ****************************************************************************
 
 ECHO.
 
-SET "PACKAGES_FOLDER_PATH=build"
-SET "NEV_BIN_FOLDER_PATH=tools\Explicit.NuGet.Versions\bin"
-SET "NEV_OBJ_FOLDER_PATH=tools\Explicit.NuGet.Versions\obj"
+SET ARTIFACTS_FOLDER_PATH=build
+SET NEV_BIN_FOLDER_PATH=tools\Explicit.NuGet.Versions\bin
+SET NEV_OBJ_FOLDER_PATH=tools\Explicit.NuGet.Versions\obj
 
 dotnet clean %1 --configuration Debug
 dotnet clean %1 --configuration Release
 
-IF EXIST %PACKAGES_FOLDER_PATH% (
-    ECHO Deleting "%PACKAGES_FOLDER_PATH%" folder...
+IF EXIST "%ARTIFACTS_FOLDER_PATH%" (
+    ECHO Deleting "%ARTIFACTS_FOLDER_PATH%" folder...
 
-    RMDIR %PACKAGES_FOLDER_PATH% /S /Q
+    RMDIR "%ARTIFACTS_FOLDER_PATH%" /S /Q
 )
 
-IF EXIST %NEV_BIN_FOLDER_PATH% (
+IF EXIST "%NEV_BIN_FOLDER_PATH%" (
     ECHO Deleting "%NEV_BIN_FOLDER_PATH%" folder...
 
-    RMDIR %NEV_BIN_FOLDER_PATH% /S /Q
+    RMDIR "%NEV_BIN_FOLDER_PATH%" /S /Q
 )
-IF EXIST %NEV_OBJ_FOLDER_PATH% (
+IF EXIST "%NEV_OBJ_FOLDER_PATH%" (
     ECHO Deleting "%NEV_OBJ_FOLDER_PATH%" folder...
 
-    RMDIR %NEV_OBJ_FOLDER_PATH% /S /Q
+    RMDIR "%NEV_OBJ_FOLDER_PATH%" /S /Q
 )
 
 ECHO.
-
-
-

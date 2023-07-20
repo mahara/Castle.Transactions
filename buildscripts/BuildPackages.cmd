@@ -79,6 +79,3 @@ ECHO --------------------------------------------
 
 dotnet test "src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Services.Transaction.Tests.exe" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net48_TestResults.xml;format=nunit3"
 dotnet test "src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Facilities.AutoTx.Tests.exe" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net48_TestResults.xml;format=nunit3"
-
-
-
