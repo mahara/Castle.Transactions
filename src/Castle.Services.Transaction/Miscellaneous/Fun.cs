@@ -56,7 +56,7 @@ namespace Castle.Services.Transaction
 
             if (action == null)
             {
-                throw new ArgumentNullException("a");
+                throw new ArgumentNullException(nameof(action));
             }
 
             if (!upgradable)
@@ -94,7 +94,7 @@ namespace Castle.Services.Transaction
 
             if (function == null)
             {
-                throw new ArgumentNullException("f");
+                throw new ArgumentNullException(nameof(function));
             }
 
             sem.EnterReadLock();
@@ -118,7 +118,7 @@ namespace Castle.Services.Transaction
 
             if (action == null)
             {
-                throw new ArgumentNullException("a");
+                throw new ArgumentNullException(nameof(action));
             }
 
             sem.EnterWriteLock();
@@ -198,7 +198,7 @@ namespace Castle.Services.Transaction
 
         /// <summary>
         /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
+        /// that it can be managed in whatever way is needed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
@@ -242,7 +242,7 @@ namespace Castle.Services.Transaction
 
         /// <summary>
         /// Takes a lambda what to do if the result failed. Returns the result so
-        /// that it can be managed in whatevery way is needed.
+        /// that it can be managed in whatever way is needed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>

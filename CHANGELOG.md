@@ -8,7 +8,7 @@ Improvements:
 - Added .NET 7.0 support
 
 Breaking Changes:
-- Upgraded [Castle.Core] version to 5.1.0 (TBD)
+- Upgraded [Castle.Core] version to 5.1.1 (TBD)
 - Upgraded [Castle.Windsor] version to 6.0.0 (TBD)
 
 
