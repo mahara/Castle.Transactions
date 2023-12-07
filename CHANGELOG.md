@@ -1,12 +1,12 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
 
-## 5.4.0 (2022-11-xx)
+## 5.4.0 (2023-12-xx)
 
 ### All
 
 Improvements:
-- Added support for **`.NET 7.0`**.
+- Added support for **`.NET 8.0`** and **`.NET 7.0`**.
 
 ### Castle.Services.Transaction
 
