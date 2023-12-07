@@ -1,5 +1,5 @@
 #region License
-// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+// Copyright 2004-2024 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction.IO
     /// Path data holder.
     /// Invariant: no fields nor properties are null after constructor.
     /// </summary>
-    public struct PathInfo
+    public record struct PathInfo
     {
         private const string RegexString =
             @"(?<root>
@@ -243,7 +243,7 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         public string FolderAndFiles { get; }
 
-        public PathType Type
+        public readonly PathType Type
         {
             get
             {
@@ -279,7 +279,7 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Checks whether <see cref="Root" /> is not an empty string.
         /// </summary>
-        public bool IsRooted =>
+        public readonly bool IsRooted =>
             Root != string.Empty;
 
         /// <summary>
@@ -340,7 +340,7 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public string RemoveParameterFromRoot(PathInfo other)
+        public readonly string RemoveParameterFromRoot(PathInfo other)
         {
             if (Root != other.Root)
             {

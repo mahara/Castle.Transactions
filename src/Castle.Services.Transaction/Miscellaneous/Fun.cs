@@ -1,5 +1,5 @@
 #region License
-// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+// Copyright 2004-2024 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ namespace Castle.Services.Transaction
     /// <summary>
     /// Error monad
     /// </summary>
-    internal struct Error
+    internal readonly record struct Error
     {
         public static Error OK = new(true, null);
 
@@ -202,7 +202,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Error Exception(Action<Exception> action)
+        public readonly Error Exception(Action<Exception> action)
         {
             if (!_success)
             {
@@ -212,7 +212,7 @@ namespace Castle.Services.Transaction
             return this;
         }
 
-        public Error Success(Action action)
+        public readonly Error Success(Action action)
         {
             if (_success)
             {
@@ -227,7 +227,7 @@ namespace Castle.Services.Transaction
     /// Error monad
     /// </summary>
     /// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
-    internal struct Error<T>
+    internal readonly struct Error<T>
     {
         private readonly Exception _exception;
         private readonly bool _success;
@@ -246,7 +246,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Error<T> Exception(Action<Exception> action)
+        public readonly Error<T> Exception(Action<Exception> action)
         {
             if (!_success)
             {
@@ -256,7 +256,7 @@ namespace Castle.Services.Transaction
             return this;
         }
 
-        public Error<T> Success(Action<T> action)
+        public readonly Error<T> Success(Action<T> action)
         {
             if (_success)
             {

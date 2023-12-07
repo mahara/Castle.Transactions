@@ -1,5 +1,5 @@
 #region License
-// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+// Copyright 2004-2024 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -358,7 +358,7 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.That(exception, Is.Not.Null);
-            Assert.IsInstanceOf(typeof(CommitResourceException), exception);
+            Assert.That(exception, Is.InstanceOf(typeof(CommitResourceException)));
         }
 
         [Test]
@@ -412,7 +412,7 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(transactionFailedEventTriggered, Is.True);
 
             Assert.That(exception, Is.Not.Null);
-            Assert.IsInstanceOf(typeof(RollbackResourceException), exception);
+            Assert.That(exception, Is.InstanceOf(typeof(RollbackResourceException)));
         }
 
         [Test]

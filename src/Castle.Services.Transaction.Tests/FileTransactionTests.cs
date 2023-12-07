@@ -1,5 +1,5 @@
 #region License
-// Copyright 2004-2022 Castle Project - https://www.castleproject.org/
+// Copyright 2004-2024 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ namespace Castle.Services.Transaction.Tests
             tx.SetRollbackOnly();
 
             Assert.Throws(typeof(TransactionException),
-                          () => tx.Commit(),
+                          tx.Commit,
                           "Should not be able to commit after rollback is set.");
         }
 

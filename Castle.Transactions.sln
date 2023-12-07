@@ -1,30 +1,48 @@
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Castle Build", "Castle Build", "{F2092D1F-09A8-4918-A22F-1F0C1E337CCB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Castle", "Castle", "{F2092D1F-09A8-4918-A22F-1F0C1E337CCB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
-		build.cmd = build.cmd
-		buildscripts\build.cmd = buildscripts\build.cmd
-		build.sh = build.sh
-		BuildPackages.cmd = BuildPackages.cmd
-		buildscripts\BuildPackages.cmd = buildscripts\BuildPackages.cmd
 		CHANGELOG.md = CHANGELOG.md
-		CleanPackages.cmd = CleanPackages.cmd
-		buildscripts\common.props = buildscripts\common.props
-		buildscripts\CommonAssemblyInfo.cs = buildscripts\CommonAssemblyInfo.cs
 		CONTRIBUTING.md = CONTRIBUTING.md
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{4AFCFE2A-3564-45B3-A841-D53B7A6B7662}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		build.cmd = build.cmd
+		build.sh = build.sh
+		BuildPackages.cmd = BuildPackages.cmd
+		CleanPackages.cmd = CleanPackages.cmd
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildscripts", "buildscripts", "{873C76B4-03FC-4EB8-9572-3C5639AD5453}"
+	ProjectSection(SolutionItems) = preProject
+		buildscripts\build.cmd = buildscripts\build.cmd
+		buildscripts\BuildPackages.cmd = buildscripts\BuildPackages.cmd
+		buildscripts\common.props = buildscripts\common.props
+		buildscripts\CommonAssemblyInfo.cs = buildscripts\CommonAssemblyInfo.cs
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{13AAE277-43FC-4F9B-B234-74EC67671964}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yml = .github\workflows\build.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{76E1AF14-A28B-494A-838C-8B4244550EB7}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Castle.Services.Transaction", "src\Castle.Services.Transaction\Castle.Services.Transaction.csproj", "{C975C2E4-F615-4B05-8AD2-D505EFD212BE}"
@@ -62,7 +80,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{13AAE277-43FC-4F9B-B234-74EC67671964} = {F2092D1F-09A8-4918-A22F-1F0C1E337CCB}
+		{13AAE277-43FC-4F9B-B234-74EC67671964} = {4AFCFE2A-3564-45B3-A841-D53B7A6B7662}
+		{873C76B4-03FC-4EB8-9572-3C5639AD5453} = {4AFCFE2A-3564-45B3-A841-D53B7A6B7662}
+		{76E1AF14-A28B-494A-838C-8B4244550EB7} = {4AFCFE2A-3564-45B3-A841-D53B7A6B7662}
+		{4AFCFE2A-3564-45B3-A841-D53B7A6B7662} = {F2092D1F-09A8-4918-A22F-1F0C1E337CCB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63AA3B80-CAC9-4B22-A9B2-33E48C2A3603}
