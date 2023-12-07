@@ -14,10 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -102,16 +98,16 @@ namespace Explicit.NuGet.Versions
         {
             WalkDocumentNodes(nuspecXmlDocument.ChildNodes, node =>
             {
-                var dependencyId = node.Attributes["id"].Value;
+                var dependencyId = node.Attributes!["id"]!.Value;
                 if (string.Equals(node.Name, "dependency", StringComparison.OrdinalIgnoreCase) &&
                     !string.IsNullOrEmpty(dependencyId) &&
-                    dependencyId.StartsWith(packageIdPrefixFilter, StringComparison.InvariantCultureIgnoreCase))
+                    dependencyId.StartsWith(packageIdPrefixFilter, StringComparison.OrdinalIgnoreCase))
                 {
-                    var dependencyVersion = node.Attributes["version"].Value;
-                    if (!dependencyVersion.StartsWith("[") &&
-                        !dependencyVersion.EndsWith("]"))
+                    var dependencyVersion = node.Attributes!["version"]!.Value;
+                    if (!dependencyVersion.StartsWith('[') &&
+                        !dependencyVersion.EndsWith(']'))
                     {
-                        node.Attributes["version"].Value = $"[{dependencyVersion}]";
+                        node.Attributes!["version"]!.Value = $"[{dependencyVersion}]";
                     }
                 }
             });
@@ -138,11 +134,11 @@ namespace Explicit.NuGet.Versions
             }
         }
 
-        class NuspecContentEntry
+        record NuspecContentEntry
         {
-            public string EntryName { get; set; }
+            public string EntryName { get; set; } = string.Empty;
 
-            public string Contents { get; set; }
+            public string Contents { get; set; } = string.Empty;
         }
 
         sealed class StringWriterWithEncoding : StringWriter
