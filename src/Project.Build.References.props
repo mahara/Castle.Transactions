@@ -3,7 +3,6 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" />
     <PackageReference Include="Castle.Windsor" />
-    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
   </ItemGroup>
