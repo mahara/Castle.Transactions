@@ -36,17 +36,23 @@ namespace Castle.Services.Transaction.Tests
         public void NestedRequiresWithCommits()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(root, Is.Not.Null);
             Assert.That(root is TransactionBase, Is.True);
+
             root.Begin();
 
             var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child1, Is.Not.Null);
             Assert.That(child1 is ChildTransaction, Is.True);
             Assert.That(child1.IsChildTransaction, Is.True);
+
             child1.Begin();
 
             var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child2, Is.Not.Null);
             Assert.That(child2 is ChildTransaction, Is.True);
             Assert.That(child2.IsChildTransaction, Is.True);
+
             child2.Begin();
 
             child2.Commit();
@@ -58,19 +64,27 @@ namespace Castle.Services.Transaction.Tests
         public void NestedRequiresAndRequiresNew()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(root, Is.Not.Null);
             Assert.That(root is TransactionBase, Is.True);
+
             root.Begin();
 
             var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child1, Is.Not.Null);
             Assert.That(child1 is ChildTransaction, Is.True);
+
             child1.Begin();
 
             var innerRoot = _transactionManager.CreateTransaction(TransactionScopeOption.RequiresNew, IsolationLevel.Unspecified);
+            Assert.That(innerRoot, Is.Not.Null);
             Assert.That(innerRoot is ChildTransaction, Is.False);
+
             innerRoot.Begin();
 
             var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child2, Is.Not.Null);
             Assert.That(child2 is ChildTransaction, Is.True);
+
             child2.Begin();
 
             child2.Commit();
@@ -86,12 +100,18 @@ namespace Castle.Services.Transaction.Tests
             var resource = new ResourceImpl();
 
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(root, Is.Not.Null);
+
             root.Begin();
+
             root.Enlist(resource);
 
             var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child1, Is.Not.Null);
             Assert.That(child1 is ChildTransaction, Is.True);
+
             child1.Enlist(resource);
+
             child1.Begin();
 
             child1.Commit();
@@ -111,6 +131,8 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(root, Is.Not.Null);
+
                 root.Begin();
 
                 _transactionManager.CreateTransaction(TransactionScopeOption.Suppress, IsolationLevel.Unspecified);
@@ -125,12 +147,18 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(root, Is.Not.Null);
+
                 root.Begin();
 
                 var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child1, Is.Not.Null);
+
                 child1.Begin();
 
                 var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child2, Is.Not.Null);
+
                 child2.Begin();
 
                 child2.Rollback();
@@ -147,12 +175,18 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(root, Is.Not.Null);
+
                 root.Begin();
 
                 var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child1, Is.Not.Null);
+
                 child1.Begin();
 
                 var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child2, Is.Not.Null);
+
                 child2.Begin();
 
                 _transactionManager.Dispose(child1);
@@ -167,12 +201,18 @@ namespace Castle.Services.Transaction.Tests
             void Method()
             {
                 var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(root, Is.Not.Null);
+
                 root.Begin();
 
                 var child1 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child1, Is.Not.Null);
+
                 child1.Begin();
 
                 var child2 = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+                Assert.That(child2, Is.Not.Null);
+
                 child2.Begin();
 
                 _transactionManager.Dispose(root);
@@ -188,17 +228,19 @@ namespace Castle.Services.Transaction.Tests
             var rFailed = new ThrowsExceptionResource(true, false);
             var rSuccess = new ResourceImpl();
 
-            var t = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-            t.Enlist(first);
-            t.Enlist(rFailed);
-            t.Enlist(rSuccess);
+            var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(tx, Is.Not.Null);
 
-            t.Begin();
+            tx.Enlist(first);
+            tx.Enlist(rFailed);
+            tx.Enlist(rSuccess);
+
+            tx.Begin();
 
             Assert.That(rFailed.Started);
             Assert.That(rSuccess.Started);
 
-            Assert.Throws(typeof(CommitResourceException), t.Commit);
+            Assert.Throws(typeof(CommitResourceException), tx.Commit);
 
             Assert.That(first.Committed);
             Assert.That(rFailed.Committed, Is.False);
@@ -209,12 +251,16 @@ namespace Castle.Services.Transaction.Tests
         public void SynchronizationsAndCommitWithNestedTransaction()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(root, Is.Not.Null);
             Assert.That(root is TalkactiveTransaction, Is.True);
+
             root.Begin();
 
             var child = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child, Is.Not.Null);
             Assert.That(child is ChildTransaction, Is.True);
             Assert.That(child.IsChildTransaction, Is.True);
+
             child.Begin();
 
             var sync = new SynchronizationImpl();
@@ -235,12 +281,16 @@ namespace Castle.Services.Transaction.Tests
         public void SynchronizationsAndRollbackWithNestedTransaction()
         {
             var root = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(root, Is.Not.Null);
             Assert.That(root is TalkactiveTransaction, Is.True);
+
             root.Begin();
 
             var child = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(child, Is.Not.Null);
             Assert.That(child is ChildTransaction, Is.True);
             Assert.That(child.IsChildTransaction, Is.True);
+
             child.Begin();
 
             var sync = new SynchronizationImpl();

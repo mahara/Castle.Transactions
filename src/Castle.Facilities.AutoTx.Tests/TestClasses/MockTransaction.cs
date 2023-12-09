@@ -19,7 +19,7 @@ namespace Castle.Facilities.AutoTx.Tests
     using System;
     using System.Transactions;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     public class MockTransaction : TransactionBase
     {

@@ -17,7 +17,6 @@
 namespace Castle.Services.Transaction
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Transactions;
@@ -27,15 +26,15 @@ namespace Castle.Services.Transaction
 
     public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDisposable
     {
-        private readonly IList<IResource> _resources = new List<IResource>();
-        private readonly IList<ISynchronization> _synchronizationItems = new List<ISynchronization>();
+        private readonly List<IResource> _resources = [];
+        private readonly List<ISynchronization> _synchronizationItems = [];
 
         protected readonly string InnerName;
 
-        private TransactionScope _ambientTransaction;
+        private TransactionScope? _ambientTransaction;
         private volatile bool _canCommit;
 
-        protected TransactionBase(string name,
+        protected TransactionBase(string? name,
                                   TransactionScopeOption mode,
                                   IsolationLevel isolationLevel)
         {
@@ -43,8 +42,27 @@ namespace Castle.Services.Transaction
             Mode = mode;
             IsolationLevel = isolationLevel;
             Status = TransactionStatus.NoTransaction;
-            Context = new Hashtable();
+            Context = new Dictionary<string, object>();
         }
+
+        #region IDisposable Members
+
+        public virtual void Dispose()
+        {
+            _resources.Select(r => r as IDisposable)
+                      .Where(r => r != null)
+                      .ForEach(r => r?.Dispose());
+
+            _resources.Clear();
+            _synchronizationItems.Clear();
+
+            if (_ambientTransaction != null)
+            {
+                DisposeAmbientTransaction();
+            }
+        }
+
+        #endregion
 
         public ILogger Logger { get; set; } =
             NullLogger.Instance;
@@ -79,7 +97,7 @@ namespace Castle.Services.Transaction
             false;
 
         /// <inheritdoc />
-        public IDictionary Context { get; private set; }
+        public IDictionary<string, object> Context { get; private set; }
 
         public ChildTransaction CreateChildTransaction()
         {
@@ -87,25 +105,6 @@ namespace Castle.Services.Transaction
             // I don't think we need to have a list of child transactions since we never use them.
             return new ChildTransaction(this);
         }
-
-        #region IDisposable Members
-
-        public virtual void Dispose()
-        {
-            _resources.Select(r => r as IDisposable)
-                      .Where(r => r != null)
-                      .ForEach(r => r.Dispose());
-
-            _resources.Clear();
-            _synchronizationItems.Clear();
-
-            if (_ambientTransaction != null)
-            {
-                DisposeAmbientTransaction();
-            }
-        }
-
-        #endregion
 
         #region ITransaction Members
 
@@ -214,7 +213,7 @@ namespace Castle.Services.Transaction
 
             var failures = new List<Pair<IResource, Exception>>();
 
-            Exception toThrow = null;
+            Exception? toThrow = null;
 
             _synchronizationItems.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
@@ -224,7 +223,7 @@ namespace Castle.Services.Transaction
             try
             {
                 _resources.ForEach(r => Logger.TryLogFail(r.Rollback)
-                                              .Exception(e => failures.Add(r.And(e))));
+                                              .Exception(e => failures.Add(r.And(e!))));
 
                 if (failures.Count == 0)
                 {
@@ -244,7 +243,7 @@ namespace Castle.Services.Transaction
             {
                 if (_ambientTransaction != null)
                 {
-                    Logger.DebugFormat("Rolling back TransactionScope (Ambient Transaction) for '{0}'.", Name);
+                    Logger.DebugFormat("Rolling back 'TransactionScope' (Ambient Transaction) for '{0}'.", Name);
 
                     DisposeAmbientTransaction();
                 }
@@ -318,7 +317,7 @@ namespace Castle.Services.Transaction
             AssertState(status, null);
         }
 
-        protected void AssertState(TransactionStatus status, string message)
+        protected void AssertState(TransactionStatus status, string? message)
         {
             if (Status != status)
             {
@@ -328,9 +327,7 @@ namespace Castle.Services.Transaction
                 }
 
                 throw new TransactionException(
-                    string.Format("State failure; should have been {0}, but was {1}.",
-                                  status,
-                                  Status));
+                    $"State failure; should have been {status}, but was {Status}.");
             }
         }
 
@@ -355,12 +352,12 @@ namespace Castle.Services.Transaction
         {
             _ambientTransaction = new TransactionScope();
 
-            Logger.DebugFormat($"Created a {nameof(TransactionScope)} (Ambient Transaction) for '{Name}'.");
+            Logger.DebugFormat($"Created a '{nameof(TransactionScope)}' (Ambient Transaction) for '{Name}'.");
         }
 
         private void DisposeAmbientTransaction()
         {
-            _ambientTransaction.Dispose();
+            _ambientTransaction?.Dispose();
             _ambientTransaction = null;
         }
     }

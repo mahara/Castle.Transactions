@@ -17,21 +17,25 @@
 namespace Castle.Services.Transaction
 {
     using System;
+#if NETFRAMEWORK
     using System.Runtime.ConstrainedExecution;
+#endif
     using System.Runtime.InteropServices;
+#if NETFRAMEWORK
+    using System.Security;
     using System.Security.Permissions;
+#endif
 
     using Microsoft.Win32.SafeHandles;
 
     /// <summary>
     /// A safe file handle on the transaction resource.
     /// </summary>
-
 #if NETFRAMEWORK
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
-    public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public sealed partial class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         /// <summary>
         /// Default constructor.
@@ -65,11 +69,20 @@ namespace Castle.Services.Transaction
         }
 
         /*
-         * BOOL WINAPI CloseHandle(__in HANDLE hObject);
+            BOOL WINAPI CloseHandle(__in HANDLE hObject);
          */
+
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool CloseHandle(IntPtr handle);
+#else
         [DllImport("kernel32.dll")]
-        //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        //[SuppressUnmanagedCodeSecurity]
+#if NETFRAMEWORK
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [SuppressUnmanagedCodeSecurity]
+#endif
         private static extern bool CloseHandle(IntPtr handle);
+#endif
     }
 }

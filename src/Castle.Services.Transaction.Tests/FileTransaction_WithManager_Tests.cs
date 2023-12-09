@@ -38,8 +38,8 @@ namespace Castle.Services.Transaction.Tests
             _transactionManager = new DefaultTransactionManager(new TransientActivityManager());
 
             _directoryPath = TestContext.CurrentContext.TestDirectory;
-            _directoryPath = _directoryPath.CombineAssert(@"Transactions\tmp");
-            _filePath = _directoryPath.Combine("test.txt");
+            _directoryPath = _directoryPath.CombinePathThenAssert(@"Transactions\TEMP");
+            _filePath = _directoryPath.CombinePath("test.txt");
 
             if (File.Exists(_filePath))
             {
@@ -62,9 +62,9 @@ namespace Castle.Services.Transaction.Tests
         public void TransactionResourcesAreDisposed()
         {
             var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(tx, Is.Not.Null);
 
             var resource = new ResourceImpl();
-
             tx.Enlist(resource);
 
             tx.Begin();
@@ -91,6 +91,8 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(_transactionManager.CurrentTransaction, Is.Null);
 
             var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(tx, Is.Not.Null);
+
             tx.Begin();
 
             Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
@@ -99,6 +101,7 @@ namespace Castle.Services.Transaction.Tests
             // invocation.Proceed() in Interceptor
 
             var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+            Assert.That(childTx, Is.Not.Null);
             Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
             Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
                         "Now that we have created a child, it's the current tx.");
@@ -107,13 +110,15 @@ namespace Castle.Services.Transaction.Tests
             childTx.Enlist(new FileResourceAdapter(txF));
             childTx.Begin();
 
-            txF.WriteAllText(_filePath, "Hello world");
+            const string Text = "Hello world";
+
+            txF.WriteAllText(_filePath, Text);
 
             childTx.Commit();
             tx.Commit();
 
             Assert.That(File.Exists(_filePath));
-            Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo("Hello world"));
+            Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo(Text));
 
             // First we need to dispose the child transaction.
             _transactionManager.Dispose(childTx);

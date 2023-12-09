@@ -17,6 +17,7 @@
 namespace Castle.Services.Transaction.IO
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     using Castle.Core.Logging;
 
@@ -26,10 +27,10 @@ namespace Castle.Services.Transaction.IO
     public abstract class TransactionAdapterBase
     {
         private readonly bool _allowOutsideSpecifiedDirectory;
-        private readonly string _specifiedDirectory;
+        private readonly string? _specifiedDirectory;
 
         protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
-                                         string specifiedDirectory)
+                                         string? specifiedDirectory)
         {
             if (constrainToSpecifiedDirectory && specifiedDirectory == null)
             {
@@ -51,7 +52,7 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Gets the transaction manager, if there is one, or sets it.
         /// </summary>
-        public ITransactionManager TransactionManager { get; set; }
+        public ITransactionManager? TransactionManager { get; set; }
 
         /// <summary>
         /// Gets/sets whether to use transactions.
@@ -61,7 +62,7 @@ namespace Castle.Services.Transaction.IO
 
         public bool OnlyJoinExisting { get; set; }
 
-        protected bool HasTransaction(out IFileTransaction transaction)
+        protected bool HasTransaction([NotNullWhen(true)] out IFileTransaction? transaction)
         {
             transaction = null;
 
@@ -70,9 +71,10 @@ namespace Castle.Services.Transaction.IO
                 return false;
             }
 
-            if (TransactionManager != null && TransactionManager.CurrentTransaction != null)
+            var transactionManager = TransactionManager;
+            if (transactionManager != null && transactionManager.CurrentTransaction != null)
             {
-                foreach (var resource in TransactionManager.CurrentTransaction.Resources())
+                foreach (var resource in transactionManager.CurrentTransaction.Resources())
                 {
                     if (resource is not FileResourceAdapter)
                     {
@@ -87,7 +89,8 @@ namespace Castle.Services.Transaction.IO
                 if (!OnlyJoinExisting)
                 {
                     transaction = new FileTransaction("Auto-created File Transaction");
-                    TransactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
+
+                    transactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
 
                     return true;
                 }
@@ -111,7 +114,8 @@ namespace Castle.Services.Transaction.IO
                 return true;
             }
 
-            var specifiedPath = PathInfo.Parse(_specifiedDirectory);
+            // BUG:     possible issues with NRT (Nullable References Type) in "_specifiedDirectory"
+            var specifiedPath = PathInfo.Parse(_specifiedDirectory!);
 
             // They must be on the same drive.
             if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
@@ -135,9 +139,7 @@ namespace Castle.Services.Transaction.IO
             if (!IsInAllowedDir(fullPath))
             {
                 throw new UnauthorizedAccessException(
-                    string.Format("Authorization required for handling path \"{0}\" (passed as \"{1}\").",
-                                  fullPath,
-                                  path));
+                    $"Authorization required for handling path '{fullPath}' (passed as '{path}').");
             }
         }
     }

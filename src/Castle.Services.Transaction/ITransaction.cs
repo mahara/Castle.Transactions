@@ -17,7 +17,6 @@
 namespace Castle.Services.Transaction
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Transactions;
 
@@ -73,7 +72,7 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Transaction context. Can be used by applications.
         /// </summary>
-        IDictionary Context { get; }
+        IDictionary<string, object> Context { get; }
 
         /// <summary>
         /// Gets an enumerable of the resources present.

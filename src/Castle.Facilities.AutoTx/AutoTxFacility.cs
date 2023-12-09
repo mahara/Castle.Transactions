@@ -16,11 +16,11 @@
 
 namespace Castle.Facilities.AutoTx
 {
-    using MicroKernel.Facilities;
-    using MicroKernel.Registration;
+    using Castle.MicroKernel.Facilities;
+    using Castle.MicroKernel.Registration;
 
-    using Services.Transaction;
-    using Services.Transaction.IO;
+    using Castle.Services.Transaction;
+    using Castle.Services.Transaction.IO;
 
     /// <summary>
     /// Augments the kernel to handle transactional components.
@@ -55,7 +55,7 @@ namespace Castle.Facilities.AutoTx
         /// <summary>
         /// Gets or sets the root folder for file transactions.
         /// </summary>
-        public string RootFolder { get; set; }
+        public string? RootFolder { get; set; }
 
         /// <summary>
         /// Registers the interceptor component, the meta-information store, and
@@ -69,8 +69,7 @@ namespace Castle.Facilities.AutoTx
                 // Transient components (e.g.: TransactionInterceptor) don't need to be named.
                 Component.For<TransactionInterceptor>(),
                 Component.For<TransactionMetaInfoStore>().Named("transaction.metaInfoStore"),
-                Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mapPath")
-                );
+                Component.For<IMapPath>().ImplementedBy<MapPathImpl>().Named("directory.adapter.mapPath"));
 
             RegisterAdapters();
 
@@ -82,19 +81,24 @@ namespace Castle.Facilities.AutoTx
             var directoryAdapter = new DirectoryAdapter(
                 Kernel.Resolve<IMapPath>(),
                 !AllowAccessOutsideRootFolder,
-                RootFolder);
-            Kernel.Register(Component.For<IDirectoryAdapter>().Named("directory.adapter").
-                            Instance(directoryAdapter));
+                RootFolder!);
+            Kernel.Register(
+                Component.For<IDirectoryAdapter>()
+                         .Named("directory.adapter")
+                         .Instance(directoryAdapter));
 
             var fileAdapter = new FileAdapter(
                 !AllowAccessOutsideRootFolder,
-                RootFolder);
-            Kernel.Register(Component.For<IFileAdapter>().Named("file.adapter")
-                            .Instance(fileAdapter));
+                RootFolder!);
+            Kernel.Register(
+                Component.For<IFileAdapter>()
+                         .Named("file.adapter")
+                         .Instance(fileAdapter));
 
             if (Kernel.HasComponent(typeof(ITransactionManager)))
             {
-                fileAdapter.TransactionManager = directoryAdapter.TransactionManager = Kernel.Resolve<ITransactionManager>();
+                fileAdapter.TransactionManager = directoryAdapter.TransactionManager =
+                    Kernel.Resolve<ITransactionManager>();
             }
             else
             {
@@ -110,8 +114,8 @@ namespace Castle.Facilities.AutoTx
                 {
                     var transactionManager = Kernel.Resolve<ITransactionManager>();
 
-                    ((DirectoryAdapter) Kernel.Resolve<IDirectoryAdapter>()).TransactionManager = transactionManager;
                     ((FileAdapter) Kernel.Resolve<IFileAdapter>()).TransactionManager = transactionManager;
+                    ((DirectoryAdapter) Kernel.Resolve<IDirectoryAdapter>()).TransactionManager = transactionManager;
                 }
             }
         }

@@ -20,30 +20,33 @@ namespace Castle.Services.Transaction.Tests
     using System.Collections.Generic;
     using System.IO;
     using System.Threading;
+#if NETFRAMEWORK
     using System.Transactions;
+#endif
 
-    using IO;
+    using Castle.Services.Transaction.IO;
 
     using NUnit.Framework;
 
-    using Path = IO.Path;
-    using TransactionException = TransactionException;
-    using TransactionStatus = TransactionStatus;
+    using Path = Castle.Services.Transaction.IO.Path;
+    using TransactionException = Castle.Services.Transaction.TransactionException;
+    using TransactionStatus = Castle.Services.Transaction.TransactionStatus;
 
     [TestFixture]
     public class FileTransactionTests
     {
         #region Setup/Teardown
 
-        private static readonly object _serializer = new();
+        private static readonly object _syncObject = new();
 
-        private readonly List<string> _infosCreated = new();
+        private readonly List<string> _infosCreated = [];
+
         private string _dllPath;
 
         [SetUp]
         public void CleanOutListEtc()
         {
-            Monitor.Enter(_serializer);
+            Monitor.Enter(_syncObject);
 
             _infosCreated.Clear();
         }
@@ -74,7 +77,7 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete("testing", true);
             }
 
-            Monitor.Exit(_serializer);
+            Monitor.Exit(_syncObject);
         }
 
         private class R : IResource
@@ -93,9 +96,9 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ConstructorTest()
         {
-            var tx = new FileTransaction();
+            var txF = new FileTransaction();
 
-            Assert.That(tx.Status, Is.EqualTo(TransactionStatus.NoTransaction));
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.NoTransaction));
         }
 
         [Test]
@@ -108,13 +111,14 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using var tx = new FileTransaction();
-            tx.Begin();
+            using var txF = new FileTransaction();
 
-            tx.SetRollbackOnly();
+            txF.Begin();
+
+            txF.SetRollbackOnly();
 
             Assert.Throws(typeof(TransactionException),
-                          tx.Commit,
+                          txF.Commit,
                           "Should not be able to commit after rollback is set.");
         }
 
@@ -128,16 +132,17 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using var tx = new FileTransaction();
-            tx.Enlist(new R());
+            using var txF = new FileTransaction();
 
-            tx.Begin();
+            txF.Enlist(new R());
+
+            txF.Begin();
 
             try
             {
                 try
                 {
-                    tx.Rollback();
+                    txF.Rollback();
 
                     Assert.Fail("Tests is wrong or the transaction doesn't rollback resources.");
                 }
@@ -145,7 +150,7 @@ namespace Castle.Services.Transaction.Tests
                 {
                 }
 
-                Assert.That(tx.Status, Is.EqualTo(TransactionStatus.RolledBack));
+                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
             }
             catch (RollbackResourceException rex)
             {
@@ -163,9 +168,10 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void ThrowsInvalidStateOnCreate()
         {
-            using var tx = new FileTransaction();
+            using var txF = new FileTransaction();
+
             Assert.Throws(typeof(TransactionException),
-                          () => ((IDirectoryAdapter) tx).Create("lol"),
+                          () => ((IDirectoryAdapter) txF).Create("lol"),
                           "The transaction hasn't begun, throws.");
         }
 
@@ -174,8 +180,11 @@ namespace Castle.Services.Transaction.Tests
         #region Ambient Transactions
 
         //
-        // .NET does not support distributed transactions yet.
+        // .NET does not fully support (cross-platform) distributed transactions yet.
         // https://github.com/dotnet/runtime/issues/715
+        //     https://github.com/dotnet/runtime/pull/72051
+        // https://github.com/dotnet/runtime/issues/71769
+        //
         // System.PlatformNotSupportedException : This platform does not support distributed transactions.
         //
 #if NETFRAMEWORK
@@ -191,15 +200,16 @@ namespace Castle.Services.Transaction.Tests
 
             using (new TransactionScope())
             {
-                using var tx = new FileTransaction();
-                tx.Begin();
+                using var txF = new FileTransaction();
 
-                Assert.That(tx.IsAmbient);
+                txF.Begin();
 
-                tx.Rollback();
+                Assert.That(txF.IsAmbient);
 
-                Assert.That(tx.IsRollbackOnlySet);
-                Assert.That(tx.Status, Is.EqualTo(TransactionStatus.RolledBack));
+                txF.Rollback();
+
+                Assert.That(txF.IsRollbackOnlySet);
+                Assert.That(txF.Status, Is.EqualTo(TransactionStatus.RolledBack));
             }
         }
 #endif
@@ -214,16 +224,16 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using var tx = new FileTransaction();
-            Assert.That(tx.Status, Is.EqualTo(TransactionStatus.NoTransaction));
+            using var txF = new FileTransaction();
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.NoTransaction));
 
-            tx.Begin();
+            txF.Begin();
 
-            Assert.That(tx.Status, Is.EqualTo(TransactionStatus.Active));
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Active));
 
-            tx.Commit();
+            txF.Commit();
 
-            Assert.That(tx.Status, Is.EqualTo(TransactionStatus.Committed));
+            Assert.That(txF.Status, Is.EqualTo(TransactionStatus.Committed));
         }
 
         #endregion
@@ -234,17 +244,18 @@ namespace Castle.Services.Transaction.Tests
         [Ignore("Not completely implemented.")]
         public void CanMoveDirectory()
         {
-            var dir1 = _dllPath.CombineAssert("a");
-            var dir2 = _dllPath.Combine("b");
+            var dir1 = _dllPath.CombinePathThenAssert("a");
+            var dir2 = _dllPath.CombinePath("b");
 
             Assert.That(Directory.Exists(dir2), Is.False);
             Assert.That(File.Exists(dir2), Is.False, "Lingering files should not be allowed to disrupt the testing.");
 
-            var file = dir1.Combine("file");
+            var file = dir1.CombinePath("file");
             File.WriteAllText(file, "I should also be moved.");
             _infosCreated.Add(file);
 
             using var tx = new FileTransaction("Moving Tx");
+
             tx.Begin();
 
             ((IDirectoryAdapter) tx).Move(dir1, dir2);
@@ -257,22 +268,33 @@ namespace Castle.Services.Transaction.Tests
 
             _infosCreated.Add(dir2);
 
-            Assert.That(File.Exists(dir2.Combine(Path.GetFileName(file))), "And so should the file in the directory.");
+            Assert.That(File.Exists(dir2.CombinePath(Path.GetFileName(file))), "And so should the file in the directory.");
         }
 
-        // http://msdn.microsoft.com/en-us/library/aa365536%28VS.85%29.aspx
+        /// <summary>
+        /// </summary>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <listheader>
+        /// REFERENCES:
+        /// </listheader>
+        /// <item><see href="https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setfileattributestransactedw" /></item>
+        /// <item><see href="http://msdn.microsoft.com/en-us/library/aa365536(VS.85).aspx" /></item>
+        /// </list>
+        ///  </remarks>
         [Test]
-        [Ignore("MSDN is wrong in saying: \"If a non-transacted thread modifies the file before the transacted thread does, "
-                + "and the file is still open when the transaction attempts to open it, "
-                + "the transaction receives the error ERROR_TRANSACTIONAL_CONFLICT.\"... "
-                + "This test proves the error in this statement. Actually, from testing the rest of the code, it's clear that "
-                + "the error comes for the opposite; when a transacted thread modifies before a non-transacted thread.")]
+        [Ignore("MSDN is wrong in saying: 'If a non-transacted thread modifies the file before the transacted thread does, " +
+                "and the file is still open when the transaction attempts to open it, " +
+                "the transaction receives the error ERROR_TRANSACTIONAL_CONFLICT.'... " +
+                "This test proves the error in this statement. Actually, from testing the rest of the code, it's clear that " +
+                "the error comes for the opposite; when a transacted thread modifies before a non-transacted thread.")]
         public void TwoTransactionsSameNameFirstSleeps()
         {
             var t1_started = new ManualResetEvent(false);
             var t2_started = new ManualResetEvent(false);
             var t2_done = new ManualResetEvent(false);
-            Exception exception = null;
+
+            Exception? exception = null;
 
             // Non-transacted thread.
             var t1 = new Thread(() =>
@@ -292,7 +314,7 @@ namespace Castle.Services.Transaction.Tests
 
                     t1_started.WaitOne();
 
-                    fs.Write(new byte[] { 0x1 }, 0, 1);
+                    fs.Write([0x1], 0, 1);
                     fs.Close();
                 }
                 catch (Exception ex)
@@ -310,9 +332,9 @@ namespace Castle.Services.Transaction.Tests
 
             t1.Start();
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
+                txF.Begin();
 
                 Console.WriteLine("t1 wait for t2 to start");
                 Console.Out.Flush();
@@ -324,7 +346,7 @@ namespace Castle.Services.Transaction.Tests
                     Console.WriteLine("t1 started");
 
                     // The transacted thread should receive ERROR_TRANSACTIONAL_CONFLICT, but it gets permission denied.
-                    using var fs = ((IFileAdapter) tx).Create("abb");
+                    using var fs = ((IFileAdapter) txF).Create("abb");
                     fs.WriteByte(0x2);
                 }
                 finally
@@ -335,9 +357,8 @@ namespace Castle.Services.Transaction.Tests
                     t1_started.Set();
                 }
 
-                tx.Commit();
+                txF.Commit();
             }
-
 
             if (exception != null)
             {

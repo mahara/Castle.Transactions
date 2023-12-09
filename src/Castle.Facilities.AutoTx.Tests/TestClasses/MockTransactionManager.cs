@@ -16,7 +16,7 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     /// <summary>
     /// Summary description for MockTransactionManager.

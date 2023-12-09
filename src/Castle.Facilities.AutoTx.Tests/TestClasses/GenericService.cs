@@ -18,7 +18,7 @@ namespace Castle.Facilities.AutoTx.Tests
 {
     using System;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     [Transactional]
     public class GenericService<T>

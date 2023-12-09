@@ -295,27 +295,27 @@ namespace Castle.Services.Transaction.IO
                 throw new NotSupportedException("Non-rooted paths are not supported.");
             }
 
-            var OK = child.FolderAndFiles.StartsWith(FolderAndFiles);
+            var result = child.FolderAndFiles.StartsWith(FolderAndFiles, StringComparison.Ordinal);
 
             switch (Type)
             {
                 case PathType.Device:
-                    OK &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
+                    result &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
 
                     break;
 
                 case PathType.Server:
-                    OK &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
+                    result &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
 
                     break;
 
                 case PathType.IPv4:
-                    OK &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
+                    result &= IPAddress.Parse(child.IPv4).Equals(IPAddress.Parse(IPv4));
 
                     break;
 
                 case PathType.IPv6:
-                    OK &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
+                    result &= IPAddress.Parse(child.IPv6).Equals(IPAddress.Parse(IPv6));
 
                     break;
 
@@ -323,12 +323,12 @@ namespace Castle.Services.Transaction.IO
                     throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
 
                 case PathType.Drive:
-                    OK &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
+                    result &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
 
                     break;
             }
 
-            return OK;
+            return result;
         }
 
         /// <summary>

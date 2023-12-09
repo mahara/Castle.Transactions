@@ -25,12 +25,12 @@ namespace Castle.Services.Transaction
     {
         private IActivityManager _activityManager;
 
-        public event EventHandler<TransactionEventArgs> TransactionCreated;
-        public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
-        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
-        public event EventHandler<TransactionEventArgs> TransactionDisposed;
-        public event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+        public event EventHandler<TransactionEventArgs>? TransactionCreated;
+        public event EventHandler<TransactionEventArgs>? TransactionCompleted;
+        public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
+        public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
+        public event EventHandler<TransactionEventArgs>? TransactionDisposed;
+        public event EventHandler<TransactionEventArgs>? ChildTransactionCreated;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
@@ -51,7 +51,7 @@ namespace Castle.Services.Transaction
 
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug($"{nameof(DefaultTransactionManager)} created.");
+                Logger.Debug($"'{nameof(DefaultTransactionManager)}' created.");
             }
         }
 
@@ -69,35 +69,44 @@ namespace Castle.Services.Transaction
         }
 
         /// <summary>
+        /// <see cref="ITransactionManager.CurrentTransaction" />
+        /// </summary>
+        /// <remarks>Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.</remarks>
+        public ITransaction? CurrentTransaction =>
+            _activityManager.CurrentActivity.CurrentTransaction;
+
+        /// <summary>
         /// <see cref="ITransactionManager.CreateTransaction(TransactionScopeOption,IsolationLevel)" />.
         /// </summary>
-        public ITransaction CreateTransaction(TransactionScopeOption mode,
-                                              IsolationLevel isolationLevel)
+        public ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                               IsolationLevel isolationLevel)
         {
             return CreateTransaction(mode, isolationLevel, false, false);
         }
 
-        public ITransaction CreateTransaction(TransactionScopeOption mode,
-                                              IsolationLevel isolationLevel,
-                                              bool isAmbient,
-                                              bool isReadOnly)
+        public ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                               IsolationLevel isolationLevel,
+                                               bool isAmbient,
+                                               bool isReadOnly)
         {
-            AssertModeSupported(mode);
+            AssertModeIsSupported(mode);
 
-            if (CurrentTransaction == null && mode == TransactionScopeOption.Suppress)
+            var currentTransaction = CurrentTransaction;
+
+            if (currentTransaction == null && mode == TransactionScopeOption.Suppress)
             {
                 return null;
             }
 
-            TransactionBase transaction = null;
+            TransactionBase? transaction = null;
 
-            if (CurrentTransaction != null)
+            if (currentTransaction != null)
             {
                 if (mode == TransactionScopeOption.Required)
                 {
-                    transaction = ((TransactionBase) CurrentTransaction).CreateChildTransaction();
+                    transaction = ((TransactionBase) currentTransaction).CreateChildTransaction();
 
-                    Logger.DebugFormat("Child transaction \"{0}\" created with mode '{1}'.",
+                    Logger.DebugFormat("Child transaction '{0}' created with mode '{1}'.",
                                        transaction.Name,
                                        mode);
                 }
@@ -111,8 +120,11 @@ namespace Castle.Services.Transaction
                 {
 #if NET || MONO
                     //
-                    // .NET does not fully support distributed transactions yet.
+                    // .NET does not fully support (cross-platform) distributed transactions yet.
                     // https://github.com/dotnet/runtime/issues/715
+                    //     https://github.com/dotnet/runtime/pull/72051
+                    // https://github.com/dotnet/runtime/issues/71769
+                    //
                     // System.PlatformNotSupportedException : This platform does not support distributed transactions.
                     //
                     throw new PlatformNotSupportedException("Distributed transactions are not supported on .NET (yet) and Mono.");
@@ -121,18 +133,18 @@ namespace Castle.Services.Transaction
 #endif
                 }
 
-                Logger.DebugFormat("Transaction \"{0}\" created.", transaction.Name);
+                Logger.DebugFormat("Transaction '{0}' created.", transaction.Name);
             }
 
             _activityManager.CurrentActivity.Push(transaction);
 
             if (transaction.IsChildTransaction)
             {
-                ChildTransactionCreated.Fire(this, new TransactionEventArgs(transaction));
+                ChildTransactionCreated?.Fire(this, new TransactionEventArgs(transaction));
             }
             else
             {
-                TransactionCreated.Fire(this, new TransactionEventArgs(transaction));
+                TransactionCreated?.Fire(this, new TransactionEventArgs(transaction));
             }
 
             return transaction;
@@ -143,55 +155,48 @@ namespace Castle.Services.Transaction
                                                        bool ambient,
                                                        bool readOnly)
         {
-            var tx = new TalkactiveTransaction(mode, isolationLevel, ambient, readOnly)
+            var transaction = new TalkactiveTransaction(mode, isolationLevel, ambient, readOnly)
             {
                 Logger = Logger.CreateChildLogger(nameof(TalkactiveTransaction))
             };
 
-            tx.TransactionCompleted += CompletedHandler;
-            tx.TransactionRolledBack += RolledBackHandler;
-            tx.TransactionFailed += FailedHandler;
+            transaction.TransactionCompleted += CompletedHandler;
+            transaction.TransactionRolledBack += RolledBackHandler;
+            transaction.TransactionFailed += FailedHandler;
 
-            return tx;
+            return transaction;
         }
 
-        private void CompletedHandler(object sender, TransactionEventArgs e)
+        private void CompletedHandler(object? sender, TransactionEventArgs e)
         {
-            TransactionCompleted.Fire(this, e);
+            TransactionCompleted?.Fire(this, e);
         }
 
-        private void RolledBackHandler(object sender, TransactionEventArgs e)
+        private void RolledBackHandler(object? sender, TransactionEventArgs e)
         {
-            TransactionRolledBack.Fire(this, e);
+            TransactionRolledBack?.Fire(this, e);
         }
 
-        private void FailedHandler(object sender, TransactionFailedEventArgs e)
+        private void FailedHandler(object? sender, TransactionFailedEventArgs e)
         {
-            TransactionFailed.Fire(this, e);
+            TransactionFailed?.Fire(this, e);
         }
 
-        private void AssertModeSupported(TransactionScopeOption mode)
+        private void AssertModeIsSupported(TransactionScopeOption mode)
         {
             var transaction = CurrentTransaction;
 
             if (mode == TransactionScopeOption.Suppress &&
                 transaction != null && transaction.Status == TransactionStatus.Active)
             {
-                var message = "There is a transaction active and the transaction mode " +
-                              "explicit says that no transaction is supported for this context.";
+                var message = "There is currently an active transaction " +
+                              "and the transaction mode explicitly says that no new child transaction is allowed in this context.";
 
                 Logger.Error(message);
 
                 throw new TransactionModeUnsupportedException(message);
             }
         }
-
-        /// <summary>
-        /// <see cref="ITransactionManager.CurrentTransaction" />
-        /// </summary>
-        /// <remarks>Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.</remarks>
-        public ITransaction CurrentTransaction =>
-            _activityManager.CurrentActivity.CurrentTransaction;
 
         /// <summary>
         /// <see cref="ITransactionManager.Dispose" />.
@@ -204,11 +209,11 @@ namespace Castle.Services.Transaction
                 throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction.");
             }
 
-            Logger.DebugFormat("Trying to dispose transaction \"{0}\".", transaction.Name);
+            Logger.DebugFormat("Trying to dispose transaction '{0}'.", transaction.Name);
 
             if (CurrentTransaction != transaction)
             {
-                throw new ArgumentException("Tried to dispose a transaction that is not on the current active transaction.",
+                throw new ArgumentException("Tried to dispose a transaction that is not current transaction.",
                                             nameof(transaction));
             }
 
@@ -226,17 +231,18 @@ namespace Castle.Services.Transaction
                 publisher.TransactionFailed -= FailedHandler;
             }
 
-            TransactionDisposed.Fire(this, new TransactionEventArgs(transaction));
+            TransactionDisposed?.Fire(this, new TransactionEventArgs(transaction));
 
-            Logger.DebugFormat("Transaction \"{0}\" disposed successfully.", transaction.Name);
+            Logger.DebugFormat("Transaction '{0}' disposed successfully.", transaction.Name);
         }
 
+        /// <inheritdoc />
 #if NET
         [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

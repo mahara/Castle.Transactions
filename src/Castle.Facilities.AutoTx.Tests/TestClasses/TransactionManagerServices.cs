@@ -16,17 +16,18 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    using NUnit.Framework;
+    using Castle.Services.Transaction;
+    using Castle.Services.Transaction.IO;
 
-    using Services.Transaction;
-    using Services.Transaction.IO;
+    using NUnit.Framework;
 
     public interface ITransactionManagerService
     {
         IDirectoryAdapter DA { get; }
         IFileAdapter FA { get; }
-        void A(ITransaction transaction);
-        void B(ITransaction transaction);
+
+        void A(ITransaction? transaction);
+        void B(ITransaction? transaction);
     }
 
     [Transactional]
@@ -43,13 +44,13 @@ namespace Castle.Facilities.AutoTx.Tests
         public IFileAdapter FA { get; }
 
         [Transaction]
-        public void A(ITransaction transaction)
+        public void A(ITransaction? transaction)
         {
             Assert.That(transaction, Is.Null);
         }
 
         [Transaction, InjectTransaction]
-        public void B(ITransaction transaction)
+        public void B(ITransaction? transaction)
         {
             Assert.That(transaction, Is.Not.Null);
         }

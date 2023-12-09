@@ -20,14 +20,14 @@ namespace Castle.Facilities.AutoTx
     using System.Linq;
     using System.Reflection;
 
-    using Core;
-    using Core.Configuration;
+    using Castle.Core;
+    using Castle.Core.Configuration;
 
-    using MicroKernel;
-    using MicroKernel.Facilities;
-    using MicroKernel.ModelBuilder.Inspectors;
+    using Castle.MicroKernel;
+    using Castle.MicroKernel.Facilities;
+    using Castle.MicroKernel.ModelBuilder.Inspectors;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     /// <summary>
     /// Tries to obtain transaction configuration based on the component configuration,
@@ -37,7 +37,7 @@ namespace Castle.Facilities.AutoTx
     {
         private static readonly string TransactionNodeName = "transaction";
 
-        private TransactionMetaInfoStore _metaInfoStore;
+        private TransactionMetaInfoStore? _metaInfoStore;
 
         /// <summary>
         /// Tries to obtain transaction configuration based on the component configuration
@@ -73,7 +73,7 @@ namespace Castle.Facilities.AutoTx
         {
             if (model.Implementation.IsDefined(typeof(TransactionalAttribute), true))
             {
-                _metaInfoStore.CreateMetaInfoFromType(model.Implementation);
+                _metaInfoStore?.CreateMetaInfoFromType(model.Implementation);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="metaModel">The meta model.</param>
         protected override void ProcessMeta(ComponentModel model, IList<MethodInfo> methods, MethodMetaModel metaModel)
         {
-            _metaInfoStore.CreateMetaInfoFromConfig(model.Implementation, methods, metaModel.ConfigNode);
+            _metaInfoStore?.CreateMetaInfoFromConfig(model.Implementation, methods, metaModel.ConfigNode);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="store">The store.</param>
         private static void Validate(ComponentModel model, TransactionMetaInfoStore store)
         {
-            TransactionMetaInfo metaInfo;
+            TransactionMetaInfo? metaInfo;
 
             var problematicMethods = new List<string>();
 
@@ -125,12 +125,9 @@ namespace Castle.Facilities.AutoTx
             }
 
             throw new FacilityException(
-                string.Format(
-                    "The class {0} wants to use transaction interception, " +
-                    "however the methods must be marked as virtual in order to do so. " +
-                    "Please correct the following methods: {1}.",
-                    model.Implementation.FullName,
-                    string.Join(", ", problematicMethods.ToArray())));
+                $"The class '{model.Implementation.FullName}' wants to use transaction interception, " +
+                "however the methods must be marked as virtual in order to do so. " +
+                $"Please correct the following methods: {string.Join(", ", [.. problematicMethods])}.");
         }
 
         /// <summary>
@@ -158,10 +155,8 @@ namespace Castle.Facilities.AutoTx
             if (configuration != null && configuration.Children[TransactionNodeName] != null)
             {
                 throw new FacilityException(
-                    string.Format(
-                        "The class {0} has configured transaction in a child node " +
-                        "but has not specified isTransaction=\"true\" on the component node.",
-                        model.Implementation.FullName));
+                    $"The class '{model.Implementation.FullName}' has configured transaction in a child node " +
+                    "but has not specified 'isTransaction=true' on the component node.");
             }
         }
 

@@ -160,7 +160,7 @@ namespace Castle.Services.Transaction.IO
                 }
             }
 
-            return sb.ToString().Trim(new[] { ' ' });
+            return sb.ToString().Trim([' ']);
         }
 
         /// <summary>
@@ -192,17 +192,18 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (path.StartsWith("\\\\?\\") || path.StartsWith("\\\\.\\"))
+            if (path.StartsWith(@"\\?\", StringComparison.Ordinal) ||
+                path.StartsWith(@"\\.\", StringComparison.Ordinal))
             {
                 return System.IO.Path.GetFullPath(path[4..]);
             }
 
-            if (path.StartsWith("\\\\?\\UNC\\"))
+            if (path.StartsWith(@"\\?\UNC\", StringComparison.Ordinal))
             {
                 return System.IO.Path.GetFullPath(path[8..]);
             }
 
-            if (path.StartsWith("file:///"))
+            if (path.StartsWith("file:///", StringComparison.Ordinal))
             {
                 return new Uri(path).LocalPath;
             }
@@ -251,7 +252,7 @@ namespace Castle.Services.Transaction.IO
 
             if (last == -1)
             {
-                throw new ArgumentException($"Could not find a path separator character in the path: \"{path}\".");
+                throw new ArgumentException($"Could not find a path separator character in the path: '{path}'.");
             }
 
             var result = path[..(endsWithSlash ? secondLast : last)];
@@ -270,7 +271,8 @@ namespace Castle.Services.Transaction.IO
                 throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
             }
 
-            if (path.EndsWith("/") || path.EndsWith("\\"))
+            if (path.EndsWith("/", StringComparison.Ordinal) ||
+                path.EndsWith(@"\", StringComparison.Ordinal))
             {
                 return string.Empty;
             }
@@ -279,8 +281,8 @@ namespace Castle.Services.Transaction.IO
 
             int strIndex;
 
-            // ReSharper is wrong that you can transform this to a ternary operator.
-            if ((strIndex = nonRoot.LastIndexOfAny(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar })) != -1)
+            // ISSUE:   ReSharper is wrong that you can transform this to a ternary operator.
+            if ((strIndex = nonRoot.LastIndexOfAny([DirectorySeparatorChar, AltDirectorySeparatorChar])) != -1)
             {
                 return nonRoot[(strIndex + 1)..];
             }
@@ -357,7 +359,7 @@ namespace Castle.Services.Transaction.IO
 
         public static char[] GetDirectorySeparatorChars()
         {
-            return new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
+            return [DirectorySeparatorChar, AltDirectorySeparatorChar];
         }
     }
 }

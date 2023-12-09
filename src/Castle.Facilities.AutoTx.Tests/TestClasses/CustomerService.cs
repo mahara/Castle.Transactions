@@ -19,11 +19,10 @@ namespace Castle.Facilities.AutoTx.Tests
     using System;
     using System.Transactions;
 
-    using MicroKernel;
+    using Castle.MicroKernel;
+    using Castle.Services.Transaction;
 
     using NUnit.Framework;
-
-    using Services.Transaction;
 
     /// <summary>
     /// Summary description for CustomerService.

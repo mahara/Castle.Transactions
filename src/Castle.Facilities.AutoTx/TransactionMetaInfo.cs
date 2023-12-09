@@ -20,7 +20,7 @@ namespace Castle.Facilities.AutoTx
     using System.Collections.Generic;
     using System.Reflection;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     /// <summary>
     /// Storage for attributes found on transactional classes.
@@ -28,27 +28,9 @@ namespace Castle.Facilities.AutoTx
     public class TransactionMetaInfo : MarshalByRefObject
     {
         private readonly object _lock = new();
-        private readonly Dictionary<MethodInfo, TransactionAttribute> _methodToAttribute;
-        private readonly HashSet<MethodInfo> _injectMethods;
-        private readonly Dictionary<MethodInfo, string> _notTransactionalCache;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionMetaInfo" /> class.
-        /// </summary>
-        public TransactionMetaInfo()
-        {
-            _methodToAttribute = new Dictionary<MethodInfo, TransactionAttribute>();
-            _injectMethods = new HashSet<MethodInfo>();
-            _notTransactionalCache = new Dictionary<MethodInfo, string>();
-        }
-
-#if NET
-        [Obsolete]
-#endif
-        public override object InitializeLifetimeService()
-        {
-            return null;
-        }
+        private readonly Dictionary<MethodInfo, TransactionAttribute> _methodToAttribute = [];
+        private readonly HashSet<MethodInfo> _injectMethods = [];
+        private readonly Dictionary<MethodInfo, string> _notTransactionalCache = [];
 
         /// <summary>
         /// Adds a method info and the corresponding transaction attribute.
@@ -75,8 +57,8 @@ namespace Castle.Facilities.AutoTx
         {
             get
             {
+                // Quicker than array: https://learn.microsoft.com/en-us/archive/blogs/ricom/performance-quiz-9-ilistlttgt-list-and-array-speed
                 // Quicker than array: http://blogs.msdn.com/ricom/archive/2006/03/12/549987.aspx
-                // Quicker than array: https://docs.microsoft.com/en-us/archive/blogs/ricom/performance-quiz-9-ilistlttgt-list-and-array-speed
                 var methods = new List<MethodInfo>(_methodToAttribute.Count);
                 methods.AddRange(_methodToAttribute.Keys);
                 return methods;
@@ -100,7 +82,7 @@ namespace Castle.Facilities.AutoTx
                     return false;
                 }
 
-                if (info.DeclaringType.IsGenericType || info.IsGenericMethod)
+                if (info.DeclaringType!.IsGenericType || info.IsGenericMethod)
                 {
                     return IsGenericMethodTransactional(info);
                 }
@@ -142,6 +124,15 @@ namespace Castle.Facilities.AutoTx
             }
 
             return false;
+        }
+
+        /// <inheritdoc />
+#if NET
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
+        public override object InitializeLifetimeService()
+        {
+            return null!;
         }
     }
 }

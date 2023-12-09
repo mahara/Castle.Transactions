@@ -10,6 +10,7 @@ Improvements:
 Breaking Changes:
 - Upgraded [Castle.Core] version to 5.1.1 (TBD)
 - Upgraded [Castle.Windsor] version to 6.0.0 (TBD)
+- Changed ```Castle.Services.Transaction.ITransaction.Context``` property type from ```System.Collections.IDictionary``` to ```System.Collections.Generic.IDictionary<string, object>```
 
 
 ## 5.3.0 (2022-09-17)
@@ -20,7 +21,7 @@ Breaking Changes:
 - Upgraded to .NET 6.0 and .NET Framework 4.8
 - Replaced ```Castle.Services.Transaction.TransactionMode``` with ```System.Transactions.TransactionScopeOption```
 - Replaced ```Castle.Services.Transaction.IsolationMode``` with ```System.Transactions.IsolationLevel```
-- Renamed ```IsolationMode``` to ```IsolationLevel```
+- Renamed ```Castle.Services.Transaction.ITransaction.IsolationMode``` property to ```Castle.Services.Transaction.ITransaction.IsolationLevel```
 
 
 ## 5.2.0 (2022-06-24)
@@ -32,7 +33,7 @@ Improvements:
 - Updated [Castle.Windsor] version to 5.1.2
 
 Breaking Changes:
-- Changed default ```IActivityManager``` in ```DefaultTransactionManager``` to ```AsyncLocalActivityManager```
+- Changed default ```Castle.Services.Transaction.IActivityManager``` in ```Castle.Services.Transaction.DefaultTransactionManager``` to ```Castle.Services.Transaction.AsyncLocalActivityManager```
 
 
 ## 5.1.0 (2022-02-20)

@@ -18,7 +18,9 @@ namespace Castle.Services.Transaction
 {
     using System;
     using System.Runtime.InteropServices;
+#if NETFRAMEWORK
     using System.Security.Permissions;
+#endif
 
     using Microsoft.Win32.SafeHandles;
 
@@ -38,16 +40,6 @@ namespace Castle.Services.Transaction
             SetHandle(preExistingHandle);
         }
 
-        protected override bool ReleaseHandle()
-        {
-            if (!(IsInvalid || IsClosed))
-            {
-                return FindClose(this);
-            }
-
-            return IsInvalid || IsClosed;
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!(IsInvalid || IsClosed))
@@ -56,6 +48,16 @@ namespace Castle.Services.Transaction
             }
 
             base.Dispose(disposing);
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                return FindClose(this);
+            }
+
+            return IsInvalid || IsClosed;
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]

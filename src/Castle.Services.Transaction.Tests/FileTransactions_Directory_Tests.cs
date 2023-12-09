@@ -21,7 +21,7 @@ namespace Castle.Services.Transaction.Tests
     using System.IO;
     using System.Threading;
 
-    using IO;
+    using Castle.Services.Transaction.IO;
 
     using NUnit.Framework;
 
@@ -30,15 +30,15 @@ namespace Castle.Services.Transaction.Tests
     {
         #region Setup/Teardown
 
-        private static readonly object _serializer = new();
+        private static readonly object _syncObject = new();
 
-        private readonly List<string> _infosCreated = new();
+        private readonly List<string> _infosCreated = [];
         private string _dllPath;
 
         [SetUp]
         public void CleanOutListEtc()
         {
-            Monitor.Enter(_serializer);
+            Monitor.Enter(_syncObject);
 
             _infosCreated.Clear();
         }
@@ -69,7 +69,7 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete("testing", true);
             }
 
-            Monitor.Exit(_serializer);
+            Monitor.Exit(_syncObject);
         }
 
         #endregion
@@ -87,10 +87,11 @@ namespace Castle.Services.Transaction.Tests
             var directoryPath = "testing";
             Assert.That(Directory.Exists(directoryPath), Is.False);
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
-                ((IDirectoryAdapter) tx).Create(directoryPath);
+                txF.Begin();
+
+                ((IDirectoryAdapter) txF).Create(directoryPath);
             }
 
             Assert.That(!Directory.Exists(directoryPath));
@@ -106,10 +107,11 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
-                var adapter = (IDirectoryAdapter) tx;
+                txF.Begin();
+
+                var adapter = (IDirectoryAdapter) txF;
 
                 Assert.That(adapter.Exists("/hahaha"), Is.False);
                 Assert.That(adapter.Exists("another_non_existent"), Is.False);
@@ -134,6 +136,7 @@ namespace Castle.Services.Transaction.Tests
             }
 
             using var tx = new FileTransaction("Not distributed transaction");
+
             tx.Begin();
 
             Assert.That(tx.IsAmbient, Is.False);
@@ -151,17 +154,19 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
+            // From https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
             // From http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
             // An attempt to open a search with a trailing backslash always fails.
             // --> So I need to make it succeed.
-            using var tx = new FileTransaction();
-            tx.Begin();
+            using var txF = new FileTransaction();
 
-            var adapter = (IDirectoryAdapter) tx;
+            txF.Begin();
+
+            var adapter = (IDirectoryAdapter) txF;
             adapter.Create("something");
 
             Assert.That(adapter.Exists("something"));
-            Assert.That(adapter.Exists("something\\"));
+            Assert.That(adapter.Exists(@"something\"));
         }
 
         [Test]
@@ -177,13 +182,13 @@ namespace Castle.Services.Transaction.Tests
             var directoryPath = "testing";
             Assert.That(Directory.Exists(directoryPath), Is.False);
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
+                txF.Begin();
 
-                ((IDirectoryAdapter) tx).Create(directoryPath);
+                ((IDirectoryAdapter) txF).Create(directoryPath);
 
-                tx.Commit();
+                txF.Commit();
             }
 
             Assert.That(Directory.Exists(directoryPath));
@@ -202,6 +207,7 @@ namespace Castle.Services.Transaction.Tests
             }
 
             using var tx = new FileTransaction("s");
+
             tx.Begin();
 
             Assert.That(((IDirectoryAdapter) tx).Exists("something"), Is.False);
@@ -226,13 +232,13 @@ namespace Castle.Services.Transaction.Tests
             var directoryPath = "testing/apa/apa2";
             Assert.That(Directory.Exists(directoryPath), Is.False);
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
+                txF.Begin();
 
-                ((IDirectoryAdapter) tx).Create(directoryPath);
+                ((IDirectoryAdapter) txF).Create(directoryPath);
 
-                tx.Commit();
+                txF.Commit();
             }
 
             Assert.That(Directory.Exists(directoryPath));
@@ -251,11 +257,13 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory.
-            var directoryPath = _dllPath.CombineAssert("testing");
+            var directoryPath = _dllPath.CombinePathThenAssert("testing");
 
             // 2. Test it.
             using var tx = new FileTransaction("Can delete empty directory.");
+
             IDirectoryAdapter adapter = tx;
+
             tx.Begin();
 
             Assert.That(adapter.Delete(directoryPath, false), "Successfully deleted.");
@@ -274,24 +282,25 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory.
-            var directoryPath = _dllPath.Combine("testing");
+            var directoryPath = _dllPath.CombinePath("testing");
             Directory.CreateDirectory(directoryPath);
-            Directory.CreateDirectory(directoryPath.Combine("one"));
-            Directory.CreateDirectory(directoryPath.Combine("two"));
-            Directory.CreateDirectory(directoryPath.Combine("three"));
+            Directory.CreateDirectory(directoryPath.CombinePath("one"));
+            Directory.CreateDirectory(directoryPath.CombinePath("two"));
+            Directory.CreateDirectory(directoryPath.CombinePath("three"));
 
             // 2. Write contents.
-            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "one").Combine("fileone"), new[] { "Hello world", "second line" });
-            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "one").Combine("filetwo"), new[] { "two", "second line" });
-            File.WriteAllLines(ExtensionMethods.Combine(directoryPath, "two").Combine("filethree"), new[] { "three", "second line" });
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("fileone"), ["Hello world", "second line"]);
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("filetwo"), ["two", "second line"]);
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "two").CombinePath("filethree"), ["three", "second line"]);
 
             // 3. Test it.
-            using var tx = new FileTransaction();
-            tx.Begin();
+            using var txF = new FileTransaction();
 
-            Assert.That(((IDirectoryAdapter) tx).Delete(directoryPath, true), Is.True);
+            txF.Begin();
 
-            tx.Commit();
+            Assert.That(((IDirectoryAdapter) txF).Delete(directoryPath, true), Is.True);
+
+            txF.Commit();
         }
 
         [Test]
@@ -305,17 +314,18 @@ namespace Castle.Services.Transaction.Tests
             }
 
             // 1. Create directory and file.
-            var directoryPath = _dllPath.CombineAssert("testing");
-            var filePath = directoryPath.Combine("file");
+            var directoryPath = _dllPath.CombinePathThenAssert("testing");
+            var filePath = directoryPath.CombinePath("file");
             File.WriteAllText(filePath, "hello");
 
             // 2. Test it.
             using var tx = new FileTransaction("Can not delete non-empty directory");
+
             IDirectoryAdapter directoryAdapter = tx;
+
             tx.Begin();
 
-            Assert.That(directoryAdapter.Delete(directoryPath, false),
-                        Is.False,
+            Assert.That(directoryAdapter.Delete(directoryPath, false), Is.False,
                         "Did not delete non-empty directory.");
 
             IFileAdapter fileAdapter = tx;

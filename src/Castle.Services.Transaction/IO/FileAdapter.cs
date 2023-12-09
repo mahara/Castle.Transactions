@@ -31,7 +31,8 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Constructor.
         /// </summary>
-        public FileAdapter() : this(false, null)
+        public FileAdapter() :
+            this(false, null)
         {
         }
 
@@ -40,18 +41,19 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="constrainToSpecifiedDirectory"></param>
         /// <param name="specifiedDirectory"></param>
-        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory) :
+        public FileAdapter(bool constrainToSpecifiedDirectory,
+                           string? specifiedDirectory) :
             base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
             if (Logger.IsDebugEnabled)
             {
                 if (constrainToSpecifiedDirectory)
                 {
-                    Logger.Debug(string.Format("FileAdapter constructor, constraining to directory: {0}.", specifiedDirectory));
+                    Logger.Debug($"'FileAdapter' constructor, constraining to directory: '{specifiedDirectory}'.");
                 }
                 else
                 {
-                    Logger.Debug("FileAdapter constructor, no directory constraint.");
+                    Logger.Debug("'FileAdapter' constructor, no directory constraint.");
                 }
             }
         }
@@ -143,6 +145,7 @@ namespace Castle.Services.Transaction.IO
         public int WriteStream(string toFilePath, Stream fromStream)
         {
             var offset = 0;
+
             using (var fs = Create(toFilePath))
             {
                 var buffer = new byte[4096];

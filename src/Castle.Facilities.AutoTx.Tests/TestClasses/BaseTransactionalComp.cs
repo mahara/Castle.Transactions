@@ -16,7 +16,7 @@
 
 namespace Castle.Facilities.AutoTx.Tests
 {
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     public abstract class BaseTransactionalComp
     {

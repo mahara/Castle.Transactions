@@ -18,7 +18,7 @@ namespace Castle.Services.Transaction.Tests
 {
     using System;
 
-    using IO;
+    using Castle.Services.Transaction.IO;
 
     using NUnit.Framework;
 
@@ -30,10 +30,10 @@ namespace Castle.Services.Transaction.Tests
         [SetUp]
         public void SetUp()
         {
-#if NETFRAMEWORK
-            _currentDirectory = Path.GetPathWithoutLastBit(Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase));
-#else
+#if NET
             _currentDirectory = Path.GetPathWithoutLastBit(AppDomain.CurrentDomain.BaseDirectory);
+#else
+            _currentDirectory = Path.GetPathWithoutLastBit(Path.GetFullPath(typeof(DirectoryAdapterTests).Assembly.CodeBase));
 #endif
         }
 

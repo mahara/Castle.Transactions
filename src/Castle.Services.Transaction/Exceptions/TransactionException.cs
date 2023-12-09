@@ -26,7 +26,7 @@ namespace Castle.Services.Transaction
         /// Initializes a new instance of the <see cref="TransactionException" /> class.
         /// </summary>
         /// <param name="message">The message.</param>
-        public TransactionException(string message) :
+        public TransactionException(string? message) :
             base(message)
         {
         }
@@ -36,7 +36,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="innerException">The inner exception.</param>
-        public TransactionException(string message, Exception innerException) :
+        public TransactionException(string? message, Exception? innerException) :
             base(message, innerException)
         {
         }

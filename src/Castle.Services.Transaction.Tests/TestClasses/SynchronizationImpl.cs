@@ -25,7 +25,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         public DateTime Before { get; private set; } =
-          DateTime.MinValue;
+            DateTime.MinValue;
 
         public DateTime After { get; private set; } =
             DateTime.MinValue;

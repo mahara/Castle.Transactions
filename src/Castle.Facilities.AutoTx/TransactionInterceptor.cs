@@ -19,15 +19,15 @@ namespace Castle.Facilities.AutoTx
     using System;
     using System.Reflection;
 
-    using Core;
-    using Core.Interceptor;
-    using Core.Logging;
+    using Castle.Core;
+    using Castle.Core.Interceptor;
+    using Castle.Core.Logging;
 
-    using DynamicProxy;
+    using Castle.DynamicProxy;
 
-    using MicroKernel;
+    using Castle.MicroKernel;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     /// <summary>
     /// Intercepts call for transactional components, coordinating the transaction creation,
@@ -40,7 +40,7 @@ namespace Castle.Facilities.AutoTx
         private readonly IKernel _kernel;
         private readonly TransactionMetaInfoStore _metaInfoStore;
 
-        private TransactionMetaInfo _metaInfo;
+        private TransactionMetaInfo? _metaInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionInterceptor" /> class.
@@ -81,7 +81,7 @@ namespace Castle.Facilities.AutoTx
         {
             MethodInfo methodInfo;
 
-            if (invocation.Method.DeclaringType.IsInterface)
+            if (invocation.Method.DeclaringType!.IsInterface)
             {
                 methodInfo = invocation.MethodInvocationTarget;
             }
@@ -132,14 +132,14 @@ namespace Castle.Facilities.AutoTx
 
                 if (transaction.IsRollbackOnlySet)
                 {
-                    Logger.DebugFormat("Rolling back transaction \"{0}\".", transaction.Name);
+                    Logger.DebugFormat("Rolling back transaction '{0}'.", transaction.Name);
 
                     rolledback = true;
                     transaction.Rollback();
                 }
                 else
                 {
-                    Logger.DebugFormat("Committing transaction \"{0}\".", transaction.Name);
+                    Logger.DebugFormat("Committing transaction '{0}'.", transaction.Name);
 
                     transaction.Commit();
                 }
@@ -162,7 +162,10 @@ namespace Castle.Facilities.AutoTx
                 {
                     if (Logger.IsDebugEnabled)
                     {
-                        Logger.DebugFormat("Rolling back transaction \"{0}\" due to exception on method {2}.{1}.", transaction.Name, methodInfo.Name, methodInfo.DeclaringType.Name);
+                        Logger.DebugFormat("Rolling back transaction '{0}' due to exception on method '{2}.{1}'.",
+                                           transaction.Name,
+                                           methodInfo.Name,
+                                           methodInfo.DeclaringType!.Name);
                     }
 
                     transaction.Rollback();

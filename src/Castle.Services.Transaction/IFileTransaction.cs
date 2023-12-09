@@ -18,7 +18,7 @@ namespace Castle.Services.Transaction
 {
     using System;
 
-    using IO;
+    using Castle.Services.Transaction.IO;
 
     /// <summary>
     /// An interface for a transaction acting on a file.

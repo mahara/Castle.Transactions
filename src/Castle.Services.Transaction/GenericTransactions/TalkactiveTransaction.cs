@@ -24,15 +24,15 @@ namespace Castle.Services.Transaction
         private bool _isAmbient;
         private bool _isReadOnly;
 
-        public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
+        public event EventHandler<TransactionEventArgs>? TransactionCompleted;
+        public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
+        public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
 
         public TalkactiveTransaction(TransactionScopeOption mode,
                                      IsolationLevel isolationLevel,
                                      bool isAmbient,
                                      bool isReadOnly) :
-            base(null, mode, isolationLevel)
+            base(string.Empty, mode, isolationLevel)
         {
             _isAmbient = isAmbient;
             _isReadOnly = isReadOnly;
@@ -58,7 +58,7 @@ namespace Castle.Services.Transaction
             }
             catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }
@@ -72,11 +72,11 @@ namespace Castle.Services.Transaction
             {
                 base.Commit();
 
-                Logger.TryLogFail(() => TransactionCompleted.Fire(this, new TransactionEventArgs(this)));
+                Logger.TryLogFail(() => TransactionCompleted?.Fire(this, new TransactionEventArgs(this)));
             }
             catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }
@@ -90,11 +90,11 @@ namespace Castle.Services.Transaction
             {
                 base.Rollback();
 
-                Logger.TryLogFail(() => TransactionRolledBack.Fire(this, new TransactionEventArgs(this)));
+                Logger.TryLogFail(() => TransactionRolledBack?.Fire(this, new TransactionEventArgs(this)));
             }
             catch (TransactionException ex)
             {
-                Logger.TryLogFail(() => TransactionFailed.Fire(this, new TransactionFailedEventArgs(this, ex)));
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
                 throw;
             }

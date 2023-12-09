@@ -18,14 +18,12 @@ namespace Castle.Facilities.AutoTx.Tests
 {
     using System;
 
-    using MicroKernel.Registration;
-    using MicroKernel.SubSystems.Configuration;
+    using Castle.MicroKernel.Registration;
+    using Castle.MicroKernel.SubSystems.Configuration;
+    using Castle.Services.Transaction;
+    using Castle.Windsor;
 
     using NUnit.Framework;
-
-    using Services.Transaction;
-
-    using Windsor;
 
     [TestFixture]
     public class FacilityBasicTests

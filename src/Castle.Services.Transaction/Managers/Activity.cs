@@ -25,7 +25,7 @@ namespace Castle.Services.Transaction
         private readonly Stack<ITransaction> _transactionStack = new(2);
         private readonly Guid _id = Guid.NewGuid();
 
-        public ITransaction CurrentTransaction =>
+        public ITransaction? CurrentTransaction =>
             _transactionStack.Count == 0 ? null : _transactionStack.Peek();
 
         public void Push(ITransaction transaction)
@@ -38,7 +38,7 @@ namespace Castle.Services.Transaction
             return _transactionStack.Pop();
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (this == obj)
             {

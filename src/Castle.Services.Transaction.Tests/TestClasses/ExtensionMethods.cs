@@ -25,7 +25,7 @@ namespace Castle.Services.Transaction.Tests
         /// using <see><cref>System.IO.Path.Combine</cref></see>
         /// and returns the result.
         /// </summary>
-        public static string Combine(this string input, string path)
+        public static string CombinePath(this string input, string path)
         {
             return Path.Combine(input, path);
         }
@@ -38,16 +38,16 @@ namespace Castle.Services.Transaction.Tests
         /// <param name="input">The path to combine the latter with.</param>
         /// <param name="path">The latter path.</param>
         /// <returns>The combined path string.</returns>
-        public static string CombineAssert(this string input, string path)
+        public static string CombinePathThenAssert(this string input, string path)
         {
-            var p = input.Combine(path);
+            var result = input.CombinePath(path);
 
-            if (!Directory.Exists(p))
+            if (!Directory.Exists(result))
             {
-                Directory.CreateDirectory(p);
+                Directory.CreateDirectory(result);
             }
 
-            return p;
+            return result;
         }
     }
 }

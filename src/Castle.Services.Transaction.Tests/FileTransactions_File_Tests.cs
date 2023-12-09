@@ -1,4 +1,5 @@
 #region License
+
 // Copyright 2004-2024 Castle Project - https://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #endregion
 
 namespace Castle.Services.Transaction.Tests
@@ -22,23 +24,24 @@ namespace Castle.Services.Transaction.Tests
     using System.Text;
     using System.Threading;
 
-    using IO;
+    using Castle.Services.Transaction.IO;
 
     using NUnit.Framework;
 
     [TestFixture]
     public class FileTransactions_File_Tests
     {
-        private static readonly object _serializer = new();
+        private static readonly object _syncObject = new();
 
-        private readonly List<string> _infosCreated = new();
+        private readonly List<string> _infosCreated = [];
+
         private string _dllPath;
-        private string _testFixturePath;
+        private string _testPath;
 
         [SetUp]
         public void CleanOutListEtc()
         {
-            Monitor.Enter(_serializer);
+            Monitor.Enter(_syncObject);
 
             _infosCreated.Clear();
         }
@@ -47,7 +50,7 @@ namespace Castle.Services.Transaction.Tests
         public void Setup()
         {
             _dllPath = TestContext.CurrentContext.TestDirectory;
-            _testFixturePath = _dllPath.Combine("Kernel");
+            _testPath = _dllPath.CombinePath("Kernel");
         }
 
         [TearDown]
@@ -70,7 +73,7 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete("testing", true);
             }
 
-            Monitor.Exit(_serializer);
+            Monitor.Exit(_syncObject);
         }
 
         [Test]
@@ -83,13 +86,13 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var directoryPath = _dllPath.CombineAssert("testing");
-            Console.WriteLine(string.Format("Directory \"{0}\"", directoryPath));
-            var toDirectory = _dllPath.CombineAssert("testing2");
+            var directoryPath = _dllPath.CombinePathThenAssert("testing");
+            Console.WriteLine($"Directory '{directoryPath}'");
+            var toDirectory = _dllPath.CombinePathThenAssert("testing2");
 
-            var filePath = directoryPath.Combine("file");
+            var filePath = directoryPath.CombinePath("file");
             Assert.That(File.Exists(filePath), Is.False);
-            var filePath2 = directoryPath.Combine("file2");
+            var filePath2 = directoryPath.CombinePath("file2");
             Assert.That(File.Exists(filePath2), Is.False);
 
             File.WriteAllText(filePath, "hello world");
@@ -97,36 +100,37 @@ namespace Castle.Services.Transaction.Tests
 
             _infosCreated.Add(filePath);
             _infosCreated.Add(filePath2);
-            _infosCreated.Add(toDirectory.Combine("file2"));
-            _infosCreated.Add(toDirectory.Combine("file"));
+            _infosCreated.Add(toDirectory.CombinePath("file2"));
+            _infosCreated.Add(toDirectory.CombinePath("file"));
             _infosCreated.Add(toDirectory);
 
             using (var tx = new FileTransaction("moving file"))
             {
                 tx.Begin();
 
-                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False,
+                Assert.That(File.Exists(toDirectory.CombinePath("file")), Is.False,
                             "Should not exist before move.");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False,
+                Assert.That(File.Exists(toDirectory.CombinePath("file2")), Is.False,
                             "Should not exist before move.");
 
                 ((IFileAdapter) tx).Move(filePath, toDirectory); // Moving file to directory.
-                ((IFileAdapter) tx).Move(filePath2, toDirectory.Combine("file2")); // Moving file to directory + new file name.
+                ((IFileAdapter) tx).Move(filePath2,
+                    toDirectory.CombinePath("file2")); // Moving file to directory + new file name.
 
-                Assert.That(File.Exists(toDirectory.Combine("file")), Is.False,
+                Assert.That(File.Exists(toDirectory.CombinePath("file")), Is.False,
                             "Should not be visible to the outside.");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.False,
+                Assert.That(File.Exists(toDirectory.CombinePath("file2")), Is.False,
                             "Should not be visible to the outside.");
 
                 tx.Commit();
 
-                Assert.That(File.Exists(toDirectory.Combine("file")), Is.True,
+                Assert.That(File.Exists(toDirectory.CombinePath("file")), Is.True,
                             "Should be visible to the outside now and since we tried to move it to an existing directory, it should put itself in that directory with its current name.");
-                Assert.That(File.Exists(toDirectory.Combine("file2")), Is.True,
+                Assert.That(File.Exists(toDirectory.CombinePath("file2")), Is.True,
                             "Should be visible to the outside now.");
             }
 
-            Assert.That(File.ReadAllText(toDirectory.Combine("file2")), Is.EqualTo("hello world 2"),
+            Assert.That(File.ReadAllText(toDirectory.CombinePath("file2")), Is.EqualTo("hello world 2"),
                         "Make sure we moved the contents.");
         }
 
@@ -140,7 +144,7 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var filePath = _testFixturePath.CombineAssert("temp").Combine("temp__");
+            var filePath = _testPath.CombinePathThenAssert("temp").CombinePath("temp__");
             _infosCreated.Add(filePath);
 
             // Simply write something to to file.
@@ -149,18 +153,18 @@ namespace Castle.Services.Transaction.Tests
                 sw.WriteLine("Hello");
             }
 
-            using (var tx = new FileTransaction())
+            using (var txF = new FileTransaction())
             {
-                tx.Begin();
+                txF.Begin();
 
-                using (var fs = ((IFileAdapter) tx).Create(filePath))
+                using (var fs = ((IFileAdapter) txF).Create(filePath))
                 {
                     var bytes = new UTF8Encoding().GetBytes("Goodbye");
                     fs.Write(bytes, 0, bytes.Length);
                     fs.Flush();
                 }
 
-                tx.Commit();
+                txF.Commit();
             }
 
             Assert.That(File.ReadAllLines(filePath)[0], Is.EqualTo("Goodbye"));
@@ -176,7 +180,7 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var filePath = _testFixturePath.CombineAssert("temp").Combine("temp2");
+            var filePath = _testPath.CombinePathThenAssert("temp").CombinePath("temp2");
             _infosCreated.Add(filePath);
 
             // Simply write something to to file.
@@ -212,7 +216,7 @@ namespace Castle.Services.Transaction.Tests
                 return;
             }
 
-            var filePath = _testFixturePath.CombineAssert("temp").Combine("test");
+            var filePath = _testPath.CombinePathThenAssert("temp").CombinePath("test");
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);

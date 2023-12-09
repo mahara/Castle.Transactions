@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction.IO
     /// </summary>
     public class MapPathImpl : IMapPath
     {
-        private readonly Func<string, string> _function;
+        private readonly Func<string, string>? _function;
 
         /// <summary>
         /// Default constructor.
@@ -85,8 +85,8 @@ namespace Castle.Services.Transaction.IO
             }
 
             return path == string.Empty ?
-                           AppDomain.CurrentDomain.BaseDirectory :
-                           Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
+                   AppDomain.CurrentDomain.BaseDirectory :
+                   Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
         }
     }
 }

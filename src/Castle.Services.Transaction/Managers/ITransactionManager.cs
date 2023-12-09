@@ -42,8 +42,8 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
         /// </summary>
-        ITransaction CreateTransaction(TransactionScopeOption mode,
-                                       IsolationLevel isolationLevel);
+        ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                        IsolationLevel isolationLevel);
 
         /// <summary>
         /// Creates a transaction.
@@ -61,17 +61,17 @@ namespace Castle.Services.Transaction
         /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
         /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
-        ITransaction CreateTransaction(TransactionScopeOption mode,
-                                       IsolationLevel isolationLevel,
-                                       bool isAmbient,
-                                       bool isReadOnly);
+        ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                        IsolationLevel isolationLevel,
+                                        bool isAmbient,
+                                        bool isReadOnly);
 
         /// <summary>
         /// Returns the current <see cref="ITransaction" />.
         /// The transaction manager will probably need to hold the created transaction
         /// in the thread or in some sort of context.
         /// </summary>
-        ITransaction CurrentTransaction { get; }
+        ITransaction? CurrentTransaction { get; }
 
         /// <summary>
         /// Dispose the transaction passed appropriately, removing it from the list of tracked transactions,

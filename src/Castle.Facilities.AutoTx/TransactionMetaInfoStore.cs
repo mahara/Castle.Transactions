@@ -18,14 +18,15 @@ namespace Castle.Facilities.AutoTx
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Transactions;
 
-    using Core.Configuration;
+    using Castle.Core.Configuration;
 
-    using MicroKernel.Facilities;
+    using Castle.MicroKernel.Facilities;
 
-    using Services.Transaction;
+    using Castle.Services.Transaction;
 
     /// <summary>
     /// A store for <see cref="TransactionMetaInfo" />.
@@ -40,15 +41,7 @@ namespace Castle.Facilities.AutoTx
         private static readonly string TransactionModeAttribute = "transactionMode";
         private static readonly string IsolationLevelAttribute = "isolationLevel";
 
-        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = new();
-
-#if NET
-        [Obsolete]
-#endif
-        public override object InitializeLifetimeService()
-        {
-            return null;
-        }
+        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = [];
 
         /// <summary>
         /// Creates meta-information from a type.
@@ -64,9 +57,11 @@ namespace Castle.Facilities.AutoTx
             return metaInfo;
         }
 
-        private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type implementation)
+        private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type? implementation)
         {
-            if (implementation == typeof(object) || implementation == typeof(MarshalByRefObject))
+            if (implementation is null ||
+                implementation == typeof(object) ||
+                implementation == typeof(MarshalByRefObject))
             {
                 return;
             }
@@ -122,7 +117,7 @@ namespace Castle.Facilities.AutoTx
         /// </summary>
         /// <param name="implementation"></param>
         /// <returns></returns>
-        public TransactionMetaInfo GetMetaInfoFor(Type implementation)
+        public TransactionMetaInfo? GetMetaInfoFor(Type implementation)
         {
             _typeToMetaInfo.TryGetValue(implementation, out var metaInfo);
 
@@ -134,7 +129,7 @@ namespace Castle.Facilities.AutoTx
             _typeToMetaInfo[implementation] = metaInfo;
         }
 
-        private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string mode)
+        private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string? mode)
         {
             if (mode == null)
             {
@@ -149,19 +144,14 @@ namespace Castle.Facilities.AutoTx
             {
                 var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
-                var message = string.Format("The configuration for the class {0}, " +
-                                            "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                                            "The possible values are {4}.",
-                                            implementation.FullName,
-                                            method.Name,
-                                            mode,
-                                            TransactionModeAttribute,
-                                            string.Join(", ", values));
+                var message = $"The configuration for the class '{implementation.FullName}', " +
+                              $"method '{method.Name}()', has specified '{mode}' on '{TransactionModeAttribute}' which is not supported. " +
+                              $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
                 throw new FacilityException(message);
             }
         }
 
-        private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string level)
+        private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string? level)
         {
             if (level == null)
             {
@@ -176,16 +166,20 @@ namespace Castle.Facilities.AutoTx
             {
                 var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 
-                var message = string.Format("The configuration for the class {0}, " +
-                                            "method {1}, has specified {2} on {3} attribute which is not supported. " +
-                                            "The possible values are {4}.",
-                                            implementation.FullName,
-                                            method.Name,
-                                            level,
-                                            IsolationLevelAttribute,
-                                            string.Join(", ", values));
+                var message = $"The configuration for the class '{implementation.FullName}', " +
+                              $"method '{method.Name}()', has specified '{level}' on '{IsolationLevelAttribute}' which is not supported. " +
+                              $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
                 throw new FacilityException(message);
             }
+        }
+
+        /// <inheritdoc />
+#if NET
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
+        public override object InitializeLifetimeService()
+        {
+            return null!;
         }
     }
 }

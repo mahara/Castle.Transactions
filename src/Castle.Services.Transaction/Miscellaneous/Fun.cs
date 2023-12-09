@@ -20,9 +20,8 @@ namespace Castle.Services.Transaction
     using System.Collections.Generic;
     using System.Threading;
 
+    using Castle.Core;
     using Castle.Core.Logging;
-
-    using Core;
 
     /// <summary>
     /// Utility class for whatever is needed to make the code better.
@@ -187,10 +186,10 @@ namespace Castle.Services.Transaction
     {
         public static Error OK = new(true, null);
 
-        private readonly Exception _exception;
+        private readonly Exception? _exception;
         private readonly bool _success;
 
-        public Error(bool success, Exception exception)
+        public Error(bool success, Exception? exception)
         {
             _success = success;
             _exception = success ? null : exception;
@@ -202,7 +201,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public readonly Error Exception(Action<Exception> action)
+        public readonly Error Exception(Action<Exception?> action)
         {
             if (!_success)
             {
@@ -229,11 +228,11 @@ namespace Castle.Services.Transaction
     /// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
     internal readonly struct Error<T>
     {
-        private readonly Exception _exception;
+        private readonly Exception? _exception;
         private readonly bool _success;
         private readonly T _parameter;
 
-        public Error(bool success, Exception exception, T parameter)
+        public Error(bool success, Exception? exception, T parameter)
         {
             _success = success;
             _parameter = parameter;
@@ -246,7 +245,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public readonly Error<T> Exception(Action<Exception> action)
+        public readonly Error<T> Exception(Action<Exception?> action)
         {
             if (!_success)
             {
