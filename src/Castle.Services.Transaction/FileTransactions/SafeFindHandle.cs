@@ -26,7 +26,7 @@ namespace Castle.Services.Transaction
 #if NETFRAMEWORK
     [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 #endif
-    internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
+    internal sealed partial class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         internal SafeFindHandle() :
             base(true)
@@ -59,7 +59,13 @@ namespace Castle.Services.Transaction
             return IsInvalid || IsClosed;
         }
 
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool FindClose(SafeHandle handle);
+#else
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool FindClose(SafeHandle hFindFile);
+#endif
     }
 }
