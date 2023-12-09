@@ -18,6 +18,9 @@ using System.Runtime.Serialization;
 
 namespace Castle.Services.Transaction
 {
+#if !NET8_0_OR_GREATER
+    [Serializable]
+#endif
     public class TransactionalConflictException : TransactionException
     {
         public TransactionalConflictException(string message) :
@@ -30,6 +33,10 @@ namespace Castle.Services.Transaction
         {
         }
 
+#if NET8_0_OR_GREATER
+        //[Obsolete(Obsoletions.LegacyFormatterImplMessage, DiagnosticId = Obsoletions.LegacyFormatterImplDiagId, UrlFormat = Obsoletions.SharedUrlFormat)]
+        [Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         protected TransactionalConflictException(SerializationInfo info, StreamingContext context) :
             base(info, context)
         {
