@@ -50,7 +50,7 @@ namespace Castle.Services.Transaction
 #if NET5_0_OR_GREATER
     [SupportedOSPlatform("windows")]
 #endif
-    public sealed class FileTransaction : TransactionBase, IFileTransaction
+    public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     {
         private SafeTransactionHandle _transactionHandle;
 
@@ -955,11 +955,19 @@ namespace Castle.Services.Transaction
         /// https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-deletefiletransacteda
         /// http://msdn.microsoft.com/en-us/library/aa363916(VS.85).aspx
         /// </summary>
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool DeleteFileTransactedW(
+            [MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
+            SafeTransactionHandle hTransaction);
+#else
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool DeleteFileTransactedW(
             [MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
             SafeTransactionHandle hTransaction);
+#endif
 
         /*
          * HANDLE WINAPI FindFirstFileTransacted(
@@ -1053,12 +1061,22 @@ namespace Castle.Services.Transaction
         /// <param name="lpSecurityAttributes">A pointer to a SECURITY_ATTRIBUTES structure. The lpSecurityDescriptor member of the structure specifies a security descriptor for the new directory.</param>
         /// <param name="hTransaction">A handle to the transaction. This handle is returned by the CreateTransaction function.</param>
         /// <returns><see langword="true" /> if the call succeeds; otherwise, do a <see cref="GetLastException()" />.</returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool CreateDirectoryTransactedW(
+            [MarshalAs(UnmanagedType.LPWStr)] string lpTemplateDirectory,
+            [MarshalAs(UnmanagedType.LPWStr)] string lpNewDirectory,
+            IntPtr lpSecurityAttributes,
+            SafeTransactionHandle hTransaction);
+#else
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool CreateDirectoryTransactedW(
             [MarshalAs(UnmanagedType.LPWStr)] string lpTemplateDirectory,
             [MarshalAs(UnmanagedType.LPWStr)] string lpNewDirectory,
             IntPtr lpSecurityAttributes,
             SafeTransactionHandle hTransaction);
+#endif
 
         /// <summary>
         /// https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-removedirectorytransacteda
@@ -1072,10 +1090,18 @@ namespace Castle.Services.Transaction
         /// </param>
         /// <param name="hTransaction">A handle to the transaction. This handle is returned by the CreateTransaction function.</param>
         /// <returns><see langword="true" /> if the call succeeds; otherwise, do a <see cref="GetLastException()" />.</returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool RemoveDirectoryTransactedW(
+            [MarshalAs(UnmanagedType.LPWStr)] string lpPathName,
+            SafeTransactionHandle hTransaction);
+#else
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool RemoveDirectoryTransactedW(
             [MarshalAs(UnmanagedType.LPWStr)] string lpPathName,
             SafeTransactionHandle hTransaction);
+#endif
 
         /// <summary>
         /// https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getfullpathnametransacteda
@@ -1146,6 +1172,17 @@ namespace Castle.Services.Transaction
         /// https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-createtransaction
         /// http://msdn.microsoft.com/en-us/library/aa366011(VS.85).aspx
         /// </remarks>
+#if NET7_0_OR_GREATER
+        [LibraryImport("ktmw32.dll", SetLastError = true)]
+        private static partial IntPtr CreateTransaction(
+            IntPtr lpTransactionAttributes,
+            IntPtr uow,
+            uint createOptions,
+            uint isolationLevel,
+            uint isolationFlags,
+            uint timeout,
+            [MarshalAs(UnmanagedType.LPWStr)] string? description);
+#else
         [DllImport("ktmw32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern IntPtr CreateTransaction(
             IntPtr lpTransactionAttributes,
@@ -1155,6 +1192,7 @@ namespace Castle.Services.Transaction
             uint isolationFlags,
             uint timeout,
             string description);
+#endif
 
         private static SafeTransactionHandle CreateTransaction(string description)
         {
@@ -1175,16 +1213,28 @@ namespace Castle.Services.Transaction
         /// This handle must have been opened with the TRANSACTION_COMMIT access right.
         /// For more information, see KTM Security and Access Rights.</param>
         /// <returns></returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("ktmw32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool CommitTransaction(SafeTransactionHandle transaction);
+#else
         [DllImport("ktmw32.dll", SetLastError = true)]
         private static extern bool CommitTransaction(SafeTransactionHandle transaction);
+#endif
 
         /// <summary>
         /// Requests that the specified transaction be rolled back. This function is synchronous.
         /// </summary>
         /// <param name="transaction">A handle to the transaction.</param>
         /// <returns>If the function succeeds, the return value is non-zero.</returns>
+#if NET7_0_OR_GREATER
+        [LibraryImport("ktmw32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool RollbackTransaction(SafeTransactionHandle transaction);
+#else
         [DllImport("ktmw32.dll", SetLastError = true)]
         private static extern bool RollbackTransaction(SafeTransactionHandle transaction);
+#endif
 
         #endregion
 
