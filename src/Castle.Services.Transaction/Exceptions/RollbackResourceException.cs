@@ -18,7 +18,9 @@ using System.Runtime.Serialization;
 
 namespace Castle.Services.Transaction
 {
+#if !NET8_0_OR_GREATER
     [Serializable]
+#endif
     public class RollbackResourceException : TransactionException
     {
         private readonly List<(IResource, Exception)> _failedResources = new();
@@ -28,11 +30,19 @@ namespace Castle.Services.Transaction
             _failedResources.AddRange(failedResources);
         }
 
+#if NET8_0_OR_GREATER
+        //[Obsolete(Obsoletions.LegacyFormatterImplMessage, DiagnosticId = Obsoletions.LegacyFormatterImplDiagId, UrlFormat = Obsoletions.SharedUrlFormat)]
+        [Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         protected RollbackResourceException(SerializationInfo info, StreamingContext context) :
             base(info, context)
         {
         }
 
+#if NET8_0_OR_GREATER
+        //[Obsolete(Obsoletions.LegacyFormatterImplMessage, DiagnosticId = Obsoletions.LegacyFormatterImplDiagId, UrlFormat = Obsoletions.SharedUrlFormat)]
+        [Obsolete("This API supports obsolete formatter-based serialization. It should not be called or extended by application code.", DiagnosticId = "SYSLIB0051", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+#endif
         protected RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<(IResource, Exception)> failedResources) :
             base(info, context)
         {
