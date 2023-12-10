@@ -17,6 +17,7 @@
 using System.Transactions;
 
 using Castle.Core.Logging;
+using Castle.Services.Transaction.Utilities;
 
 namespace Castle.Services.Transaction
 {
@@ -27,10 +28,10 @@ namespace Castle.Services.Transaction
 
         protected readonly string InnerName;
 
-        private TransactionScope _ambientTransaction;
+        private TransactionScope? _ambientTransaction;
         private volatile bool _canCommit;
 
-        protected TransactionBase(string name,
+        protected TransactionBase(string? name,
                                   TransactionMode transactionMode,
                                   IsolationLevel isolationLevel)
         {
@@ -45,7 +46,7 @@ namespace Castle.Services.Transaction
         {
             _resources.Select(r => r as IDisposable)
                       .Where(r => r is not null)
-                      .ForEach(r => r.Dispose());
+                      .ForEach(r => r!.Dispose());
 
             _resources.Clear();
             _synchronizationObjects.Clear();
@@ -61,7 +62,7 @@ namespace Castle.Services.Transaction
         public ILogger Logger { get; set; } = NullLogger.Instance;
 
         public virtual string Name =>
-            string.IsNullOrEmpty(InnerName) ?
+            InnerName.IsNullOrEmpty() ?
             $"{nameof(Transaction)} #{GetHashCode()}" :
             InnerName;
 
@@ -90,7 +91,7 @@ namespace Castle.Services.Transaction
 
         private void DisposeAmbientTransaction()
         {
-            _ambientTransaction.Dispose();
+            _ambientTransaction?.Dispose();
             _ambientTransaction = null;
         }
 
@@ -204,7 +205,7 @@ namespace Castle.Services.Transaction
 
             var failures = new List<(IResource, Exception)>();
 
-            Exception exceptionToThrow = null;
+            Exception? exceptionToThrow = null;
 
             _synchronizationObjects.ForEach(s => Logger.TryLogFail(s.BeforeCompletion));
 
@@ -215,7 +216,7 @@ namespace Castle.Services.Transaction
             {
                 _resources.ForEach(r =>
                                    Logger.TryLogFail(r.Rollback)
-                                         .Exception(ex => failures.Add((r, ex))));
+                                         .Exception(ex => failures.Add((r, ex!))));
 
                 if (failures.Count == 0)
                 {
@@ -264,12 +265,16 @@ namespace Castle.Services.Transaction
         /// </summary>
         protected abstract void InnerRollback();
 
-        public virtual void Enlist(IResource resource)
+        public virtual void Enlist(IResource? resource)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(resource);
+#else
             if (resource is null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
+#endif
 
             if (_resources.Contains(resource))
             {
@@ -285,12 +290,16 @@ namespace Castle.Services.Transaction
             _resources.Add(resource);
         }
 
-        public virtual void RegisterSynchronization(ISynchronization synchronization)
+        public virtual void RegisterSynchronization(ISynchronization? synchronization)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(synchronization);
+#else
             if (synchronization is null)
             {
                 throw new ArgumentNullException(nameof(synchronization));
             }
+#endif
 
             if (_synchronizationObjects.Contains(synchronization))
             {
@@ -313,11 +322,11 @@ namespace Castle.Services.Transaction
             AssertState(status, null);
         }
 
-        protected void AssertState(TransactionStatus status, string message)
+        protected void AssertState(TransactionStatus status, string? message)
         {
             if (status != Status)
             {
-                if (!string.IsNullOrEmpty(message))
+                if (!message.IsNullOrEmpty())
                 {
                     throw new TransactionException(message);
                 }

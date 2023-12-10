@@ -33,7 +33,7 @@ namespace Castle.Services.Transaction
     [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
-    public sealed class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public sealed partial class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         public SafeTransactionHandle() :
             base(true)
@@ -68,7 +68,13 @@ namespace Castle.Services.Transaction
          *      __in  HANDLE hObject
          * );
          */
+#if NET7_0_OR_GREATER
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool CloseHandle(IntPtr handle);
+#else
         [DllImport("kernel32.dll")]
         private static extern bool CloseHandle(IntPtr handle);
+#endif
     }
 }
