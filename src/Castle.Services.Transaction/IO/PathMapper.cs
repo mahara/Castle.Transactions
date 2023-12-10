@@ -22,7 +22,7 @@ namespace Castle.Services.Transaction.IO
     /// </summary>
     public class PathMapper : IPathMapper
     {
-        private readonly Func<string, string> _function;
+        private readonly Func<string, string>? _function;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PathMapper" /> class.

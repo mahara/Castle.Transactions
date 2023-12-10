@@ -22,6 +22,7 @@ using Castle.Core.Configuration;
 using Castle.MicroKernel.Facilities;
 
 using Castle.Services.Transaction;
+using Castle.Services.Transaction.Utilities;
 
 namespace Castle.Facilities.AutoTx
 {
@@ -55,7 +56,7 @@ namespace Castle.Facilities.AutoTx
             return metaInfo;
         }
 
-        private static void PopulateMetaInfoFrom(TransactionMetaInfo metaInfo, Type implementationType)
+        private static void PopulateMetaInfoFrom(TransactionMetaInfo metaInfo, Type? implementationType)
         {
             if (implementationType is null ||
                 implementationType == typeof(object) ||
@@ -117,7 +118,7 @@ namespace Castle.Facilities.AutoTx
         /// </summary>
         /// <param name="implementationType"></param>
         /// <returns></returns>
-        public TransactionMetaInfo GetMetaInfoFor(Type implementationType)
+        public TransactionMetaInfo? GetMetaInfoFor(Type implementationType)
         {
             _implementationTypeToMetaInfo.TryGetValue(implementationType, out var metaInfo);
 
@@ -129,9 +130,9 @@ namespace Castle.Facilities.AutoTx
             _implementationTypeToMetaInfo[implementationType] = metaInfo;
         }
 
-        private static TransactionMode ParseTransactionModeName(Type implementationType, MethodInfo method, string transactionModeName)
+        private static TransactionMode ParseTransactionModeName(Type implementationType, MethodInfo method, string? transactionModeName)
         {
-            if (string.IsNullOrEmpty(transactionModeName))
+            if (transactionModeName.IsNullOrEmpty())
             {
                 return TransactionMode.Unspecified;
             }
@@ -149,9 +150,9 @@ namespace Castle.Facilities.AutoTx
             return transactionMode;
         }
 
-        private static IsolationLevel ParseIsolationLevelName(Type implementationType, MethodInfo method, string isolationLevelName)
+        private static IsolationLevel ParseIsolationLevelName(Type implementationType, MethodInfo method, string? isolationLevelName)
         {
-            if (string.IsNullOrEmpty(isolationLevelName))
+            if (isolationLevelName.IsNullOrEmpty())
             {
                 return IsolationLevel.Unspecified;
             }
@@ -175,7 +176,7 @@ namespace Castle.Facilities.AutoTx
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

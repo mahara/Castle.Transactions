@@ -79,7 +79,7 @@ namespace Castle.Services.Transaction.Tests
         [Test]
         public void TransactionResourcesAreDisposed()
         {
-            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
+            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
             var resource = new ResourceImpl();
             tx.Enlist(resource);
@@ -109,7 +109,7 @@ namespace Castle.Services.Transaction.Tests
 
             Assert.That(currentTransaction, Is.Null);
 
-            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified);
+            var tx = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
             tx.Begin();
 

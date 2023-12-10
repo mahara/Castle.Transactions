@@ -124,7 +124,7 @@ namespace Castle.Services.Transaction
         /// Register a participant on the transaction.
         /// </summary>
         /// <param name="resource"></param>
-        void Enlist(IResource resource);
+        void Enlist(IResource? resource);
 
         /// <summary>
         /// Registers a synchronization object that will be invoked
@@ -132,7 +132,7 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="synchronization"></param>
         /// <exception cref="ArgumentNullException">If <paramref name="synchronization" /> is <see langword="null" />.</exception>
-        void RegisterSynchronization(ISynchronization synchronization);
+        void RegisterSynchronization(ISynchronization? synchronization);
 
         /// <summary>
         /// Gets an enumerable of the resources present.

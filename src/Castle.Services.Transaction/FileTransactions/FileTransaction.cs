@@ -26,9 +26,7 @@ using System.Text;
 using System.Transactions;
 
 using Castle.Services.Transaction.IO;
-#if NETFRAMEWORK
 using Castle.Services.Transaction.Utilities;
-#endif
 
 using Microsoft.Win32.SafeHandles;
 
@@ -51,7 +49,7 @@ namespace Castle.Services.Transaction
 #endif
     public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     {
-        private SafeTransactionHandle _transactionHandle;
+        private SafeTransactionHandle? _transactionHandle;
 
         #region Constructors
 
@@ -67,7 +65,7 @@ namespace Castle.Services.Transaction
         /// Constructor with transaction name.
         /// </summary>
         /// <param name="name">The name of the transaction.</param>
-        public FileTransaction(string name) :
+        public FileTransaction(string? name) :
             base(name, TransactionMode.Unspecified, IsolationLevel.ReadCommitted)
         {
         }
@@ -139,7 +137,7 @@ namespace Castle.Services.Transaction
         #region ITransaction Members
 
         public override string Name =>
-            !string.IsNullOrEmpty(InnerName) ?
+            !InnerName.IsNullOrEmpty() ?
             InnerName :
             $"{nameof(FileTransaction)} #{GetHashCode()}";
 
@@ -198,7 +196,7 @@ namespace Castle.Services.Transaction
 
         protected override void InnerCommit()
         {
-            if (CommitTransaction(_transactionHandle))
+            if (CommitTransaction(_transactionHandle!))
             {
                 return;
             }
@@ -210,7 +208,7 @@ namespace Castle.Services.Transaction
 
         protected override void InnerRollback()
         {
-            if (!RollbackTransaction(_transactionHandle))
+            if (!RollbackTransaction(_transactionHandle!))
             {
                 throw new TransactionException(
                     "Rollback failed.",
@@ -222,12 +220,16 @@ namespace Castle.Services.Transaction
 
         #region IDirectoryAdapter & IFileAdapter Members
 
-        bool IDirectoryAdapter.Create(string path)
+        bool IDirectoryAdapter.Create(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
@@ -272,28 +274,36 @@ namespace Castle.Services.Transaction
             return false;
         }
 
-        FileStream IFileAdapter.Create(string filePath)
+        FileStream IFileAdapter.Create(string? filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+#else
+            if (filePath.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
             return Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
         }
 
-        void IDirectoryAdapter.Delete(string path)
+        void IDirectoryAdapter.Delete(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
-            if (!RemoveDirectoryTransactedW(path, _transactionHandle))
+            if (!RemoveDirectoryTransactedW(path, _transactionHandle!))
             {
                 throw new TransactionException(
                     $"Unable to delete directory: '{path}' (Transaction '{Name}'). " +
@@ -302,16 +312,20 @@ namespace Castle.Services.Transaction
             }
         }
 
-        void IFileAdapter.Delete(string filePath)
+        void IFileAdapter.Delete(string? filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+#else
+            if (filePath.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
-            if (!DeleteFileTransactedW(filePath, _transactionHandle))
+            if (!DeleteFileTransactedW(filePath, _transactionHandle!))
             {
                 throw new TransactionException(
                     $"Unable to delete file: '{filePath}' (Transaction '{Name}'). " +
@@ -320,16 +334,21 @@ namespace Castle.Services.Transaction
             }
         }
 
-        void IDirectoryAdapter.Move(string path, string newPath)
+        void IDirectoryAdapter.Move(string? path, string? newPath)
         {
-            if (string.IsNullOrEmpty(path))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+            ArgumentException.ThrowIfNullOrEmpty(newPath);
+#else
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
-            if (string.IsNullOrEmpty(newPath))
+            if (newPath.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(newPath)}' cannot be null or empty.", nameof(newPath));
             }
+#endif
 
             if (!((IDirectoryAdapter) this).Exists(path))
             {
@@ -342,11 +361,25 @@ namespace Castle.Services.Transaction
                                IntPtr.Zero,
                                IntPtr.Zero,
                                MoveFileFlags.CopyAllowed,
-                               _transactionHandle);
+                               _transactionHandle!);
         }
 
-        void IFileAdapter.Move(string filePath, string newFilePath)
+        void IFileAdapter.Move(string? filePath, string? newFilePath)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentException.ThrowIfNullOrEmpty(newFilePath);
+#else
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+            if (newFilePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(newFilePath)}' cannot be null or empty.", nameof(newFilePath));
+            }
+#endif
+
             // Case 1: The new file path is a directory.
             if (((IDirectoryAdapter) this).Exists(newFilePath))
             {
@@ -355,7 +388,7 @@ namespace Castle.Services.Transaction
                                    IntPtr.Zero,
                                    IntPtr.Zero,
                                    MoveFileFlags.CopyAllowed,
-                                   _transactionHandle);
+                                   _transactionHandle!);
 
                 return;
             }
@@ -366,15 +399,19 @@ namespace Castle.Services.Transaction
                                IntPtr.Zero,
                                IntPtr.Zero,
                                MoveFileFlags.CopyAllowed,
-                               _transactionHandle);
+                               _transactionHandle!);
         }
 
-        bool IDirectoryAdapter.Exists(string path)
+        bool IDirectoryAdapter.Exists(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
@@ -385,12 +422,16 @@ namespace Castle.Services.Transaction
             return !handle.IsInvalid;
         }
 
-        bool IFileAdapter.Exists(string filePath)
+        bool IFileAdapter.Exists(string? filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+#else
+            if (filePath.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
@@ -399,19 +440,23 @@ namespace Castle.Services.Transaction
             return !handle.IsInvalid;
         }
 
-        string IDirectoryAdapter.GetFullPath(string path)
+        string IDirectoryAdapter.GetFullPath(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
+#endif
 
             AssertState(TransactionStatus.Active);
 
             return GetFullPathNameTransacted(path);
         }
 
-        string IDirectoryAdapter.MapPath(string path)
+        string IDirectoryAdapter.MapPath(string? path)
         {
             throw new NotSupportedException($"Use the '{nameof(DirectoryAdapter)}.{nameof(DirectoryAdapter.MapPath)}' instead.");
         }
@@ -420,25 +465,38 @@ namespace Castle.Services.Transaction
 
         #region IDirectoryAdapter Members
 
-        bool IDirectoryAdapter.Delete(string path, bool recursively)
+        bool IDirectoryAdapter.Delete(string? path, bool recursively)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertState(TransactionStatus.Active);
 
             return recursively ?
                    DeleteRecursive(path) :
-                   RemoveDirectoryTransactedW(path, _transactionHandle);
+                   RemoveDirectoryTransactedW(path, _transactionHandle!);
         }
 
         #endregion
 
         #region IFileAdapter Members
 
-        public FileStream Open(string filePath, FileMode fileMode)
+        public FileStream Open(string? filePath, FileMode fileMode)
         {
-            if (string.IsNullOrEmpty(filePath))
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+#else
+            if (filePath.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
             }
+#endif
 
             return Open(filePath, fileMode, FileAccess.ReadWrite, FileShare.None);
         }
@@ -446,13 +504,22 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// DO NOT USE: Implemented in the file adapter: <see cref="FileAdapter" />.
         /// </summary>
-        int IFileAdapter.WriteStream(string toFilePath, Stream fromStream)
+        int IFileAdapter.WriteStream(string? toFilePath, Stream? fromStream)
         {
             throw new NotSupportedException($"Use the '{nameof(FileAdapter)}.{nameof(FileAdapter.WriteStream)}' instead.");
         }
 
-        public string ReadAllText(string filePath)
+        public string ReadAllText(string? filePath)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+#else
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+#endif
+
             AssertState(TransactionStatus.Active);
 
             using var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -460,8 +527,22 @@ namespace Castle.Services.Transaction
             return reader.ReadToEnd();
         }
 
-        public string ReadAllText(string filePath, Encoding encoding)
+        public string ReadAllText(string? filePath, Encoding? encoding)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentNullException.ThrowIfNull(encoding);
+#else
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+            if (encoding is null)
+            {
+                throw new ArgumentNullException(nameof(encoding));
+            }
+#endif
+
             AssertState(TransactionStatus.Active);
 
             using var reader = new StreamReader(Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), encoding);
@@ -476,8 +557,22 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="filePath">The path to write to.</param>
         /// <param name="contents">The contents of the file after writing to it.</param>
-        public void WriteAllText(string filePath, string contents)
+        public void WriteAllText(string? filePath, string? contents)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
+            ArgumentNullException.ThrowIfNull(contents);
+#else
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+            if (contents is null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+#endif
+
             AssertState(TransactionStatus.Active);
 
             var exists = ((IFileAdapter) this).Exists(filePath);
@@ -521,7 +616,7 @@ namespace Castle.Services.Transaction
                                                    TranslateFileMode(fileMode),
                                                    0,
                                                    IntPtr.Zero,
-                                                   _transactionHandle,
+                                                   _transactionHandle!,
                                                    IntPtr.Zero,
                                                    IntPtr.Zero);
 
@@ -603,32 +698,32 @@ namespace Castle.Services.Transaction
             return CreateDirectoryTransacted(null, directoryPath);
         }
 
-        private bool CreateDirectoryTransacted(string templatePath,
+        private bool CreateDirectoryTransacted(string? templatePath,
                                                string directoryPath)
         {
             return CreateDirectoryTransactedW(templatePath,
                                               directoryPath,
                                               IntPtr.Zero,
-                                              _transactionHandle);
+                                              _transactionHandle!);
         }
 
         private bool DeleteRecursive(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
 
             return RecurseFiles(path,
-                                filePath => DeleteFileTransactedW(filePath, _transactionHandle),
-                                directoryPath => RemoveDirectoryTransactedW(directoryPath, _transactionHandle));
+                                filePath => DeleteFileTransactedW(filePath, _transactionHandle!),
+                                directoryPath => RemoveDirectoryTransactedW(directoryPath, _transactionHandle!));
         }
 
         private bool RecurseFiles(string path,
                                   Func<string, bool> operationOnFiles,
                                   Func<string, bool> operationOnDirectories)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -696,7 +791,7 @@ namespace Castle.Services.Transaction
                 sb.Capacity,
                 sb,
                 ref pointer, // Here we can check if it's a file or not.
-                _transactionHandle);
+                _transactionHandle!);
 
             if (handle == 0) // Failure.
             {
@@ -717,13 +812,13 @@ namespace Castle.Services.Transaction
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Exception GetLastException()
+        private static Exception? GetLastException()
         {
             return GetLastException(Marshal.GetLastWin32Error());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Exception GetLastException(int win32ErrorCode)
+        private static Exception? GetLastException(int win32ErrorCode)
         {
             return Marshal.GetExceptionForHR(win32ErrorCode);
         }
@@ -1020,7 +1115,7 @@ namespace Castle.Services.Transaction
                                             FINDEX_SEARCH_OPS.FindExSearchNameMatch,
                                             IntPtr.Zero,
                                              0,
-                                            _transactionHandle);
+                                            _transactionHandle!);
         }
 
         private SafeFindHandle FindFirstFileTransactedW(string lpFileName,
@@ -1032,7 +1127,7 @@ namespace Castle.Services.Transaction
                                             FINDEX_SEARCH_OPS.FindExSearchNameMatch,
                                             IntPtr.Zero,
                                             0,
-                                            _transactionHandle);
+                                            _transactionHandle!);
         }
 
         // Not transacted.
@@ -1064,14 +1159,14 @@ namespace Castle.Services.Transaction
         [LibraryImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static partial bool CreateDirectoryTransactedW(
-            [MarshalAs(UnmanagedType.LPWStr)] string lpTemplateDirectory,
+            [MarshalAs(UnmanagedType.LPWStr)] string? lpTemplateDirectory,
             [MarshalAs(UnmanagedType.LPWStr)] string lpNewDirectory,
             IntPtr lpSecurityAttributes,
             SafeTransactionHandle hTransaction);
 #else
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool CreateDirectoryTransactedW(
-            [MarshalAs(UnmanagedType.LPWStr)] string lpTemplateDirectory,
+            [MarshalAs(UnmanagedType.LPWStr)] string? lpTemplateDirectory,
             [MarshalAs(UnmanagedType.LPWStr)] string lpNewDirectory,
             IntPtr lpSecurityAttributes,
             SafeTransactionHandle hTransaction);
