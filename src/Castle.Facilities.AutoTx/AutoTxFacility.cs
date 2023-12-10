@@ -62,7 +62,7 @@ namespace Castle.Facilities.AutoTx
         /// <summary>
         /// Gets or sets the root directory for file transactions.
         /// </summary>
-        public string RootDirectory { get; set; }
+        public string? RootDirectory { get; set; }
 
         /// <summary>
         /// Registers the <see cref="TransactionInterceptor" />,

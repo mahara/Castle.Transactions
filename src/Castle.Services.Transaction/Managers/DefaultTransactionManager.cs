@@ -23,7 +23,7 @@ namespace Castle.Services.Transaction
 {
     public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
     {
-        private IActivityManager _activityManager;
+        private IActivityManager? _activityManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultTransactionManager" /> class.
@@ -38,10 +38,18 @@ namespace Castle.Services.Transaction
         /// </summary>
         /// <param name="activityManager">The activity manager.</param>
         /// <exception cref="ArgumentNullException"><paramref name="activityManager" /> is <see langword="null" />.</exception>
-        public DefaultTransactionManager(IActivityManager activityManager)
+        public DefaultTransactionManager(IActivityManager? activityManager)
         {
-            _activityManager = activityManager ??
-                               throw new ArgumentNullException(nameof(activityManager));
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(activityManager);
+#else
+            if (activityManager is null)
+            {
+                throw new ArgumentNullException(nameof(activityManager));
+            }
+#endif
+
+            _activityManager = activityManager;
 
             //
             //  NOTE:   .NET starts to support Windows-only distributed transactions since .NET 7.0.
@@ -65,7 +73,7 @@ namespace Castle.Services.Transaction
             Logger.Debug($"'{nameof(DefaultTransactionManager)}' created.");
         }
 
-        public virtual void Dispose(ITransaction transaction)
+        public virtual void Dispose(ITransaction? transaction)
         {
             if (transaction is null)
             {
@@ -83,7 +91,7 @@ namespace Castle.Services.Transaction
                 throw new ArgumentException(message, nameof(transaction));
             }
 
-            _activityManager.CurrentActivity.Pop();
+            _activityManager?.CurrentActivity.Pop();
 
             if (transaction is IDisposable disposable)
             {
@@ -102,12 +110,12 @@ namespace Castle.Services.Transaction
             Logger.Debug($"Transaction '{transaction.Name}' successfully disposed.");
         }
 
-        public event EventHandler<TransactionEventArgs> TransactionCreated;
-        public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
-        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
-        public event EventHandler<TransactionEventArgs> TransactionDisposed;
-        public event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+        public event EventHandler<TransactionEventArgs>? TransactionCreated;
+        public event EventHandler<TransactionEventArgs>? TransactionCompleted;
+        public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
+        public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
+        public event EventHandler<TransactionEventArgs>? TransactionDisposed;
+        public event EventHandler<TransactionEventArgs>? ChildTransactionCreated;
 
         public ILogger Logger { get; set; } = NullLogger.Instance;
 
@@ -115,15 +123,26 @@ namespace Castle.Services.Transaction
         /// Gets or sets the activity manager.
         /// </summary>
         /// <exception cref="ArgumentNullException">If <paramref name="value" /> is <see langword="null" />.</exception>
-        public IActivityManager ActivityManager
+        public IActivityManager? ActivityManager
         {
             get => _activityManager;
-            set => _activityManager = value ??
-                                      throw new ArgumentNullException(nameof(value));
+            set
+            {
+#if NET8_0_OR_GREATER
+                ArgumentNullException.ThrowIfNull(value);
+#else
+                if (value is null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+#endif
+
+                _activityManager = value;
+            }
         }
 
-        public ITransaction CurrentTransaction =>
-            _activityManager.CurrentActivity.CurrentTransaction;
+        public ITransaction? CurrentTransaction =>
+            _activityManager?.CurrentActivity.CurrentTransaction;
 
         /// <summary>
         /// <see cref="ITransactionManager.CreateTransaction(TransactionMode,IsolationLevel)" />.
@@ -131,16 +150,16 @@ namespace Castle.Services.Transaction
         /// <remarks>
         /// Thread-safety of this method depends on that of the <see cref="IActivityManager.CurrentActivity" />.
         /// </remarks>
-        public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationLevel isolationLevel)
+        public ITransaction? CreateTransaction(TransactionMode transactionMode,
+                                               IsolationLevel isolationLevel)
         {
             return CreateTransaction(transactionMode, isolationLevel, false, false);
         }
 
-        public ITransaction CreateTransaction(TransactionMode transactionMode,
-                                              IsolationLevel isolationLevel,
-                                              bool isAmbient,
-                                              bool isReadOnly)
+        public ITransaction? CreateTransaction(TransactionMode transactionMode,
+                                               IsolationLevel isolationLevel,
+                                               bool isAmbient,
+                                               bool isReadOnly)
         {
             transactionMode = GetTransactionMode(transactionMode);
 
@@ -155,7 +174,7 @@ namespace Castle.Services.Transaction
                 return null;
             }
 
-            TransactionBase transaction = null;
+            TransactionBase? transaction = null;
 
             if (currentTransaction is not null)
             {
@@ -180,15 +199,15 @@ namespace Castle.Services.Transaction
                 Logger.Debug($"Transaction '{transaction.Name}' created.");
             }
 
-            _activityManager.CurrentActivity.Push(transaction);
+            _activityManager?.CurrentActivity.Push(transaction);
 
             if (transaction.IsChildTransaction)
             {
-                ChildTransactionCreated.Fire(this, new TransactionEventArgs(transaction));
+                ChildTransactionCreated?.Fire(this, new TransactionEventArgs(transaction));
             }
             else
             {
-                TransactionCreated.Fire(this, new TransactionEventArgs(transaction));
+                TransactionCreated?.Fire(this, new TransactionEventArgs(transaction));
             }
 
             return transaction;
@@ -212,17 +231,17 @@ namespace Castle.Services.Transaction
             return tx;
         }
 
-        private void CompletedHandler(object sender, TransactionEventArgs e)
+        private void CompletedHandler(object? sender, TransactionEventArgs e)
         {
             TransactionCompleted.Fire(this, e);
         }
 
-        private void RolledBackHandler(object sender, TransactionEventArgs e)
+        private void RolledBackHandler(object? sender, TransactionEventArgs e)
         {
             TransactionRolledBack.Fire(this, e);
         }
 
-        private void FailedHandler(object sender, TransactionFailedEventArgs e)
+        private void FailedHandler(object? sender, TransactionFailedEventArgs e)
         {
             TransactionFailed.Fire(this, e);
         }
@@ -264,7 +283,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

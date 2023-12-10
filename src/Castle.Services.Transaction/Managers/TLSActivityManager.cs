@@ -28,7 +28,7 @@ namespace Castle.Services.Transaction
     public class TLSActivityManager : MarshalByRefObject, IActivityManager
     {
         [ThreadStatic]
-        private static Activity _activity;
+        private static Activity? _activity;
 
         private readonly object _lock = new();
 
@@ -57,7 +57,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

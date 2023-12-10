@@ -23,12 +23,12 @@ namespace Castle.Services.Transaction
 #endif
     public class TransactionModeUnsupportedException : TransactionException
     {
-        public TransactionModeUnsupportedException(string message) :
+        public TransactionModeUnsupportedException(string? message) :
             base(message)
         {
         }
 
-        public TransactionModeUnsupportedException(string message, Exception innerException) :
+        public TransactionModeUnsupportedException(string? message, Exception? innerException) :
             base(message, innerException)
         {
         }
