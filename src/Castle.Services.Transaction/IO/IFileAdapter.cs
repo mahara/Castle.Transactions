@@ -28,13 +28,13 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="filePath">The path where to create the file.</param>
         /// <returns>A <see cref="FileStream" /> to the file.</returns>
-        FileStream Create(string filePath);
+        FileStream Create(string? filePath);
 
         /// <summary>
         /// Deletes a file as part of a transaction.
         /// </summary>
         /// <param name="filePath"></param>
-        void Delete(string filePath);
+        void Delete(string? filePath);
 
         /// <summary>
         /// Moves the file from the original path to the new path.
@@ -53,14 +53,14 @@ namespace Castle.Services.Transaction.IO
         ///     Move("b/a.txt", "c/") // "c" must be a directory and might or might not exist. If it doesn't exist, it will be created.
         /// </code>
         /// </remarks>
-        void Move(string filePath, string newFilePath);
+        void Move(string? filePath, string? newFilePath);
 
         /// <summary>
         /// Returns whether the specified file exists or not.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <returns></returns>
-        bool Exists(string filePath);
+        bool Exists(string? filePath);
 
         /// <summary>
         /// Opens a file with ReadWrite access.
@@ -68,7 +68,7 @@ namespace Castle.Services.Transaction.IO
         /// <param name="filePath"></param>
         /// <param name="fileMode"></param>
         /// <returns></returns>
-        FileStream Open(string filePath, FileMode fileMode);
+        FileStream Open(string? filePath, FileMode fileMode);
 
         /// <summary>
         /// Writes an input stream to the file path.
@@ -76,14 +76,14 @@ namespace Castle.Services.Transaction.IO
         /// <param name="toFilePath">The path to write to.</param>
         /// <param name="fromStream">The stream to read from.</param>
         /// <returns>The number of bytes written.</returns>
-        int WriteStream(string toFilePath, Stream fromStream);
+        int WriteStream(string? toFilePath, Stream? fromStream);
 
         /// <summary>
         /// Reads all text from a file as part of a transaction.
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        string ReadAllText(string filePath);
+        string ReadAllText(string? filePath);
 
         /// <summary>
         /// Reads all text in a file and returns the string of it.
@@ -91,13 +91,13 @@ namespace Castle.Services.Transaction.IO
         /// <param name="filePath"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        string ReadAllText(string filePath, Encoding encoding);
+        string ReadAllText(string? filePath, Encoding? encoding);
 
         /// <summary>
         /// Writes text to a file as part of a transaction.
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="contents"></param>
-        void WriteAllText(string filePath, string contents);
+        void WriteAllText(string? filePath, string? contents);
     }
 }
