@@ -20,7 +20,7 @@ namespace Castle.Services.Transaction
     {
         private readonly ThreadLocal<Activity> _activity = new(static () => new Activity());
 
-        public Activity CurrentActivity => _activity.Value;
+        public Activity CurrentActivity => _activity.Value!;
 
 #if NET
         //[Obsolete("Obsoletions.RemotingApisMessage, DiagnosticId = Obsoletions.RemotingApisDiagId, UrlFormat = Obsoletions.SharedUrlFormat")]
@@ -28,7 +28,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

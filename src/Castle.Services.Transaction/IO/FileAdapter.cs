@@ -16,6 +16,8 @@
 
 using System.Text;
 
+using Castle.Services.Transaction.Utilities;
+
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
@@ -32,7 +34,7 @@ namespace Castle.Services.Transaction.IO
         {
         }
 
-        public FileAdapter(bool constrainToSpecifiedDirectory, string specifiedDirectory) :
+        public FileAdapter(bool constrainToSpecifiedDirectory, string? specifiedDirectory) :
             base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
             if (Logger.IsDebugEnabled)
@@ -48,8 +50,13 @@ namespace Castle.Services.Transaction.IO
             }
         }
 
-        public FileStream Create(string filePath)
+        public FileStream Create(string? filePath)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))
@@ -60,8 +67,13 @@ namespace Castle.Services.Transaction.IO
             return File.Create(filePath);
         }
 
-        public void Delete(string filePath)
+        public void Delete(string? filePath)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))
@@ -74,13 +86,27 @@ namespace Castle.Services.Transaction.IO
             File.Delete(filePath);
         }
 
-        public void Move(string filePath, string newFilePath)
+        public void Move(string? filePath, string? newFilePath)
         {
             throw new NotImplementedException();
+
+            //if (filePath.IsNullOrEmpty())
+            //{
+            //    throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            //}
+            //if (newFilePath.IsNullOrEmpty())
+            //{
+            //    throw new ArgumentException($"'{nameof(newFilePath)}' cannot be null or empty.", nameof(newFilePath));
+            //}
         }
 
-        public bool Exists(string filePath)
+        public bool Exists(string? filePath)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))
@@ -91,8 +117,13 @@ namespace Castle.Services.Transaction.IO
             return File.Exists(filePath);
         }
 
-        public FileStream Open(string filePath, FileMode fileMode)
+        public FileStream Open(string? filePath, FileMode fileMode)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))
@@ -103,8 +134,21 @@ namespace Castle.Services.Transaction.IO
             return File.Open(filePath, fileMode);
         }
 
-        public int WriteStream(string toFilePath, Stream fromStream)
+        public int WriteStream(string? toFilePath, Stream? fromStream)
         {
+            if (toFilePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(toFilePath)}' cannot be null or empty.", nameof(toFilePath));
+            }
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(fromStream);
+#else
+            if (fromStream is null)
+            {
+                throw new ArgumentNullException(nameof(fromStream));
+            }
+#endif
+
             var offset = 0;
 
             using (var fs = Create(toFilePath))
@@ -123,13 +167,26 @@ namespace Castle.Services.Transaction.IO
             return offset;
         }
 
-        public string ReadAllText(string filePath)
+        public string ReadAllText(string? filePath)
         {
             return ReadAllText(filePath, Encoding.UTF8);
         }
 
-        public string ReadAllText(string filePath, Encoding encoding)
+        public string ReadAllText(string? filePath, Encoding? encoding)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(encoding);
+#else
+            if (encoding is null)
+            {
+                throw new ArgumentNullException(nameof(encoding));
+            }
+#endif
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))
@@ -141,8 +198,21 @@ namespace Castle.Services.Transaction.IO
 
         }
 
-        public void WriteAllText(string filePath, string contents)
+        public void WriteAllText(string? filePath, string? contents)
         {
+            if (filePath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            }
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(contents);
+#else
+            if (contents is null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+#endif
+
             AssertAllowed(filePath);
 
             if (HasTransaction(out var tx))

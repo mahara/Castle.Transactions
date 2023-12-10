@@ -14,6 +14,8 @@
 // limitations under the License.
 #endregion
 
+using Castle.Services.Transaction.Utilities;
+
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
@@ -26,14 +28,19 @@ namespace Castle.Services.Transaction.IO
 
         public DirectoryAdapter(IPathMapper pathMapper,
                                 bool constrainToSpecifiedDirectory,
-                                string specifiedDirectory) :
+                                string? specifiedDirectory) :
             base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
             _pathMapper = pathMapper ?? throw new ArgumentNullException(nameof(pathMapper));
         }
 
-        public bool Create(string path)
+        public bool Create(string? path)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -51,8 +58,13 @@ namespace Castle.Services.Transaction.IO
             return false;
         }
 
-        public void Delete(string path)
+        public void Delete(string? path)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -65,8 +77,13 @@ namespace Castle.Services.Transaction.IO
             Directory.Delete(path);
         }
 
-        public bool Delete(string path, bool recursively)
+        public bool Delete(string? path, bool recursively)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -79,12 +96,21 @@ namespace Castle.Services.Transaction.IO
             return true;
         }
 
-        public void Move(string path, string newPath)
+        public void Move(string? path, string? newPath)
         {
-            AssertAllowed(path);
-            AssertAllowed(newPath);
-
             throw new NotImplementedException("This hasn't been completely implemented with the >255 character paths. Please help out and send a patch.");
+
+            //if (path.IsNullOrEmpty())
+            //{
+            //    throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            //}
+            //if (newPath.IsNullOrEmpty())
+            //{
+            //    throw new ArgumentException($"'{nameof(newPath)}' cannot be null or empty.", nameof(newPath));
+            //}
+
+            //AssertAllowed(path);
+            //AssertAllowed(newPath);
 
             // TODO: Move(string path, string newPath)
             //if (HasTransaction(out var tx))
@@ -97,8 +123,13 @@ namespace Castle.Services.Transaction.IO
             //Directory.Move(path, newPath);
         }
 
-        public bool Exists(string path)
+        public bool Exists(string? path)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -109,8 +140,13 @@ namespace Castle.Services.Transaction.IO
             return Directory.Exists(path);
         }
 
-        public string GetFullPath(string path)
+        public string GetFullPath(string? path)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -121,8 +157,13 @@ namespace Castle.Services.Transaction.IO
             return Path.GetFullPath(path);
         }
 
-        public string MapPath(string path)
+        public string MapPath(string? path)
         {
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+
             return _pathMapper.MapPath(path);
         }
     }

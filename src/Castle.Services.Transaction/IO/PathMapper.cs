@@ -22,7 +22,7 @@ namespace Castle.Services.Transaction.IO
     /// </summary>
     public class PathMapper : IPathMapper
     {
-        private readonly Func<string, string> _function;
+        private readonly Func<string, string>? _function;
 
         public PathMapper()
         {
