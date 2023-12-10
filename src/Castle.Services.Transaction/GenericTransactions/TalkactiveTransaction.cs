@@ -33,9 +33,9 @@ namespace Castle.Services.Transaction
             _isReadOnly = isReadOnly;
         }
 
-        public event EventHandler<TransactionEventArgs> TransactionCompleted;
-        public event EventHandler<TransactionEventArgs> TransactionRolledBack;
-        public event EventHandler<TransactionFailedEventArgs> TransactionFailed;
+        public event EventHandler<TransactionEventArgs>? TransactionCompleted;
+        public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
+        public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
 
         public override bool IsAmbient
         {

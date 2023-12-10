@@ -23,12 +23,12 @@ namespace Castle.Services.Transaction
 #endif
     public class TransactionalConflictException : TransactionException
     {
-        public TransactionalConflictException(string message) :
+        public TransactionalConflictException(string? message) :
             base(message)
         {
         }
 
-        public TransactionalConflictException(string message, Exception innerException) :
+        public TransactionalConflictException(string? message, Exception? innerException) :
             base(message, innerException)
         {
         }

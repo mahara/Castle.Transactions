@@ -25,7 +25,8 @@ namespace Castle.Services.Transaction
     {
         private readonly List<(IResource, Exception)> _failedResources = new();
 
-        public RollbackResourceException(string message, IEnumerable<(IResource, Exception)> failedResources) : base(message, null)
+        public RollbackResourceException(string message, IEnumerable<(IResource, Exception)> failedResources) :
+            base(message, null)
         {
             _failedResources.AddRange(failedResources);
         }
