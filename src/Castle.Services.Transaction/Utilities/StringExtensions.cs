@@ -14,16 +14,97 @@
 // limitations under the License.
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
 #if NETFRAMEWORK
 using System.Globalization;
-using System.Runtime.CompilerServices;
 #endif
+using System.Runtime.CompilerServices;
 
 namespace Castle.Services.Transaction.Utilities
 {
     public static class StringExtensions
     {
+        /// <summary>
+        ///     Indicates whether this <see cref="string" /> instance is <see langword="null" />, an empty string (""), or consists only of white-space characters.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <returns>
+        ///     <see langword="true" /> if the input string is <see langword="null" />, an empty string (""), or consists only of white-space characters;
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.isnullorwhitespace" />
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrWhiteSpace([NotNullWhen(false)] this string? str)
+        {
+            return string.IsNullOrWhiteSpace(str);
+        }
+
+        /// <summary>
+        ///     Indicates whether the specified string is <see langword="null" /> or an empty string ("").
+        /// </summary>
+        /// <param name="str">The string to test.</param>
+        /// <returns>
+        ///     <see langword="true" /> if the value parameter is <see langword="null" /> or an empty string ("");
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.isnullorempty" />
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrEmpty([NotNullWhen(false)] this string? str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+
 #if NETFRAMEWORK
+        /// <summary>
+        ///     Indicates whether the specified <see cref="ReadOnlySpan{T}" /> instance consists only of white-space characters.
+        /// </summary>
+        /// <param name="span">The input character span.</param>
+        /// <returns>
+        ///     <see langword="true" /> if the character span consists only of white-space characters;
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.memoryextensions.iswhitespace" />
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.isnullorwhitespace" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsWhiteSpace(this ReadOnlySpan<char> span)
+        {
+            // Unroll loop: process 4 characters at a time to reduce branching overhead.
+            while (span.Length >= 4)
+            {
+                if (!char.IsWhiteSpace(span[0]) ||
+                    !char.IsWhiteSpace(span[1]) ||
+                    !char.IsWhiteSpace(span[2]) ||
+                    !char.IsWhiteSpace(span[3]))
+                {
+                    return false;
+                }
+
+                span = span[4..];
+            }
+
+            // Process remaining 0 to 3 characters.
+            for (var i = 0; i < span.Length; i++)
+            {
+                if (!char.IsWhiteSpace(span[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         ///     Returns a value indicating whether the specified <see cref="string" /> value occurs within this <see cref="string" /> instance,
         ///     when compared using the specified comparison type.
@@ -45,7 +126,7 @@ namespace Castle.Services.Transaction.Utilities
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(
-            this string str,
+            this string? str,
             string value,
             StringComparison comparisonType)
         {
@@ -82,7 +163,7 @@ namespace Castle.Services.Transaction.Utilities
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(
-            this string str,
+            this string? str,
             char value,
             StringComparison comparisonType)
         {
@@ -114,7 +195,7 @@ namespace Castle.Services.Transaction.Utilities
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(
-            this string str,
+            this string? str,
             char value,
             StringComparison comparisonType)
         {
@@ -152,7 +233,7 @@ namespace Castle.Services.Transaction.Utilities
         ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.startswith" />
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool StartsWith(this string str, char value)
+        public static bool StartsWith(this string? str, char value)
         {
             if (str is null)
             {
@@ -179,7 +260,7 @@ namespace Castle.Services.Transaction.Utilities
         ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.endswith" />
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool EndsWith(this string str, char value)
+        public static bool EndsWith(this string? str, char value)
         {
             if (str is null)
             {
