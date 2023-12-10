@@ -79,12 +79,12 @@ namespace Castle.Services.Transaction
             _parent.SetRollbackOnly();
         }
 
-        public override void Enlist(IResource resource)
+        public override void Enlist(IResource? resource)
         {
             _parent.Enlist(resource);
         }
 
-        public override void RegisterSynchronization(ISynchronization synchronization)
+        public override void RegisterSynchronization(ISynchronization? synchronization)
         {
             _parent.RegisterSynchronization(synchronization);
         }

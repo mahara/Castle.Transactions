@@ -24,7 +24,7 @@ namespace Castle.Services.Transaction
 
         public AsyncLocalActivityManager()
         {
-            _data.Value = null;
+            _data.Value = null!;
         }
 
         public Activity CurrentActivity
@@ -33,11 +33,11 @@ namespace Castle.Services.Transaction
             {
                 Activity activity;
 
-                if ((activity = _data.Value) is null)
+                if ((activity = _data.Value!) is null)
                 {
                     lock (_lock)
                     {
-                        if ((activity = _data.Value) is null)
+                        if ((activity = _data.Value!) is null)
                         {
                             activity = new Activity();
 
@@ -56,7 +56,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }
