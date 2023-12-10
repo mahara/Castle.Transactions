@@ -66,12 +66,16 @@ namespace Castle.Services.Transaction.IO
                                RegexOptions.Multiline);
         }
 
-        public static PathInfo Parse(string path)
+        public static PathInfo Parse(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(path);
+#else
             if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
+#endif
 
             var matches = _regex.Matches(path);
 
