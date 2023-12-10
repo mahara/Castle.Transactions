@@ -28,11 +28,11 @@ namespace Castle.Services.Transaction
             {
                 Activity activity;
 
-                if ((activity = _data.Value) is null)
+                if ((activity = _data.Value!) is null)
                 {
                     lock (_lock)
                     {
-                        if ((activity = _data.Value) is null)
+                        if ((activity = _data.Value!) is null)
                         {
                             activity = _data.Value = new Activity();
                         }
@@ -49,7 +49,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

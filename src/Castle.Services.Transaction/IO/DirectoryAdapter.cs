@@ -14,6 +14,8 @@
 // limitations under the License.
 #endregion
 
+using Castle.Services.Transaction.Utilities;
+
 namespace Castle.Services.Transaction.IO
 {
     /// <summary>
@@ -24,17 +26,34 @@ namespace Castle.Services.Transaction.IO
     {
         private readonly IPathMapper _pathMapper;
 
-        public DirectoryAdapter(IPathMapper pathMapper,
+        public DirectoryAdapter(IPathMapper? pathMapper,
                                 bool constrainToSpecifiedDirectory,
-                                string specifiedDirectory) :
+                                string? specifiedDirectory) :
             base(constrainToSpecifiedDirectory, specifiedDirectory)
         {
-            _pathMapper = pathMapper ??
-                          throw new ArgumentNullException(nameof(pathMapper));
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(pathMapper);
+#else
+            if (pathMapper is null)
+            {
+                throw new ArgumentNullException(nameof(pathMapper));
+            }
+#endif
+
+            _pathMapper = pathMapper;
         }
 
-        public bool Create(string path)
+        public bool Create(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -52,8 +71,17 @@ namespace Castle.Services.Transaction.IO
             return false;
         }
 
-        public void Delete(string path)
+        public void Delete(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -66,8 +94,17 @@ namespace Castle.Services.Transaction.IO
             Directory.Delete(path);
         }
 
-        public bool Delete(string path, bool recursively)
+        public bool Delete(string? path, bool recursively)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -80,8 +117,22 @@ namespace Castle.Services.Transaction.IO
             return true;
         }
 
-        public void Move(string path, string newPath)
+        public void Move(string? path, string? newPath)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+            ArgumentException.ThrowIfNullOrEmpty(newPath);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+            if (newPath.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(newPath)}' cannot be null or empty.", nameof(newPath));
+            }
+#endif
+
             AssertAllowed(path);
             AssertAllowed(newPath);
 
@@ -95,8 +146,17 @@ namespace Castle.Services.Transaction.IO
             Directory.Move(path, newPath);
         }
 
-        public bool Exists(string path)
+        public bool Exists(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -107,8 +167,17 @@ namespace Castle.Services.Transaction.IO
             return Directory.Exists(path);
         }
 
-        public string GetFullPath(string path)
+        public string GetFullPath(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             AssertAllowed(path);
 
             if (HasTransaction(out var tx))
@@ -119,8 +188,17 @@ namespace Castle.Services.Transaction.IO
             return Path.GetFullPath(path);
         }
 
-        public string MapPath(string path)
+        public string MapPath(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(path);
+#else
+            if (path.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            }
+#endif
+
             return _pathMapper.MapPath(path);
         }
     }
