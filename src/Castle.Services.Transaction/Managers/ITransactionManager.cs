@@ -34,30 +34,30 @@ namespace Castle.Services.Transaction
         /// <summary>
         /// Raised when a top level transaction was created.
         /// </summary>
-        event EventHandler<TransactionEventArgs> TransactionCreated;
+        event EventHandler<TransactionEventArgs>? TransactionCreated;
 
         /// <summary>
         /// Raised when the transaction was disposed.
         /// </summary>
-        event EventHandler<TransactionEventArgs> TransactionDisposed;
+        event EventHandler<TransactionEventArgs>? TransactionDisposed;
 
         /// <summary>
         /// Raised when a child transaction was created.
         /// </summary>
-        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+        event EventHandler<TransactionEventArgs>? ChildTransactionCreated;
 
         /// <summary>
         /// Returns the current <see cref="ITransaction" />.
         /// The transaction manager will probably need to hold
         /// the created transaction in the thread or in some sort of context.
         /// </summary>
-        ITransaction CurrentTransaction { get; }
+        ITransaction? CurrentTransaction { get; }
 
         /// <summary>
         /// <see cref="CreateTransaction(TransactionMode,IsolationLevel,bool,bool)" />.
         /// </summary>
-        ITransaction CreateTransaction(TransactionMode transactionMode,
-                                       IsolationLevel isolationLevel);
+        ITransaction? CreateTransaction(TransactionMode transactionMode,
+                                        IsolationLevel isolationLevel);
 
         /// <summary>
         /// Creates a transaction.
@@ -74,9 +74,9 @@ namespace Castle.Services.Transaction
         /// transactionMode = <see cref="TransactionMode.NotSupported" />
         /// and yet there is an ambient transaction in the transaction manager which is active.
         /// </exception>
-        ITransaction CreateTransaction(TransactionMode transactionMode,
-                                       IsolationLevel isolationLevel,
-                                       bool isAmbient,
-                                       bool isReadOnly);
+        ITransaction? CreateTransaction(TransactionMode transactionMode,
+                                        IsolationLevel isolationLevel,
+                                        bool isAmbient,
+                                        bool isReadOnly);
     }
 }
