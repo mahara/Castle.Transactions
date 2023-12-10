@@ -7,6 +7,8 @@
 
 Improvements:
 - Added **`.NET 8.0`** and **`.NET 7.0`** supports.
+- Enabled NRT (Nullable Reference Types)
+  (https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-reference-types).
 
 ### Castle.Services.Transaction
 
