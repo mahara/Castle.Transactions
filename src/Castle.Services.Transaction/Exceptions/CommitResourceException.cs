@@ -23,7 +23,7 @@ namespace Castle.Services.Transaction
 #endif
     public class CommitResourceException : TransactionException
     {
-        private readonly IResource _failedResource;
+        private readonly IResource _failedResource = null!;
 
         public CommitResourceException(string message, Exception innerException, IResource failedResource) :
             base(message, innerException)
