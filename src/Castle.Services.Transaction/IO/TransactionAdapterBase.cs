@@ -14,7 +14,10 @@
 // limitations under the License.
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 using Castle.Core.Logging;
+using Castle.Services.Transaction.Utilities;
 
 namespace Castle.Services.Transaction.IO
 {
@@ -24,17 +27,21 @@ namespace Castle.Services.Transaction.IO
     public abstract class TransactionAdapterBase
     {
         private readonly bool _allowOutsideSpecifiedDirectory;
-        private readonly string _specifiedDirectory;
+        private readonly string? _specifiedDirectory;
 
         protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
-                                         string specifiedDirectory)
+                                         string? specifiedDirectory)
         {
             if (constrainToSpecifiedDirectory)
             {
-                if (string.IsNullOrEmpty(specifiedDirectory))
+#if NET8_0_OR_GREATER
+                ArgumentException.ThrowIfNullOrEmpty(specifiedDirectory);
+#else
+                if (specifiedDirectory.IsNullOrEmpty())
                 {
                     throw new ArgumentException($"'{nameof(specifiedDirectory)}' cannot be null or empty.", nameof(specifiedDirectory));
                 }
+#endif
             }
 
             _allowOutsideSpecifiedDirectory = !constrainToSpecifiedDirectory;
@@ -46,7 +53,7 @@ namespace Castle.Services.Transaction.IO
         /// <summary>
         /// Gets the transaction manager if there is one, or sets it.
         /// </summary>
-        public ITransactionManager TransactionManager { get; set; }
+        public ITransactionManager? TransactionManager { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use transactions.
@@ -55,7 +62,7 @@ namespace Castle.Services.Transaction.IO
 
         public bool OnlyJoinExisting { get; set; }
 
-        protected bool HasTransaction(out IFileTransaction transaction)
+        protected bool HasTransaction([NotNullWhen(true)] out IFileTransaction? transaction)
         {
             transaction = null;
 
@@ -106,7 +113,7 @@ namespace Castle.Services.Transaction.IO
             var tentativePath = PathInfo.Parse(path);
 
             // If the given non-root is empty, we are looking at a relative path.
-            if (string.IsNullOrEmpty(tentativePath.Root))
+            if (tentativePath.Root.IsNullOrEmpty())
             {
                 return true;
             }
@@ -114,7 +121,7 @@ namespace Castle.Services.Transaction.IO
             var specifiedPath = PathInfo.Parse(_specifiedDirectory);
 
             // They must be on the same drive.
-            if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
+            if (!tentativePath.DriveLetter.IsNullOrEmpty() &&
                 specifiedPath.DriveLetter != tentativePath.DriveLetter)
             {
                 return false;
