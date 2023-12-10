@@ -69,7 +69,7 @@ namespace Castle.Services.Transaction
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }
