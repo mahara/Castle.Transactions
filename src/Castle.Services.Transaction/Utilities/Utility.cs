@@ -23,8 +23,8 @@ namespace Castle.Services.Transaction.Utilities
     /// </summary>
     internal static class Utility
     {
-        public static void Fire<TEventArgs>(this EventHandler<TEventArgs> handler,
-                                            object sender,
+        public static void Fire<TEventArgs>(this EventHandler<TEventArgs>? handler,
+                                            object? sender,
                                             TEventArgs args)
             where TEventArgs : EventArgs
         {
@@ -43,6 +43,10 @@ namespace Castle.Services.Transaction.Utilities
 
         public static void AtomicRead(this ReaderWriterLockSlim @lock, Action action, bool upgradable)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(@lock);
+            ArgumentNullException.ThrowIfNull(action);
+#else
             if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
@@ -51,6 +55,7 @@ namespace Castle.Services.Transaction.Utilities
             {
                 throw new ArgumentNullException(nameof(action));
             }
+#endif
 
             if (!upgradable)
             {
@@ -80,6 +85,10 @@ namespace Castle.Services.Transaction.Utilities
 
         public static T AtomicRead<T>(this ReaderWriterLockSlim @lock, Func<T> function)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(@lock);
+            ArgumentNullException.ThrowIfNull(function);
+#else
             if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
@@ -88,6 +97,7 @@ namespace Castle.Services.Transaction.Utilities
             {
                 throw new ArgumentNullException(nameof(function));
             }
+#endif
 
             @lock.EnterReadLock();
 
@@ -103,6 +113,10 @@ namespace Castle.Services.Transaction.Utilities
 
         public static void AtomicWrite(this ReaderWriterLockSlim @lock, Action action)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(@lock);
+            ArgumentNullException.ThrowIfNull(action);
+#else
             if (@lock is null)
             {
                 throw new ArgumentNullException(nameof(@lock));
@@ -111,6 +125,7 @@ namespace Castle.Services.Transaction.Utilities
             {
                 throw new ArgumentNullException(nameof(action));
             }
+#endif
 
             @lock.EnterWriteLock();
 
@@ -129,6 +144,10 @@ namespace Castle.Services.Transaction.Utilities
         /// </summary>
         public static void ForEach<TSource>(this IEnumerable<TSource> source, Action<TSource> action)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(action);
+#else
             if (source is null)
             {
                 throw new ArgumentNullException(nameof(source));
@@ -137,6 +156,7 @@ namespace Castle.Services.Transaction.Utilities
             {
                 throw new ArgumentNullException(nameof(action));
             }
+#endif
 
             foreach (var element in source)
             {
@@ -173,9 +193,9 @@ namespace Castle.Services.Transaction.Utilities
         public static Error OK = new(true, null);
 
         private readonly bool _success;
-        private readonly Exception _exception;
+        private readonly Exception? _exception;
 
-        public Error(bool success, Exception exception)
+        public Error(bool success, Exception? exception)
         {
             _success = success;
             _exception = success ? null : exception;
@@ -197,7 +217,7 @@ namespace Castle.Services.Transaction.Utilities
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public readonly Error Exception(Action<Exception> action)
+        public readonly Error Exception(Action<Exception?> action)
         {
             if (!_success)
             {
@@ -215,10 +235,10 @@ namespace Castle.Services.Transaction.Utilities
     internal readonly struct Error<T>
     {
         private readonly bool _success;
-        private readonly Exception _exception;
+        private readonly Exception? _exception;
         private readonly T _parameter;
 
-        public Error(bool success, Exception exception, T parameter)
+        public Error(bool success, Exception? exception, T parameter)
         {
             _success = success;
             _exception = success ? null : exception;
@@ -231,7 +251,7 @@ namespace Castle.Services.Transaction.Utilities
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Error<T> Exception(Action<Exception> action)
+        public Error<T> Exception(Action<Exception?> action)
         {
             if (!_success)
             {

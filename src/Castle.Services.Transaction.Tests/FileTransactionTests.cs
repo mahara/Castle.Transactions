@@ -310,7 +310,7 @@ namespace Castle.Services.Transaction.Tests
                 "when a transacted thread modifies before a non-transacted thread.")]
         public void TwoTransactions_SameName_FirstSleeps()
         {
-            Exception exception = null;
+            Exception? exception = null;
 
             var t1_started = new ManualResetEvent(false);
             var t2_started = new ManualResetEvent(false);
