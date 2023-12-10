@@ -14,10 +14,31 @@
 // limitations under the License.
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace Castle.Services.Transaction.Utilities
 {
     public static class StringExtensions
     {
+        /// <summary>
+        ///     Indicates whether the specified string is <see langword="null" /> or an empty string ("").
+        /// </summary>
+        /// <param name="str">The string to test.</param>
+        /// <returns>
+        ///     <see langword="true" /> if the value parameter is <see langword="null" /> or an empty string ("");
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.isnullorempty" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrEmpty([AllowNull, NotNullWhen(false)] this string str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+
 #if NETFRAMEWORK
         /// <summary>
         ///     Returns a value indicating whether the specified <see cref="string" /> value occurs within this <see cref="string" /> instance,

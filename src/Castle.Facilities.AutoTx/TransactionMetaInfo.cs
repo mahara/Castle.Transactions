@@ -87,7 +87,8 @@ namespace Castle.Facilities.AutoTx
                     return false;
                 }
 
-                if (method.DeclaringType.IsGenericType || method.IsGenericMethod)
+                if ((method.DeclaringType is Type declaringType && declaringType.IsGenericType) ||
+                    method.IsGenericMethod)
                 {
                     return IsGenericMethodTransactional(method);
                 }
@@ -140,7 +141,7 @@ namespace Castle.Facilities.AutoTx
 #endif
         public override object InitializeLifetimeService()
         {
-            return null;
+            return null!;
         }
     }
 }

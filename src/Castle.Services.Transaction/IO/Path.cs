@@ -64,12 +64,16 @@ namespace Castle.Services.Transaction.IO
         /// <param name="path">Gets whether the path is rooted or relative.</param>
         /// <returns>Whether the path is rooted or not.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
-        public static bool IsRooted(string path)
+        public static bool IsRooted(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(path);
+#else
             if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
+#endif
 
             if (path == string.Empty)
             {
@@ -84,9 +88,9 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="path">The path to get the root for.</param>
         /// <returns>The string denoting the root.</returns>
-        public static string GetPathRoot(string path)
+        public static string GetPathRoot(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -123,12 +127,16 @@ namespace Castle.Services.Transaction.IO
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
-        public static string GetPathWithoutRoot(string path)
+        public static string GetPathWithoutRoot(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(path);
+#else
             if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
+#endif
 
             if (path == string.Empty)
             {
@@ -148,8 +156,13 @@ namespace Castle.Services.Transaction.IO
         /// The directory path with all occurrences of the alternating chars replaced
         /// for the specified in <see cref="DirectorySeparatorChar" />.
         /// </returns>
-        public static string NormalizeDirectorySeparatorChars(string pathWithAlternatingChars)
+        public static string NormalizeDirectorySeparatorChars(string? pathWithAlternatingChars)
         {
+            if (pathWithAlternatingChars.IsNullOrEmpty())
+            {
+                throw new ArgumentException($"'{nameof(pathWithAlternatingChars)}' cannot be null or empty.", nameof(pathWithAlternatingChars));
+            }
+
             var sb = new StringBuilder();
 
             for (var i = 0; i < pathWithAlternatingChars.Length; i++)
@@ -172,7 +185,7 @@ namespace Castle.Services.Transaction.IO
         /// </summary>
         /// <param name="path">The path to get the info from.</param>
         /// <returns></returns>
-        public static PathInfo GetPathInfo(string path)
+        public static PathInfo GetPathInfo(string? path)
         {
             return PathInfo.Parse(path);
         }
@@ -183,12 +196,16 @@ namespace Castle.Services.Transaction.IO
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">If <paramref name="path" /> is <see langword="null" />.</exception>
-        public static string GetFullPath(string path)
+        public static string GetFullPath(string? path)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(path);
+#else
             if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
+#endif
 
             if (path.StartsWith(@"\\?\", StringComparison.Ordinal) ||
                 path.StartsWith(@"\\.\", StringComparison.Ordinal))
@@ -220,9 +237,9 @@ namespace Castle.Services.Transaction.IO
         /// For a path "/a/b/c" would return "/a/b" or
         /// for "\\?\C:\directoryA\directory\B\C\d.txt" would return "\\?\C:\directoryA\directory\B\C".
         /// </remarks>
-        public static string GetPathWithoutLastSegment(string path)
+        public static string GetPathWithoutLastSegment(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -261,9 +278,9 @@ namespace Castle.Services.Transaction.IO
             return result == string.Empty ? new string(lastType, 1) : result;
         }
 
-        public static string GetFileName(string path)
+        public static string GetFileName(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -287,9 +304,9 @@ namespace Castle.Services.Transaction.IO
             return result;
         }
 
-        public static string GetFileNameWithoutExtension(string path)
+        public static string GetFileNameWithoutExtension(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -300,9 +317,9 @@ namespace Castle.Services.Transaction.IO
             return lastPeriod == -1 ? fileName : fileName[..lastPeriod];
         }
 
-        public static bool HasExtension(string path)
+        public static bool HasExtension(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }
@@ -310,9 +327,9 @@ namespace Castle.Services.Transaction.IO
             return GetFileName(path).Length != GetFileNameWithoutExtension(path).Length;
         }
 
-        public static string GetExtension(string path)
+        public static string GetExtension(string? path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (path.IsNullOrEmpty())
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
             }

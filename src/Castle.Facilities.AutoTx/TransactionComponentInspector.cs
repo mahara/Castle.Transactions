@@ -35,7 +35,7 @@ namespace Castle.Facilities.AutoTx
     {
         public const string Transaction_ConfigurationElementName = "transaction";
 
-        private TransactionMetaInfoStore _metaInfoStore;
+        private TransactionMetaInfoStore _metaInfoStore = null!;
 
         /// <summary>
         /// Obtains transaction configuration based on the component configuration,
@@ -102,7 +102,7 @@ namespace Castle.Facilities.AutoTx
         /// <param name="metaInfoStore">The meta-information store.</param>
         private static void Validate(ComponentModel model, TransactionMetaInfoStore metaInfoStore)
         {
-            TransactionMetaInfo metaInfo;
+            TransactionMetaInfo? metaInfo;
 
             var problematicMethodNames = new List<string>();
 

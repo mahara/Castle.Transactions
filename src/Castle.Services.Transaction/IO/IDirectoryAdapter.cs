@@ -33,13 +33,13 @@ namespace Castle.Services.Transaction.IO
         /// The 'safe' value to get returned for be interopable with other path/dirutil implementations
         /// would hence be false (i.e. that the directory didn't already exist).
         /// </remarks>
-        bool Create(string path);
+        bool Create(string? path);
 
         /// <summary>
         /// Deletes a directory recursively.
         /// </summary>
         /// <param name="path">The path to delete recursively.</param>
-        void Delete(string path);
+        void Delete(string? path);
 
         /// <summary>
         /// Deletes an empty directory.
@@ -56,28 +56,28 @@ namespace Castle.Services.Transaction.IO
         /// <remarks>
         /// Non-empty directories will cause false to be returned.
         /// </remarks>
-        bool Delete(string path, bool recursively);
+        bool Delete(string? path, bool recursively);
 
         /// <summary>
         /// Moves the directory from the original path to the new path.
         /// </summary>
         /// <param name="path">The original path.</param>
         /// <param name="newPath">The new path where to move.</param>
-        void Move(string path, string newPath);
+        void Move(string? path, string newPath);
 
         /// <summary>
         /// Checks whether the path exists.
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns><see langword="true" /> if it exists; otherwise, <see langword="false" />.</returns>
-        bool Exists(string path);
+        bool Exists(string? path);
 
         /// <summary>
         /// Gets the full path of the specified directory.
         /// </summary>
         /// <param name="path">The relative directory path.</param>
         /// <returns>A string with the full path.</returns>
-        string GetFullPath(string path);
+        string GetFullPath(string? path);
 
         /// <summary>
         /// Gets the MapPath of the path.
@@ -88,6 +88,6 @@ namespace Castle.Services.Transaction.IO
         /// This will be relative to the root web directory if we're in a web site;
         /// otherwise, to the executing assembly.
         /// </remarks>
-        string MapPath(string path);
+        string MapPath(string? path);
     }
 }
