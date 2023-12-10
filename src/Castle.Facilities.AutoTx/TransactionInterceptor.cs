@@ -39,7 +39,7 @@ namespace Castle.Facilities.AutoTx
         private readonly IKernel _kernel;
         private readonly TransactionMetaInfoStore _metaInfoStore;
 
-        private TransactionMetaInfo _metaInfo;
+        private TransactionMetaInfo? _metaInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactionInterceptor" /> class.
@@ -72,7 +72,7 @@ namespace Castle.Facilities.AutoTx
         {
             MethodInfo method;
 
-            if (invocation.Method.DeclaringType.IsInterface)
+            if (invocation.Method.DeclaringType is Type declaringType && declaringType.IsInterface)
             {
                 method = invocation.MethodInvocationTarget;
             }
@@ -151,7 +151,7 @@ namespace Castle.Facilities.AutoTx
             {
                 if (!isRolledback)
                 {
-                    Logger.Debug($"Rolling back transaction '{transaction.Name}' due to exception on method '{method.DeclaringType.Name}.{method.Name}'.");
+                    Logger.Debug($"Rolling back transaction '{transaction.Name}' due to exception on method '{method.DeclaringType?.Name}.{method.Name}'.");
 
                     transaction.Rollback();
                 }
