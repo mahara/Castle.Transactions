@@ -47,7 +47,7 @@ ECHO ----------------------------------------------------
 dotnet build "Castle.Transactions.sln" --configuration %BUILD_CONFIGURATION% -property:APPVEYOR_BUILD_VERSION=%BUILD_VERSION% || EXIT /B 1
 
 dotnet build "tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln" --configuration Release
-"tools\Explicit.NuGet.Versions\bin\nev.exe" "build" "Castle."
+"tools\Explicit.NuGet.Versions\bin\nev.exe" "bin" "Castle."
 
 GOTO TEST
 
@@ -63,26 +63,26 @@ ECHO ------------------------------------
 ECHO Running .NET (net8.0) Unit Tests
 ECHO ------------------------------------
 
-dotnet test "src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net8.0\Castle.Services.Transaction.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net8.0_TestResults.xml;format=nunit3"
-dotnet test "src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net8.0\Castle.Facilities.AutoTx.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net8.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net8.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net8.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net8.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net8.0_TestResults.xml;format=nunit3"
 
 ECHO ------------------------------------
 ECHO Running .NET (net7.0) Unit Tests
 ECHO ------------------------------------
 
-dotnet test "src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net7.0\Castle.Services.Transaction.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net7.0_TestResults.xml;format=nunit3"
-dotnet test "src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net7.0\Castle.Facilities.AutoTx.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net7.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net7.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net7.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net7.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net7.0_TestResults.xml;format=nunit3"
 
 ECHO ------------------------------------
 ECHO Running .NET (net6.0) Unit Tests
 ECHO ------------------------------------
 
-dotnet test "src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Services.Transaction.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net6.0_TestResults.xml;format=nunit3"
-dotnet test "src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net6.0\Castle.Facilities.AutoTx.Tests.dll" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net6.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net6.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net6.0_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net6.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net6.0_TestResults.xml;format=nunit3"
 
 ECHO --------------------------------------------
 ECHO Running .NET Framework (net48) Unit Tests
 ECHO --------------------------------------------
 
-dotnet test "src\Castle.Services.Transaction.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Services.Transaction.Tests.exe" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net48_TestResults.xml;format=nunit3"
-dotnet test "src\Castle.Facilities.AutoTx.Tests\bin\%BUILD_CONFIGURATION%\net48\Castle.Facilities.AutoTx.Tests.exe" --results-directory "build\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net48_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net48\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.exe" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net48_TestResults.xml;format=nunit3"
+dotnet test "bin\%BUILD_CONFIGURATION%\net48\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.exe" --results-directory "bin\%BUILD_CONFIGURATION%" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net48_TestResults.xml;format=nunit3"
