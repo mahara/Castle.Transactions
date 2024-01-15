@@ -1,4 +1,4 @@
-<Project>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
     https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management
     https://devblogs.microsoft.com/nuget/introducing-central-package-management/
@@ -9,19 +9,19 @@
   <ItemGroup>
     <PackageVersion Include="Castle.Core" Version="[4.4.1,5)" />
     <PackageVersion Include="Castle.Windsor" Version="[5.1.2,6)" />
+    <PackageVersion Include="CSharpIsNullAnalyzer" Version="0.1.495" />
     <PackageVersion Include="DotNetZip" Version="1.16.0" />
     <PackageVersion Include="IndexRange" Version="1.0.3" />
     <PackageVersion Include="LiquidTestReports.Markdown" Version="1.0.9" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
     <PackageVersion Include="Nullable" Version="1.3.1" />
-    <PackageVersion Include="NUnit" Version="4.0.1" />
-    <PackageVersion Include="NUnit.Analyzers" Version="3.10.0" />
+    <PackageVersion Include="NUnit" Version="4.1.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.1.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageVersion Include="NUnitLite" Version="4.0.1" />
-    <PackageVersion Include="NunitXml.TestLogger" Version="3.1.15" />
+    <PackageVersion Include="NUnitLite" Version="4.1.0" />
+    <PackageVersion Include="NunitXml.TestLogger" Version="3.1.20" />
   </ItemGroup>
 </Project>
