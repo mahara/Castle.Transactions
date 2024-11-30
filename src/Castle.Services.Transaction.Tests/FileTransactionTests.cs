@@ -45,7 +45,7 @@ namespace Castle.Services.Transaction.Tests
 
         private readonly object _lock = new();
 
-        private readonly List<string> _pathsCreated = new();
+        private readonly List<string> _pathsCreated = [];
 
         private string _testFixtureRootDirectoryPath;
         private string _testFixtureDirectoryPath;
@@ -327,7 +327,7 @@ namespace Castle.Services.Transaction.Tests
 
                     t1_started.WaitOne();
 
-                    fs.Write(new byte[] { 0x1 }, 0, 1);
+                    fs.Write([0x1], 0, 1);
 
                     fs.Close();
                 }
