@@ -121,7 +121,7 @@ namespace Castle.Facilities.AutoTx
                 }
             }
 
-            var problematicMethodNamesString = string.Join(", ", problematicMethodNames.ToArray());
+            var problematicMethodNamesString = string.Join(", ", [.. problematicMethodNames]);
             throw new FacilityException(
                 $"The class '{model.Implementation.FullName}' wants to use transaction interception, " +
                 $"however the methods must be marked as virtual in order to do so. " +

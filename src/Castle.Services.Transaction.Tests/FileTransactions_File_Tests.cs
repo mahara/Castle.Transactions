@@ -28,7 +28,7 @@ namespace Castle.Services.Transaction.Tests
     {
         private readonly object _lock = new();
 
-        private readonly List<string> _fileSystemPathsCreated = new();
+        private readonly List<string> _fileSystemPathsCreated = [];
 
         private string _testFixtureRootDirectoryPath;
         private string _testFixtureDirectoryPath;

@@ -56,7 +56,7 @@ namespace Castle.Services.Transaction.IO
             System.IO.Path.AltDirectorySeparatorChar;
 
         public static char[] DirectorySeparatorChars =>
-            new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
+            [DirectorySeparatorChar, AltDirectorySeparatorChar];
 
         /// <summary>
         /// Returns whether the path is rooted.
@@ -177,7 +177,7 @@ namespace Castle.Services.Transaction.IO
                 }
             }
 
-            return sb.ToString().Trim(new[] { ' ' });
+            return sb.ToString().Trim([' ']);
         }
 
         /// <summary>
