@@ -45,11 +45,11 @@ namespace Castle.Services.Transaction.IO
 
         public static readonly char DirectorySeparatorChar = System.IO.Path.DirectorySeparatorChar;
         public static readonly char AltDirectorySeparatorChar = System.IO.Path.AltDirectorySeparatorChar;
-        public static readonly char[] DirectorySeparatorChars = new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
-        public static readonly char[] WhitespaceTrimChars = new[] { ' ' };
-        public static readonly char[] SlashTrimChars = new[] { '\\', '/' };
+        public static readonly char[] DirectorySeparatorChars = [DirectorySeparatorChar, AltDirectorySeparatorChar];
+        public static readonly char[] WhitespaceTrimChars = [' '];
+        public static readonly char[] SlashTrimChars = ['\\', '/'];
 
-        private static readonly List<char> _invalidPathChars = new(GetInvalidPathChars());
+        private static readonly List<char> _invalidPathChars = [.. GetInvalidPathChars()];
 
         static Path()
         {
