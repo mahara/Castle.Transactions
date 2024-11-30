@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.IO;
 
-using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -69,10 +68,14 @@ public record struct PathInfo
 
     public static PathInfo Parse(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         var matches = _regex.Matches(path);
 
@@ -288,7 +291,7 @@ public record struct PathInfo
     /// <param name="child">The path info to verify</param>
     /// <returns>Whether it is true that the current path info is a parent of child.</returns>
     /// <exception cref="NotSupportedException">If this instance of path info and child aren't rooted.</exception>
-    public bool IsParentOf(PathInfo child)
+    public readonly bool IsParentOf(PathInfo child)
     {
         if (Root == string.Empty || child.Root == string.Empty)
         {
@@ -300,12 +303,16 @@ public record struct PathInfo
         switch (Type)
         {
             case PathType.Device:
-                result &= child.DeviceName.ToLowerInvariant() == DeviceName.ToLowerInvariant();
+#pragma warning disable CA1309 // Use ordinal string comparison
+                result &= string.Equals(child.DeviceName, DeviceName, StringComparison.InvariantCultureIgnoreCase);
+#pragma warning restore CA1309 // Use ordinal string comparison
 
                 break;
 
             case PathType.Server:
-                result &= child.ServerName.ToLowerInvariant() == ServerName.ToLowerInvariant();
+#pragma warning disable CA1309 // Use ordinal string comparison
+                result &= string.Equals(child.ServerName, ServerName, StringComparison.InvariantCultureIgnoreCase);
+#pragma warning restore CA1309 // Use ordinal string comparison
 
                 break;
 
@@ -323,7 +330,9 @@ public record struct PathInfo
                 throw new InvalidOperationException("Since root isn't empty we should never get relative paths.");
 
             case PathType.Drive:
-                result &= DriveLetter.ToLowerInvariant() == child.DriveLetter.ToLowerInvariant();
+#pragma warning disable CA1309 // Use ordinal string comparison
+                result &= string.Equals(child.DriveLetter, DriveLetter, StringComparison.InvariantCultureIgnoreCase);
+#pragma warning restore CA1309 // Use ordinal string comparison
 
                 break;
         }

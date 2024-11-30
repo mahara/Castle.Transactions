@@ -16,9 +16,6 @@
 
 namespace Castle.Facilities.AutoTx.Tests;
 
-using System;
-using System.Linq;
-
 using Castle.MicroKernel.Facilities;
 using Castle.Windsor;
 

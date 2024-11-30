@@ -16,9 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
-
 [Serializable]
 public class Activity : MarshalByRefObject
 {

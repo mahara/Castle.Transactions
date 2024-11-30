@@ -16,7 +16,6 @@
 
 namespace Castle.Facilities.AutoTx.Tests;
 
-using System;
 using System.Transactions;
 
 using Castle.Services.Transaction;

@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
 using System.Transactions;
 
 using NUnit.Framework;
@@ -240,7 +239,7 @@ public class NestedTransactionsTests
         Assert.That(rFailed.Started);
         Assert.That(rSuccess.Started);
 
-        Assert.Throws(typeof(CommitResourceException), tx.Commit);
+        Assert.Throws<CommitResourceException>(tx.Commit);
 
         Assert.That(first.Committed);
         Assert.That(rFailed.Committed, Is.False);

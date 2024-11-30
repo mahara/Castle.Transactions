@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System.Threading;
-
 using NUnit.Framework;
 
 public class MiscellaneousTests

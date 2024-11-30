@@ -17,7 +17,6 @@
 #if NETFRAMEWORK
 namespace Castle.Services.Transaction;
 
-using System;
 using System.Runtime.Remoting.Messaging;
 
 public class CallContextActivityManager : MarshalByRefObject, IActivityManager
@@ -42,7 +41,7 @@ public class CallContextActivityManager : MarshalByRefObject, IActivityManager
         {
             var activity = (Activity) CallContext.GetData(Key);
 
-            if (activity == null)
+            if (activity is null)
             {
                 activity = new Activity();
                 CallContext.SetData(Key, activity);
