@@ -23,7 +23,7 @@ namespace Castle.Services.Transaction
 #endif
     public class RollbackResourceException : TransactionException
     {
-        private readonly List<(IResource, Exception)> _failedResources = new();
+        private readonly List<(IResource, Exception)> _failedResources = [];
 
         public RollbackResourceException(string message, IEnumerable<(IResource, Exception)> failedResources) :
             base(message, null)
