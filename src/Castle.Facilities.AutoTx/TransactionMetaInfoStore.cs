@@ -40,7 +40,7 @@ namespace Castle.Facilities.AutoTx
             BindingFlags.NonPublic |
             BindingFlags.DeclaredOnly;
 
-        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = new();
+        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = [];
 
         /// <summary>
         /// Creates <see cref="TransactionMetaInfo" /> from a type.
