@@ -14,81 +14,80 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+/// <summary>
+/// Emulates a standalone transaction,
+/// but in fact it just propagates a transaction.
+/// </summary>
+public sealed class ChildTransaction : TransactionBase
 {
-    /// <summary>
-    /// Emulates a standalone transaction,
-    /// but in fact it just propagates a transaction.
-    /// </summary>
-    public sealed class ChildTransaction : TransactionBase
+    private readonly ITransaction _parent;
+
+    public ChildTransaction(ITransaction parent) :
+        base($"{nameof(ChildTransaction)} to '{parent.Name}'",
+             parent.Mode,
+             parent.IsolationLevel)
     {
-        private readonly ITransaction _parent;
+        _parent = parent;
+    }
 
-        public ChildTransaction(ITransaction parent) :
-            base($"{nameof(ChildTransaction)} to '{parent.Name}'",
-                 parent.Mode,
-                 parent.IsolationLevel)
-        {
-            _parent = parent;
-        }
+    public override bool IsAmbient
+    {
+        get => true;
+        protected set { }
+    }
 
-        public override bool IsAmbient
-        {
-            get => true;
-            protected set { }
-        }
+    public override bool IsReadOnly
+    {
+        get => _parent.IsReadOnly;
+        protected set { }
+    }
 
-        public override bool IsReadOnly
-        {
-            get => _parent.IsReadOnly;
-            protected set { }
-        }
+    public override bool IsRollbackOnlySet =>
+      _parent.IsRollbackOnlySet;
 
-        public override bool IsRollbackOnlySet =>
-          _parent.IsRollbackOnlySet;
+    public override void Begin()
+    {
+    }
 
-        public override void Begin()
-        {
-        }
+    protected override void InnerBegin()
+    {
+    }
 
-        protected override void InnerBegin()
-        {
-        }
+    public override void Commit()
+    {
+    }
 
-        public override void Commit()
-        {
-        }
+    protected override void InnerCommit()
+    {
+    }
 
-        protected override void InnerCommit()
-        {
-        }
+    public override void Rollback()
+    {
+        // Vote as rollback.
+        _parent.SetRollbackOnly();
+    }
 
-        public override void Rollback()
-        {
-            // Vote as rollback.
-            _parent.SetRollbackOnly();
-        }
+    protected override void InnerRollback()
+    {
+    }
 
-        protected override void InnerRollback()
-        {
-        }
+    public override void SetRollbackOnly()
+    {
+        _parent.SetRollbackOnly();
+    }
 
-        public override void SetRollbackOnly()
-        {
-            _parent.SetRollbackOnly();
-        }
+    public override bool IsChildTransaction =>
+        true;
 
-        public override bool IsChildTransaction =>
-            true;
+    public override void Enlist(IResource resource)
+    {
+        _parent.Enlist(resource);
+    }
 
-        public override void Enlist(IResource resource)
-        {
-            _parent.Enlist(resource);
-        }
-
-        public override void RegisterSynchronization(ISynchronization s)
-        {
-            _parent.RegisterSynchronization(s);
-        }
+    public override void RegisterSynchronization(ISynchronization s)
+    {
+        _parent.RegisterSynchronization(s);
     }
 }

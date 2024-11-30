@@ -14,33 +14,32 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+using System.Runtime.Serialization;
+
+[Serializable]
+public class CommitResourceException : TransactionException
 {
-    using System;
-    using System.Runtime.Serialization;
+    private readonly IResource? _failedResource;
 
-    [Serializable]
-    public class CommitResourceException : TransactionException
+    public CommitResourceException(string message, Exception innerException, IResource failedResource) :
+        base(message, innerException)
     {
-        private readonly IResource? _failedResource;
-
-        public CommitResourceException(string message, Exception innerException, IResource failedResource) :
-            base(message, innerException)
-        {
-            _failedResource = failedResource;
-        }
+        _failedResource = failedResource;
+    }
 
 #if NETFRAMEWORK
-        public CommitResourceException(SerializationInfo info, StreamingContext context) :
-            base(info, context)
-        {
-        }
-
-        public CommitResourceException(SerializationInfo info, StreamingContext context, IResource? failedResource) :
-            base(info, context)
-        {
-            _failedResource = failedResource;
-        }
-#endif
+    public CommitResourceException(SerializationInfo info, StreamingContext context) :
+        base(info, context)
+    {
     }
+
+    public CommitResourceException(SerializationInfo info, StreamingContext context, IResource? failedResource) :
+        base(info, context)
+    {
+        _failedResource = failedResource;
+    }
+#endif
 }

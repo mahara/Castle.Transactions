@@ -14,19 +14,18 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using Castle.Services.Transaction.IO;
+
+using NUnit.Framework;
+
+[TestFixture]
+public class FileAdapterTests
 {
-    using Castle.Services.Transaction.IO;
-
-    using NUnit.Framework;
-
-    [TestFixture]
-    public class FileAdapterTests
+    [Test]
+    public void ConstructorUseTransactions()
     {
-        [Test]
-        public void ConstructorUseTransactions()
-        {
-            Assert.That(new FileAdapter().UseTransactions);
-        }
+        Assert.That(new FileAdapter().UseTransactions);
     }
 }
