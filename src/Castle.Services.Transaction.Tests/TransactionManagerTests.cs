@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
 using System.Transactions;
 
 using NUnit.Framework;
@@ -382,7 +381,7 @@ public class TransactionManagerTests
         Assert.That(transactionFailedEventTriggered, Is.True);
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception, Is.InstanceOf(typeof(CommitResourceException)));
+        Assert.That(exception, Is.InstanceOf<CommitResourceException>());
     }
 
     [Test]
@@ -439,7 +438,7 @@ public class TransactionManagerTests
         Assert.That(transactionFailedEventTriggered, Is.True);
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception, Is.InstanceOf(typeof(RollbackResourceException)));
+        Assert.That(exception, Is.InstanceOf<RollbackResourceException>());
     }
 
     [Test]

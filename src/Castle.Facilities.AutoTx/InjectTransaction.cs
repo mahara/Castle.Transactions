@@ -16,8 +16,6 @@
 
 namespace Castle.Facilities.AutoTx;
 
-using System;
-
 /// <summary>
 /// Tells the kernel to give the transaction instance to the method as a parameter.
 /// </summary>

@@ -16,14 +16,9 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
-#if NET7_0_OR_GREATER
-using System.Runtime.InteropServices.Marshalling;
-#endif
 #if NETFRAMEWORK
 using System.Security.Permissions;
 #endif
@@ -125,7 +120,7 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
             Rollback();
         }
 
-        if (_transactionHandle != null && !_transactionHandle.IsInvalid)
+        if (_transactionHandle is not null && !_transactionHandle.IsInvalid)
         {
             _transactionHandle.Dispose();
         }
@@ -161,7 +156,7 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     {
         // We have a ongoing current transaction, join it!
         var currentTx = Transaction.Current;
-        if (currentTx != null)
+        if (currentTx is not null)
         {
             var kTx = (IKernelTransaction) TransactionInterop.GetDtcTransaction(currentTx);
 
@@ -221,10 +216,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     string IDirectoryAdapter.GetFullPath(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -240,10 +239,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     bool IFileAdapter.Exists(string filePath)
     {
-        if (filePath == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(filePath);
+#else
+        if (filePath is null)
         {
             throw new ArgumentNullException(nameof(filePath));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -270,10 +273,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     FileStream IFileAdapter.Create(string filePath)
     {
-        if (filePath == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(filePath);
+#else
+        if (filePath is null)
         {
             throw new ArgumentNullException(nameof(filePath));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -283,10 +290,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     bool IDirectoryAdapter.Create(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -339,10 +350,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     void IFileAdapter.Delete(string filePath)
     {
-        if (filePath == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(filePath);
+#else
+        if (filePath is null)
         {
             throw new ArgumentNullException(nameof(filePath));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -356,10 +371,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     void IDirectoryAdapter.Delete(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         AssertState(TransactionStatus.Active);
 
@@ -373,15 +392,20 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     void IDirectoryAdapter.Move(string path, string newPath)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(newPath);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
 
-        if (newPath == null)
+        if (newPath is null)
         {
             throw new ArgumentNullException(nameof(newPath));
         }
+#endif
 
         var da = (IDirectoryAdapter) this;
 
@@ -468,10 +492,14 @@ public sealed partial class FileTransaction : TransactionBase, IFileTransaction
     /// <inheritdoc />
     public FileStream Open(string filePath, FileMode mode)
     {
-        if (filePath == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(filePath);
+#else
+        if (filePath is null)
         {
             throw new ArgumentNullException(nameof(filePath));
         }
+#endif
 
         return Open(filePath, mode, FileAccess.ReadWrite, FileShare.None);
     }

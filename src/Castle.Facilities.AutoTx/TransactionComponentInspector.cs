@@ -16,8 +16,6 @@
 
 namespace Castle.Facilities.AutoTx;
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using Castle.Core;
@@ -111,9 +109,9 @@ public class TransactionComponentInspector : MethodMetaInspector
 
         foreach (var service in model.Services)
         {
-            if (service == null ||
+            if (service is null ||
                 service.IsInterface ||
-                (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null ||
+                (metaInfo = store.GetMetaInfoFor(model.Implementation)) is null ||
                  (problematicMethods = (from method in metaInfo.Methods
                                         where !method.IsVirtual
                                         select method.Name)
@@ -139,7 +137,7 @@ public class TransactionComponentInspector : MethodMetaInspector
     /// </returns>
     private static bool IsMarkedWithTransactional(IConfiguration configuration)
     {
-        return configuration != null &&
+        return configuration is not null &&
                configuration.Attributes["isTransactional"] == "true";
     }
 
@@ -152,7 +150,7 @@ public class TransactionComponentInspector : MethodMetaInspector
     {
         var configuration = model.Configuration;
 
-        if (configuration != null && configuration.Children[TransactionNodeName] != null)
+        if (configuration is not null && configuration.Children[TransactionNodeName] is not null)
         {
             throw new FacilityException(
                 $"The class '{model.Implementation.FullName}' has configured transaction in a child node " +
@@ -169,7 +167,7 @@ public class TransactionComponentInspector : MethodMetaInspector
                                                             TransactionMetaInfoStore store)
     {
         var metaInfo = store.GetMetaInfoFor(model.Implementation);
-        if (metaInfo == null)
+        if (metaInfo is null)
         {
             return;
         }

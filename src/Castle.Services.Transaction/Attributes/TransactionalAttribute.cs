@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-
 /// <summary>
 /// Indicates that the target class wants to use the transactional services.
 /// </summary>

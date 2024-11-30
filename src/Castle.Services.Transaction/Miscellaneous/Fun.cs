@@ -16,10 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-
 using Castle.Core;
 using Castle.Core.Logging;
 
@@ -33,7 +29,7 @@ internal static class Fun
                                         TEventArgs args)
         where TEventArgs : EventArgs
     {
-        if (handler == null)
+        if (handler is null)
         {
             return;
         }
@@ -48,15 +44,20 @@ internal static class Fun
 
     public static void AtomicRead(this ReaderWriterLockSlim sem, Action action, bool upgradable)
     {
-        if (sem == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(sem);
+        ArgumentNullException.ThrowIfNull(action);
+#else
+        if (sem is null)
         {
             throw new ArgumentNullException(nameof(sem));
         }
 
-        if (action == null)
+        if (action is null)
         {
             throw new ArgumentNullException(nameof(action));
         }
+#endif
 
         if (!upgradable)
         {
@@ -86,15 +87,20 @@ internal static class Fun
 
     public static T AtomicRead<T>(this ReaderWriterLockSlim sem, Func<T> function)
     {
-        if (sem == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(sem);
+        ArgumentNullException.ThrowIfNull(function);
+#else
+        if (sem is null)
         {
             throw new ArgumentNullException(nameof(sem));
         }
 
-        if (function == null)
+        if (function is null)
         {
             throw new ArgumentNullException(nameof(function));
         }
+#endif
 
         sem.EnterReadLock();
 
@@ -110,15 +116,20 @@ internal static class Fun
 
     public static void AtomicWrite(this ReaderWriterLockSlim sem, Action action)
     {
-        if (sem == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(sem);
+        ArgumentNullException.ThrowIfNull(action);
+#else
+        if (sem is null)
         {
             throw new ArgumentNullException(nameof(sem));
         }
 
-        if (action == null)
+        if (action is null)
         {
             throw new ArgumentNullException(nameof(action));
         }
+#endif
 
         sem.EnterWriteLock();
 
@@ -137,15 +148,20 @@ internal static class Fun
     /// </summary>
     public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
     {
-        if (items == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(items);
+        ArgumentNullException.ThrowIfNull(action);
+#else
+        if (items is null)
         {
             throw new ArgumentNullException(nameof(items));
         }
 
-        if (action == null)
+        if (action is null)
         {
             throw new ArgumentNullException(nameof(action));
         }
+#endif
 
         foreach (var item in items)
         {

@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
 #if NETFRAMEWORK
 using System.Runtime.ConstrainedExecution;
 #endif

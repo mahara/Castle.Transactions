@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.IO;
 
-using System;
 using System.IO;
 using System.Text;
 

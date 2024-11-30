@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
 using System.Transactions;
 
 using Castle.Core.Logging;
@@ -93,14 +92,14 @@ public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
 
         var currentTransaction = CurrentTransaction;
 
-        if (currentTransaction == null && mode == TransactionScopeOption.Suppress)
+        if (currentTransaction is null && mode == TransactionScopeOption.Suppress)
         {
             return null;
         }
 
         TransactionBase? transaction = null;
 
-        if (currentTransaction != null)
+        if (currentTransaction is not null)
         {
             if (mode == TransactionScopeOption.Required)
             {
@@ -112,7 +111,7 @@ public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
             }
         }
 
-        if (transaction == null)
+        if (transaction is null)
         {
             transaction = InstantiateTransaction(mode, isolationLevel, isAmbient, isReadOnly);
 
@@ -150,6 +149,7 @@ public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
         return transaction;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "CA1859")]
     private TransactionBase InstantiateTransaction(TransactionScopeOption mode,
                                                    IsolationLevel isolationLevel,
                                                    bool ambient,
@@ -187,7 +187,7 @@ public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
         var transaction = CurrentTransaction;
 
         if (mode == TransactionScopeOption.Suppress &&
-            transaction != null && transaction.Status == TransactionStatus.Active)
+            transaction is not null && transaction.Status == TransactionStatus.Active)
         {
             var message = "There is currently an active transaction " +
                           "and the transaction mode explicitly says that no new child transaction is allowed in this context.";
@@ -204,7 +204,7 @@ public class DefaultTransactionManager : MarshalByRefObject, ITransactionManager
     /// <param name="transaction"></param>
     public virtual void Dispose(ITransaction transaction)
     {
-        if (transaction == null)
+        if (transaction is null)
         {
             throw new ArgumentNullException(nameof(transaction), "Tried to dispose a null transaction.");
         }

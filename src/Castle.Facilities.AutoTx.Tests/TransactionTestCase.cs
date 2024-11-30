@@ -16,8 +16,6 @@
 
 namespace Castle.Facilities.AutoTx.Tests;
 
-using System;
-
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Services.Transaction;

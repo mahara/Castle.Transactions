@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-
 /// <summary>
 /// This interface shows that the transaction of transaction manager implementing
 /// it is aware of what is success (the completed event), failure or roll-backs.

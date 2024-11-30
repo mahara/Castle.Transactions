@@ -16,8 +16,6 @@
 
 namespace Castle.Facilities.AutoTx;
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 using Castle.Services.Transaction;
@@ -27,7 +25,14 @@ using Castle.Services.Transaction;
 /// </summary>
 public class TransactionMetaInfo : MarshalByRefObject
 {
-    private readonly object _lock = new();
+    private static readonly
+#if NET9_0_OR_GREATER
+        Lock
+#else
+        object
+#endif
+        _lock = new();
+
     private readonly Dictionary<MethodInfo, TransactionAttribute> _methodToAttribute = [];
     private readonly HashSet<MethodInfo> _injectMethods = [];
     private readonly Dictionary<MethodInfo, string> _notTransactionalCache = [];

@@ -16,7 +16,6 @@
 
 namespace Castle.Facilities.AutoTx;
 
-using System;
 using System.Reflection;
 
 using Castle.Core;
@@ -90,9 +89,10 @@ public class TransactionInterceptor : IInterceptor, IOnBehalfAware
             methodInfo = invocation.Method;
         }
 
-        if (_metaInfo == null || !_metaInfo.Contains(methodInfo))
+        if (_metaInfo is null || !_metaInfo.Contains(methodInfo))
         {
             invocation.Proceed();
+
             return;
         }
 
@@ -103,9 +103,10 @@ public class TransactionInterceptor : IInterceptor, IOnBehalfAware
                                                     attribute.IsDistributed,
                                                     attribute.IsReadOnly);
 
-        if (transaction == null)
+        if (transaction is null)
         {
             invocation.Proceed();
+
             return;
         }
 

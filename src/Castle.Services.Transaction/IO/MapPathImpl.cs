@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.IO;
 
-using System;
-
 /// <summary>
 /// An implementation of the MapPath which seems to be working well with both testfixtures and online.
 /// Consumed by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
@@ -57,7 +55,7 @@ public class MapPathImpl : IMapPath
             return Path.GetFullPath(path);
         }
 
-        if (_function != null)
+        if (_function is not null)
         {
             return _function(path);
         }

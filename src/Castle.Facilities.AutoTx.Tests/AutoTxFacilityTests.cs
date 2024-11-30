@@ -80,7 +80,7 @@ public class AutoTxFacilityTests
     [Test]
     public void TestReadonlyTransactions()
     {
-        IWindsorContainer container = new WindsorContainer();
+        var container = new WindsorContainer();
 
         container.AddFacility(new AutoTxFacility());
 

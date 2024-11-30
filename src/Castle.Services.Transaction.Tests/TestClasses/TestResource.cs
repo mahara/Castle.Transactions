@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-
 internal class TestResource : ResourceImpl
 {
     private readonly Action _s;

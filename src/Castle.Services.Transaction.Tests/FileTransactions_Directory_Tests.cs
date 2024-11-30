@@ -16,10 +16,7 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 using Castle.Services.Transaction.IO;
 

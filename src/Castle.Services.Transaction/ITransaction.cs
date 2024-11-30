@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
 using System.Transactions;
 
 /// <summary>

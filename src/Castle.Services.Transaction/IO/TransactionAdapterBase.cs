@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.IO;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 using Castle.Core.Logging;
@@ -32,7 +31,7 @@ public abstract class TransactionAdapterBase
     protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
                                      string? specifiedDirectory)
     {
-        if (constrainToSpecifiedDirectory && specifiedDirectory == null)
+        if (constrainToSpecifiedDirectory && specifiedDirectory is null)
         {
             throw new ArgumentNullException(nameof(specifiedDirectory));
         }
@@ -72,7 +71,7 @@ public abstract class TransactionAdapterBase
         }
 
         var transactionManager = TransactionManager;
-        if (transactionManager != null && transactionManager.CurrentTransaction != null)
+        if (transactionManager is not null && transactionManager.CurrentTransaction is not null)
         {
             foreach (var resource in transactionManager.CurrentTransaction.Resources())
             {

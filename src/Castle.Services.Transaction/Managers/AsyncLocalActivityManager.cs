@@ -16,9 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Threading;
-
 public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
 {
     private readonly AsyncLocal<Activity?> _data = new();
@@ -34,7 +31,7 @@ public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
         {
             var activity = _data.Value;
 
-            if (activity == null)
+            if (activity is null)
             {
                 activity = new Activity();
                 _data.Value = activity;

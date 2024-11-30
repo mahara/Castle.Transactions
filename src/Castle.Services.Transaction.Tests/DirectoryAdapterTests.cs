@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-
 using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;

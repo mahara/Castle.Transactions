@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
 using System.IO;
 using System.Transactions;
 
@@ -104,7 +103,7 @@ public class FileTransaction_WithManager_Tests
 
         var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
         Assert.That(childTx, Is.Not.Null);
-        Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
+        Assert.That(childTx, Is.InstanceOf<ChildTransaction>());
         Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
                     "Now that we have created a child, it's the current tx.");
 

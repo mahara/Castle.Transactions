@@ -16,7 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
 using System.Transactions;
 
 public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher

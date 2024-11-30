@@ -16,9 +16,6 @@
 
 namespace Castle.Facilities.AutoTx;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Transactions;
 
@@ -131,18 +128,26 @@ public class TransactionMetaInfoStore : MarshalByRefObject
 
     private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string? mode)
     {
-        if (mode == null)
+        if (mode is null)
         {
             return TransactionScopeOption.Required;
         }
 
         try
         {
+#if NET
+            return Enum.Parse<TransactionScopeOption>(mode, true);
+#else
             return (TransactionScopeOption) Enum.Parse(typeof(TransactionScopeOption), mode, true);
+#endif
         }
         catch (Exception)
         {
+#if NET
+            var values = Enum.GetValues<TransactionScopeOption>();
+#else
             var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
+#endif
 
             var message = $"The configuration for the class '{implementation.FullName}', " +
                           $"method '{method.Name}()', has specified '{mode}' on '{TransactionModeAttribute}' which is not supported. " +
@@ -153,18 +158,26 @@ public class TransactionMetaInfoStore : MarshalByRefObject
 
     private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string? level)
     {
-        if (level == null)
+        if (level is null)
         {
             return IsolationLevel.Unspecified;
         }
 
         try
         {
+#if NET
+            return Enum.Parse<IsolationLevel>(level, true);
+#else
             return (IsolationLevel) Enum.Parse(typeof(IsolationLevel), level, true);
+#endif
         }
         catch (Exception)
         {
+#if NET
+            var values = Enum.GetValues<TransactionScopeOption>();
+#else
             var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
+#endif
 
             var message = $"The configuration for the class '{implementation.FullName}', " +
                           $"method '{method.Name}()', has specified '{level}' on '{IsolationLevelAttribute}' which is not supported. " +
