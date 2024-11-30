@@ -36,7 +36,7 @@ namespace Castle.Services.Transaction.Tests
 
         private readonly object _lock = new();
 
-        private readonly List<string> _pathsCreated = new();
+        private readonly List<string> _pathsCreated = [];
 
         private string _testFixtureRootDirectoryPath;
         private string _testFixtureDirectoryPath;
