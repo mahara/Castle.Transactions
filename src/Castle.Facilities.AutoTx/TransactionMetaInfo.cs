@@ -27,9 +27,9 @@ namespace Castle.Facilities.AutoTx
     {
         private readonly object _lock = new();
 
-        private readonly Dictionary<MethodInfo, TransactionAttribute> _transactionalMethods = new();
-        private readonly HashSet<MethodInfo> _transactionalInjectionMethods = new();
-        private readonly Dictionary<MethodInfo, string> _nonTransactionalMethods = new();
+        private readonly Dictionary<MethodInfo, TransactionAttribute> _transactionalMethods = [];
+        private readonly HashSet<MethodInfo> _transactionalInjectionMethods = [];
+        private readonly Dictionary<MethodInfo, string> _nonTransactionalMethods = [];
 
         /// <summary>
         /// A collection of <see cref="MethodInfo" /> which need transaction.
