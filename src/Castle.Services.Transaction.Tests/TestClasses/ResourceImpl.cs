@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-
 public class ResourceImpl : IResource, IDisposable
 {
     public bool WasDisposed;
@@ -65,5 +63,7 @@ public class ResourceImpl : IResource, IDisposable
     public void Dispose()
     {
         WasDisposed = true;
+
+        GC.SuppressFinalize(this);
     }
 }

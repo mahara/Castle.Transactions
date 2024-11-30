@@ -16,9 +16,9 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
+#if NETFRAMEWORK
 using System.Runtime.Serialization;
+#endif
 
 using Castle.Core;
 

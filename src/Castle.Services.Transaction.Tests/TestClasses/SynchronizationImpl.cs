@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-
 public class SynchronizationImpl : ISynchronization
 {
     public SynchronizationImpl()

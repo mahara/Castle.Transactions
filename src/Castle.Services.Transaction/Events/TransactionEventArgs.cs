@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-
 /// <summary>
 /// Event args for a transaction event.
 /// </summary>

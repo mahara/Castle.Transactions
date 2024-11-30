@@ -16,9 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Transactions;
 
 using Castle.Core;
@@ -50,16 +47,18 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
     public virtual void Dispose()
     {
         _resources.Select(r => r as IDisposable)
-                  .Where(r => r != null)
+                  .Where(r => r is not null)
                   .ForEach(r => r?.Dispose());
 
         _resources.Clear();
         _synchronizationItems.Clear();
 
-        if (_ambientTransaction != null)
+        if (_ambientTransaction is not null)
         {
             DisposeAmbientTransaction();
         }
+
+        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -189,7 +188,7 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
         {
             if (!commitFailed)
             {
-                if (_ambientTransaction != null)
+                if (_ambientTransaction is not null)
                 {
                     Logger.DebugFormat("Committing TransactionScope (Ambient Transaction) for '{0}'.", Name);
 
@@ -230,7 +229,7 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
                 return;
             }
 
-            if (toThrow == null)
+            if (toThrow is null)
             {
                 throw new RollbackResourceException(
                     "Failed to properly roll back all resources. See the inner exception or the failed resources list for details.",
@@ -241,7 +240,7 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
         }
         finally
         {
-            if (_ambientTransaction != null)
+            if (_ambientTransaction is not null)
             {
                 Logger.DebugFormat("Rolling back 'TransactionScope' (Ambient Transaction) for '{0}'.", Name);
 
@@ -274,10 +273,14 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
     /// <inheritdoc />
     public virtual void Enlist(IResource resource)
     {
-        if (resource == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(resource);
+#else
+        if (resource is null)
         {
             throw new ArgumentNullException(nameof(resource));
         }
+#endif
 
         if (_resources.Contains(resource))
         {
@@ -295,10 +298,14 @@ public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDispo
     /// <inheritdoc />
     public virtual void RegisterSynchronization(ISynchronization synchronization)
     {
-        if (synchronization == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(synchronization);
+#else
+        if (synchronization is null)
         {
             throw new ArgumentNullException(nameof(synchronization));
         }
+#endif
 
         if (_synchronizationItems.Contains(synchronization))
         {

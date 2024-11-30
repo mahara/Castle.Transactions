@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
-
 /// <summary>
 /// A resource adapter for a file transaction.
 /// </summary>
@@ -64,5 +62,7 @@ public class FileResourceAdapter : IResource, IDisposable
     public void Dispose()
     {
         Transaction.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

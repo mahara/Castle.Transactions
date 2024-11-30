@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.IO;
 
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 /// <summary>
@@ -57,10 +55,14 @@ public static class Path
     /// <exception cref="ArgumentNullException">If the passed argument is null.</exception>
     public static bool IsRooted(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path == string.Empty)
         {
@@ -77,10 +79,14 @@ public static class Path
     /// <returns>The string denoting the root.</returns>
     public static string GetPathRoot(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path == string.Empty)
         {
@@ -122,10 +128,14 @@ public static class Path
     /// <exception cref="ArgumentNullException"></exception>
     public static string GetPathWithoutRoot(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path.Length == 0)
         {
@@ -171,10 +181,14 @@ public static class Path
     /// <exception cref="ArgumentNullException"></exception>
     public static PathInfo GetPathInfo(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         return PathInfo.Parse(path);
     }
@@ -187,10 +201,14 @@ public static class Path
     /// <exception cref="ArgumentNullException">if path is null</exception>
     public static string GetFullPath(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path.StartsWith(@"\\?\", StringComparison.Ordinal) ||
             path.StartsWith(@"\\.\", StringComparison.Ordinal))
@@ -221,10 +239,14 @@ public static class Path
     /// <returns></returns>
     public static string GetPathWithoutLastBit(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         var chars = new List<char>(new[] { DirectorySeparatorChar, AltDirectorySeparatorChar });
 
@@ -261,18 +283,27 @@ public static class Path
 
     public static string GetFileName(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path == string.Empty)
         {
             throw new ArgumentException($"{nameof(path)} must not be empty.", nameof(path));
         }
 
+#if NET
+        if (path.EndsWith('/') ||
+            path.EndsWith('\\'))
+#else
         if (path.EndsWith("/", StringComparison.Ordinal) ||
             path.EndsWith(@"\", StringComparison.Ordinal))
+#endif
         {
             return string.Empty;
         }
@@ -292,10 +323,14 @@ public static class Path
 
     public static bool HasExtension(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path == string.Empty)
         {
@@ -307,10 +342,14 @@ public static class Path
 
     public static string GetExtension(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         if (path == string.Empty)
         {
@@ -325,10 +364,14 @@ public static class Path
 
     public static string GetFileNameWithoutExtension(string path)
     {
-        if (path == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(path);
+#else
+        if (path is null)
         {
             throw new ArgumentNullException(nameof(path));
         }
+#endif
 
         var filename = GetFileName(path);
         var lastPeriod = filename.LastIndexOf('.');

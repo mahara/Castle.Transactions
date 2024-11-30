@@ -16,8 +16,9 @@
 
 namespace Castle.Services.Transaction;
 
-using System;
+#if NETFRAMEWORK
 using System.Runtime.Serialization;
+#endif
 
 public class TransactionalConflictException : TransactionException
 {
