@@ -14,19 +14,18 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
-{
-    public class TransientActivityManager : IActivityManager
-    {
-        public TransientActivityManager()
-        {
-            CurrentActivity = new Activity();
-        }
+namespace Castle.Services.Transaction.Tests;
 
-        /// <summary>
-        /// Gets the current activity.
-        /// </summary>
-        /// <value>The current activity.</value>
-        public Activity CurrentActivity { get; }
+public class TransientActivityManager : IActivityManager
+{
+    public TransientActivityManager()
+    {
+        CurrentActivity = new Activity();
     }
+
+    /// <summary>
+    /// Gets the current activity.
+    /// </summary>
+    /// <value>The current activity.</value>
+    public Activity CurrentActivity { get; }
 }

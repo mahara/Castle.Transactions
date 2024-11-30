@@ -14,136 +14,135 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using System;
+using System.IO;
+using System.Transactions;
+
+using NUnit.Framework;
+
+[TestFixture]
+public class FileTransaction_WithManager_Tests
 {
-    using System;
-    using System.IO;
-    using System.Transactions;
+    private string _directoryPath;
+    private string _filePath;
+    // just if I'm curious and want to see that the file exists with my own eyes :p
+    private bool _deleteAtEnd;
 
-    using NUnit.Framework;
+    private DefaultTransactionManager _transactionManager;
 
-    [TestFixture]
-    public class FileTransaction_WithManager_Tests
+    [SetUp]
+    public void Setup()
     {
-        private string _directoryPath;
-        private string _filePath;
-        // just if I'm curious and want to see that the file exists with my own eyes :p
-        private bool _deleteAtEnd;
+        _transactionManager = new DefaultTransactionManager(new TransientActivityManager());
 
-        private DefaultTransactionManager _transactionManager;
+        _directoryPath = TestContext.CurrentContext.TestDirectory;
+        _directoryPath = _directoryPath.CombinePathThenAssert(@"Transactions\TEMP");
+        _filePath = _directoryPath.CombinePath("test.txt");
 
-        [SetUp]
-        public void Setup()
+        if (File.Exists(_filePath))
         {
-            _transactionManager = new DefaultTransactionManager(new TransientActivityManager());
-
-            _directoryPath = TestContext.CurrentContext.TestDirectory;
-            _directoryPath = _directoryPath.CombinePathThenAssert(@"Transactions\TEMP");
-            _filePath = _directoryPath.CombinePath("test.txt");
-
-            if (File.Exists(_filePath))
-            {
-                File.Delete(_filePath);
-            }
-
-            _deleteAtEnd = true;
+            File.Delete(_filePath);
         }
 
-        [TearDown]
-        public void TearDown()
+        _deleteAtEnd = true;
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (_deleteAtEnd && Directory.Exists(_directoryPath))
         {
-            if (_deleteAtEnd && Directory.Exists(_directoryPath))
-            {
-                Directory.Delete(_directoryPath, true);
-            }
+            Directory.Delete(_directoryPath, true);
+        }
+    }
+
+    [Test]
+    [Platform("Win")]
+    public void TransactionResourcesAreDisposed()
+    {
+        var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+        Assert.That(tx, Is.Not.Null);
+
+        var resource = new ResourceImpl();
+        tx.Enlist(resource);
+
+        tx.Begin();
+
+        // lalala
+
+        tx.Rollback();
+
+        _transactionManager.Dispose(tx);
+
+        Assert.That(resource.WasDisposed);
+    }
+
+    [Test]
+    [Platform("Win")]
+    public void NestedFileTransactionCanBeCommitted()
+    {
+        if (Environment.OSVersion.Version.Major < 6)
+        {
+            Assert.Ignore("TxF not supported.");
+
+            return;
         }
 
-        [Test]
-        [Platform("Win")]
-        public void TransactionResourcesAreDisposed()
-        {
-            var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-            Assert.That(tx, Is.Not.Null);
+        Assert.That(_transactionManager.CurrentTransaction, Is.Null);
 
-            var resource = new ResourceImpl();
-            tx.Enlist(resource);
+        var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+        Assert.That(tx, Is.Not.Null);
 
-            tx.Begin();
+        tx.Begin();
 
-            // lalala
+        Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
+        Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(tx));
 
-            tx.Rollback();
+        // invocation.Proceed() in Interceptor
 
-            _transactionManager.Dispose(tx);
+        var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
+        Assert.That(childTx, Is.Not.Null);
+        Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
+        Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
+                    "Now that we have created a child, it's the current tx.");
 
-            Assert.That(resource.WasDisposed);
-        }
+        var txF = new FileTransaction();
+        childTx.Enlist(new FileResourceAdapter(txF));
+        childTx.Begin();
 
-        [Test]
-        [Platform("Win")]
-        public void NestedFileTransactionCanBeCommitted()
-        {
-            if (Environment.OSVersion.Version.Major < 6)
-            {
-                Assert.Ignore("TxF not supported.");
+        const string Text = "Hello world";
 
-                return;
-            }
+        txF.WriteAllText(_filePath, Text);
 
-            Assert.That(_transactionManager.CurrentTransaction, Is.Null);
+        childTx.Commit();
+        tx.Commit();
 
-            var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-            Assert.That(tx, Is.Not.Null);
+        Assert.That(File.Exists(_filePath));
+        Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo(Text));
 
-            tx.Begin();
+        // First we need to dispose the child transaction.
+        _transactionManager.Dispose(childTx);
 
-            Assert.That(_transactionManager.CurrentTransaction, Is.Not.Null);
-            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(tx));
+        // Now we can dispose the main transaction.
+        _transactionManager.Dispose(tx);
 
-            // invocation.Proceed() in Interceptor
+        Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
+        Assert.That(txF.IsDisposed);
+    }
 
-            var childTx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-            Assert.That(childTx, Is.Not.Null);
-            Assert.That(childTx, Is.InstanceOf(typeof(ChildTransaction)));
-            Assert.That(_transactionManager.CurrentTransaction, Is.EqualTo(childTx),
-                        "Now that we have created a child, it's the current tx.");
+    [Test]
+    [Platform("Win")]
+    public void UsingNestedTransactionFileTransactionOnlyVotesToCommit()
+    {
+        // TODO: Implement proper exception handling when file transaction is voted to commit.
+    }
 
-            var txF = new FileTransaction();
-            childTx.Enlist(new FileResourceAdapter(txF));
-            childTx.Begin();
-
-            const string Text = "Hello world";
-
-            txF.WriteAllText(_filePath, Text);
-
-            childTx.Commit();
-            tx.Commit();
-
-            Assert.That(File.Exists(_filePath));
-            Assert.That(File.ReadAllLines(_filePath)[0], Is.EqualTo(Text));
-
-            // First we need to dispose the child transaction.
-            _transactionManager.Dispose(childTx);
-
-            // Now we can dispose the main transaction.
-            _transactionManager.Dispose(tx);
-
-            Assert.That(txF.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Committed));
-            Assert.That(txF.IsDisposed);
-        }
-
-        [Test]
-        [Platform("Win")]
-        public void UsingNestedTransactionFileTransactionOnlyVotesToCommit()
-        {
-            // TODO: Implement proper exception handling when file transaction is voted to commit.
-        }
-
-        [Test]
-        [Platform("Win")]
-        public void BugWhenResourceFailsAndTransactionCommits()
-        {
-            _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
-        }
+    [Test]
+    [Platform("Win")]
+    public void BugWhenResourceFailsAndTransactionCommits()
+    {
+        _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
     }
 }

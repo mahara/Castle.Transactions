@@ -14,40 +14,39 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using System.IO;
+
+public static class ExtensionMethods
 {
-    using System.IO;
-
-    public static class ExtensionMethods
+    /// <summary>
+    /// Combines an input path and a path together
+    /// using <see><cref>System.IO.Path.Combine</cref></see>
+    /// and returns the result.
+    /// </summary>
+    public static string CombinePath(this string input, string path)
     {
-        /// <summary>
-        /// Combines an input path and a path together
-        /// using <see><cref>System.IO.Path.Combine</cref></see>
-        /// and returns the result.
-        /// </summary>
-        public static string CombinePath(this string input, string path)
+        return Path.Combine(input, path);
+    }
+
+    /// <summary>
+    /// Combines two paths and makes sure the
+    /// DIRECTORY resulting from the combination exists
+    /// by creating it with default permissions if it doesn't.
+    /// </summary>
+    /// <param name="input">The path to combine the latter with.</param>
+    /// <param name="path">The latter path.</param>
+    /// <returns>The combined path string.</returns>
+    public static string CombinePathThenAssert(this string input, string path)
+    {
+        var result = input.CombinePath(path);
+
+        if (!Directory.Exists(result))
         {
-            return Path.Combine(input, path);
+            Directory.CreateDirectory(result);
         }
 
-        /// <summary>
-        /// Combines two paths and makes sure the
-        /// DIRECTORY resulting from the combination exists
-        /// by creating it with default permissions if it doesn't.
-        /// </summary>
-        /// <param name="input">The path to combine the latter with.</param>
-        /// <param name="path">The latter path.</param>
-        /// <returns>The combined path string.</returns>
-        public static string CombinePathThenAssert(this string input, string path)
-        {
-            var result = input.CombinePath(path);
-
-            if (!Directory.Exists(result))
-            {
-                Directory.CreateDirectory(result);
-            }
-
-            return result;
-        }
+        return result;
     }
 }

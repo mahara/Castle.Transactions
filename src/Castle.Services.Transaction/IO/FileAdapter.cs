@@ -14,174 +14,173 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO
+namespace Castle.Services.Transaction.IO;
+
+using System;
+using System.IO;
+using System.Text;
+
+/// <summary>
+/// Adapter class for the file transactions which implement the same interface.
+///
+/// This adapter chooses intelligently whether there's an ambient transaction,
+/// and if there is, joins it.
+/// </summary>
+public sealed class FileAdapter : TransactionAdapterBase, IFileAdapter
 {
-    using System;
-    using System.IO;
-    using System.Text;
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    public FileAdapter() :
+        this(false, null)
+    {
+    }
 
     /// <summary>
-    /// Adapter class for the file transactions which implement the same interface.
-    ///
-    /// This adapter chooses intelligently whether there's an ambient transaction,
-    /// and if there is, joins it.
+    /// Constructor.
     /// </summary>
-    public sealed class FileAdapter : TransactionAdapterBase, IFileAdapter
+    /// <param name="constrainToSpecifiedDirectory"></param>
+    /// <param name="specifiedDirectory"></param>
+    public FileAdapter(bool constrainToSpecifiedDirectory,
+                       string? specifiedDirectory) :
+        base(constrainToSpecifiedDirectory, specifiedDirectory)
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public FileAdapter() :
-            this(false, null)
+        if (Logger.IsDebugEnabled)
         {
-        }
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="constrainToSpecifiedDirectory"></param>
-        /// <param name="specifiedDirectory"></param>
-        public FileAdapter(bool constrainToSpecifiedDirectory,
-                           string? specifiedDirectory) :
-            base(constrainToSpecifiedDirectory, specifiedDirectory)
-        {
-            if (Logger.IsDebugEnabled)
+            if (constrainToSpecifiedDirectory)
             {
-                if (constrainToSpecifiedDirectory)
-                {
-                    Logger.Debug($"'FileAdapter' constructor, constraining to directory: '{specifiedDirectory}'.");
-                }
-                else
-                {
-                    Logger.Debug("'FileAdapter' constructor, no directory constraint.");
-                }
+                Logger.Debug($"'FileAdapter' constructor, constraining to directory: '{specifiedDirectory}'.");
+            }
+            else
+            {
+                Logger.Debug("'FileAdapter' constructor, no directory constraint.");
             }
         }
+    }
 
-        /// <inheritdoc />
-        public bool Exists(string filePath)
-        {
-            AssertAllowed(filePath);
+    /// <inheritdoc />
+    public bool Exists(string filePath)
+    {
+        AssertAllowed(filePath);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return ((IFileAdapter) tx).Exists(filePath);
-            }
+        if (HasTransaction(out var tx))
+        {
+            return ((IFileAdapter) tx).Exists(filePath);
+        }
 #endif
 
-            return File.Exists(filePath);
-        }
+        return File.Exists(filePath);
+    }
 
-        /// <inheritdoc />
-        public string ReadAllText(string path)
-        {
-            return ReadAllText(path, Encoding.UTF8);
-        }
+    /// <inheritdoc />
+    public string ReadAllText(string path)
+    {
+        return ReadAllText(path, Encoding.UTF8);
+    }
 
-        /// <inheritdoc />
-        public string ReadAllText(string path, Encoding encoding)
-        {
-            AssertAllowed(path);
+    /// <inheritdoc />
+    public string ReadAllText(string path, Encoding encoding)
+    {
+        AssertAllowed(path);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return tx.ReadAllText(path, encoding);
-            }
+        if (HasTransaction(out var tx))
+        {
+            return tx.ReadAllText(path, encoding);
+        }
 #endif
 
-            return File.ReadAllText(path, encoding);
-        }
+        return File.ReadAllText(path, encoding);
+    }
 
-        /// <inheritdoc />
-        public void WriteAllText(string path, string contents)
-        {
-            AssertAllowed(path);
+    /// <inheritdoc />
+    public void WriteAllText(string path, string contents)
+    {
+        AssertAllowed(path);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                tx.WriteAllText(path, contents);
+        if (HasTransaction(out var tx))
+        {
+            tx.WriteAllText(path, contents);
 
-                return;
-            }
+            return;
+        }
 #endif
 
-            File.WriteAllText(path, contents);
-        }
+        File.WriteAllText(path, contents);
+    }
 
-        /// <inheritdoc />
-        public FileStream Create(string path)
-        {
-            AssertAllowed(path);
+    /// <inheritdoc />
+    public FileStream Create(string path)
+    {
+        AssertAllowed(path);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return ((IFileAdapter) tx).Create(path);
-            }
+        if (HasTransaction(out var tx))
+        {
+            return ((IFileAdapter) tx).Create(path);
+        }
 #endif
 
-            return File.Create(path);
-        }
+        return File.Create(path);
+    }
 
-        /// <inheritdoc />
-        public FileStream Open(string filePath, FileMode mode)
-        {
-            AssertAllowed(filePath);
+    /// <inheritdoc />
+    public FileStream Open(string filePath, FileMode mode)
+    {
+        AssertAllowed(filePath);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                return tx.Open(filePath, mode);
-            }
+        if (HasTransaction(out var tx))
+        {
+            return tx.Open(filePath, mode);
+        }
 #endif
 
-            return File.Open(filePath, mode);
-        }
+        return File.Open(filePath, mode);
+    }
 
-        /// <inheritdoc />
-        public int WriteStream(string toFilePath, Stream fromStream)
+    /// <inheritdoc />
+    public int WriteStream(string toFilePath, Stream fromStream)
+    {
+        var offset = 0;
+
+        using (var fs = Create(toFilePath))
         {
-            var offset = 0;
-
-            using (var fs = Create(toFilePath))
+            var buffer = new byte[4096];
+            int read;
+            while ((read = fromStream.Read(buffer, 0, buffer.Length)) != 0)
             {
-                var buffer = new byte[4096];
-                int read;
-                while ((read = fromStream.Read(buffer, 0, buffer.Length)) != 0)
-                {
-                    fs.Write(buffer, 0, read);
+                fs.Write(buffer, 0, read);
 
-                    offset += read;
-                }
+                offset += read;
             }
-
-            return offset;
         }
 
-        /// <inheritdoc />
-        public void Delete(string filePath)
-        {
-            AssertAllowed(filePath);
+        return offset;
+    }
+
+    /// <inheritdoc />
+    public void Delete(string filePath)
+    {
+        AssertAllowed(filePath);
 
 #if !MONO
-            if (HasTransaction(out var tx))
-            {
-                ((IFileAdapter) tx).Delete(filePath);
+        if (HasTransaction(out var tx))
+        {
+            ((IFileAdapter) tx).Delete(filePath);
 
-                return;
-            }
+            return;
+        }
 #endif
 
-            File.Delete(filePath);
-        }
+        File.Delete(filePath);
+    }
 
-        /// <inheritdoc />
-        public void Move(string originalFilePath, string newFilePath)
-        {
-            throw new NotImplementedException();
-        }
+    /// <inheritdoc />
+    public void Move(string originalFilePath, string newFilePath)
+    {
+        throw new NotImplementedException();
     }
 }

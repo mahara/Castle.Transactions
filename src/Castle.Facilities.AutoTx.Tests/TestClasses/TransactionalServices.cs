@@ -14,23 +14,22 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
-{
-    public interface ITransactionalService
-    {
-        void Save();
+namespace Castle.Facilities.AutoTx.Tests;
 
-        void Create();
+public interface ITransactionalService
+{
+    void Save();
+
+    void Create();
+}
+
+public class TransactionalService : ITransactionalService
+{
+    public void Save()
+    {
     }
 
-    public class TransactionalService : ITransactionalService
+    public void Create()
     {
-        public void Save()
-        {
-        }
-
-        public void Create()
-        {
-        }
     }
 }

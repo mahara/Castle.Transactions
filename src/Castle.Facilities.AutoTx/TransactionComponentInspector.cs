@@ -14,170 +14,169 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx
+namespace Castle.Facilities.AutoTx;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+using Castle.Core;
+using Castle.Core.Configuration;
+
+using Castle.MicroKernel;
+using Castle.MicroKernel.Facilities;
+using Castle.MicroKernel.ModelBuilder.Inspectors;
+
+using Castle.Services.Transaction;
+
+/// <summary>
+/// Tries to obtain transaction configuration based on the component configuration,
+/// or (if not available) check for the attributes.
+/// </summary>
+public class TransactionComponentInspector : MethodMetaInspector
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
+    private static readonly string TransactionNodeName = "transaction";
 
-    using Castle.Core;
-    using Castle.Core.Configuration;
-
-    using Castle.MicroKernel;
-    using Castle.MicroKernel.Facilities;
-    using Castle.MicroKernel.ModelBuilder.Inspectors;
-
-    using Castle.Services.Transaction;
+    private TransactionMetaInfoStore? _metaInfoStore;
 
     /// <summary>
-    /// Tries to obtain transaction configuration based on the component configuration,
+    /// Tries to obtain transaction configuration based on the component configuration
     /// or (if not available) check for the attributes.
     /// </summary>
-    public class TransactionComponentInspector : MethodMetaInspector
+    /// <param name="kernel">The kernel.</param>
+    /// <param name="model">The model.</param>
+    public override void ProcessModel(IKernel kernel, ComponentModel model)
     {
-        private static readonly string TransactionNodeName = "transaction";
+        _metaInfoStore ??= kernel.Resolve<TransactionMetaInfoStore>();
 
-        private TransactionMetaInfoStore? _metaInfoStore;
-
-        /// <summary>
-        /// Tries to obtain transaction configuration based on the component configuration
-        /// or (if not available) check for the attributes.
-        /// </summary>
-        /// <param name="kernel">The kernel.</param>
-        /// <param name="model">The model.</param>
-        public override void ProcessModel(IKernel kernel, ComponentModel model)
+        if (IsMarkedWithTransactional(model.Configuration))
         {
-            _metaInfoStore ??= kernel.Resolve<TransactionMetaInfoStore>();
+            base.ProcessModel(kernel, model);
+        }
+        else
+        {
+            AssertThereNoTransactionOnConfig(model);
 
-            if (IsMarkedWithTransactional(model.Configuration))
-            {
-                base.ProcessModel(kernel, model);
-            }
-            else
-            {
-                AssertThereNoTransactionOnConfig(model);
-
-                ConfigureBasedOnAttributes(model);
-            }
-
-            Validate(model, _metaInfoStore);
-
-            AddTransactionInterceptorIfIsTransactional(model, _metaInfoStore);
+            ConfigureBasedOnAttributes(model);
         }
 
-        /// <summary>
-        /// Tries to configure the <see cref="ComponentModel" /> based on attributes.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        private void ConfigureBasedOnAttributes(ComponentModel model)
+        Validate(model, _metaInfoStore);
+
+        AddTransactionInterceptorIfIsTransactional(model, _metaInfoStore);
+    }
+
+    /// <summary>
+    /// Tries to configure the <see cref="ComponentModel" /> based on attributes.
+    /// </summary>
+    /// <param name="model">The model.</param>
+    private void ConfigureBasedOnAttributes(ComponentModel model)
+    {
+        if (model.Implementation.IsDefined(typeof(TransactionalAttribute), true))
         {
-            if (model.Implementation.IsDefined(typeof(TransactionalAttribute), true))
-            {
-                _metaInfoStore?.CreateMetaInfoFromType(model.Implementation);
-            }
+            _metaInfoStore?.CreateMetaInfoFromType(model.Implementation);
         }
+    }
 
-        /// <summary>
-        /// Obtains the name of the node (overrides MethodMetaInspector.ObtainNodeName)
-        /// </summary>
-        /// <returns>the node name on the configuration</returns>
-        protected override string ObtainNodeName()
+    /// <summary>
+    /// Obtains the name of the node (overrides MethodMetaInspector.ObtainNodeName)
+    /// </summary>
+    /// <returns>the node name on the configuration</returns>
+    protected override string ObtainNodeName()
+    {
+        return TransactionNodeName;
+    }
+
+    /// <summary>
+    /// Processes the meta-information available on the component configuration.
+    /// (overrides MethodMetaInspector.ProcessMeta)
+    /// </summary>
+    /// <param name="model">The model.</param>
+    /// <param name="methods">The methods.</param>
+    /// <param name="metaModel">The meta model.</param>
+    protected override void ProcessMeta(ComponentModel model, IList<MethodInfo> methods, MethodMetaModel metaModel)
+    {
+        _metaInfoStore?.CreateMetaInfoFromConfig(model.Implementation, methods, metaModel.ConfigNode);
+    }
+
+    /// <summary>
+    /// Validates the type is OK to generate a proxy.
+    /// </summary>
+    /// <param name="model">The model.</param>
+    /// <param name="store">The store.</param>
+    private static void Validate(ComponentModel model, TransactionMetaInfoStore store)
+    {
+        TransactionMetaInfo? metaInfo;
+
+        var problematicMethods = new List<string>();
+
+        foreach (var service in model.Services)
         {
-            return TransactionNodeName;
-        }
-
-        /// <summary>
-        /// Processes the meta-information available on the component configuration.
-        /// (overrides MethodMetaInspector.ProcessMeta)
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <param name="methods">The methods.</param>
-        /// <param name="metaModel">The meta model.</param>
-        protected override void ProcessMeta(ComponentModel model, IList<MethodInfo> methods, MethodMetaModel metaModel)
-        {
-            _metaInfoStore?.CreateMetaInfoFromConfig(model.Implementation, methods, metaModel.ConfigNode);
-        }
-
-        /// <summary>
-        /// Validates the type is OK to generate a proxy.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <param name="store">The store.</param>
-        private static void Validate(ComponentModel model, TransactionMetaInfoStore store)
-        {
-            TransactionMetaInfo? metaInfo;
-
-            var problematicMethods = new List<string>();
-
-            foreach (var service in model.Services)
-            {
-                if (service == null ||
-                    service.IsInterface ||
-                    (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null ||
-                     (problematicMethods = (from method in metaInfo.Methods
-                                            where !method.IsVirtual
-                                            select method.Name)
-                                           .ToList())
-                     .Count == 0)
-                {
-                    return;
-                }
-            }
-
-            throw new FacilityException(
-                $"The class '{model.Implementation.FullName}' wants to use transaction interception, " +
-                "however the methods must be marked as virtual in order to do so. " +
-                $"Please correct the following methods: {string.Join(", ", [.. problematicMethods])}.");
-        }
-
-        /// <summary>
-        /// Determines whether the configuration has <c>isTransaction="true"</c> attribute.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>
-        /// <c>true</c> if yes; otherwise, <c>false</c>.
-        /// </returns>
-        private static bool IsMarkedWithTransactional(IConfiguration configuration)
-        {
-            return configuration != null &&
-                   configuration.Attributes["isTransactional"] == "true";
-        }
-
-        /// <summary>
-        /// Asserts that if there are transaction behavior
-        /// configured for methods, the component node has <c>isTransaction="true"</c> attribute
-        /// </summary>
-        /// <param name="model">The model.</param>
-        private static void AssertThereNoTransactionOnConfig(ComponentModel model)
-        {
-            var configuration = model.Configuration;
-
-            if (configuration != null && configuration.Children[TransactionNodeName] != null)
-            {
-                throw new FacilityException(
-                    $"The class '{model.Implementation.FullName}' has configured transaction in a child node " +
-                    "but has not specified 'isTransaction=true' on the component node.");
-            }
-        }
-
-        /// <summary>
-        /// Associates the transaction interceptor with the <see cref="ComponentModel" />.
-        /// </summary>
-        /// <param name="model">The model.</param>
-        /// <param name="store">The meta-information store.</param>
-        private void AddTransactionInterceptorIfIsTransactional(ComponentModel model,
-                                                                TransactionMetaInfoStore store)
-        {
-            var metaInfo = store.GetMetaInfoFor(model.Implementation);
-            if (metaInfo == null)
+            if (service == null ||
+                service.IsInterface ||
+                (metaInfo = store.GetMetaInfoFor(model.Implementation)) == null ||
+                 (problematicMethods = (from method in metaInfo.Methods
+                                        where !method.IsVirtual
+                                        select method.Name)
+                                       .ToList())
+                 .Count == 0)
             {
                 return;
             }
-
-            model.Dependencies.Add(
-                new DependencyModel(ObtainNodeName(), typeof(TransactionInterceptor), false));
-
-            model.Interceptors.AddFirst(new InterceptorReference(typeof(TransactionInterceptor)));
         }
+
+        throw new FacilityException(
+            $"The class '{model.Implementation.FullName}' wants to use transaction interception, " +
+            "however the methods must be marked as virtual in order to do so. " +
+            $"Please correct the following methods: {string.Join(", ", [.. problematicMethods])}.");
+    }
+
+    /// <summary>
+    /// Determines whether the configuration has <c>isTransaction="true"</c> attribute.
+    /// </summary>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns>
+    /// <c>true</c> if yes; otherwise, <c>false</c>.
+    /// </returns>
+    private static bool IsMarkedWithTransactional(IConfiguration configuration)
+    {
+        return configuration != null &&
+               configuration.Attributes["isTransactional"] == "true";
+    }
+
+    /// <summary>
+    /// Asserts that if there are transaction behavior
+    /// configured for methods, the component node has <c>isTransaction="true"</c> attribute
+    /// </summary>
+    /// <param name="model">The model.</param>
+    private static void AssertThereNoTransactionOnConfig(ComponentModel model)
+    {
+        var configuration = model.Configuration;
+
+        if (configuration != null && configuration.Children[TransactionNodeName] != null)
+        {
+            throw new FacilityException(
+                $"The class '{model.Implementation.FullName}' has configured transaction in a child node " +
+                "but has not specified 'isTransaction=true' on the component node.");
+        }
+    }
+
+    /// <summary>
+    /// Associates the transaction interceptor with the <see cref="ComponentModel" />.
+    /// </summary>
+    /// <param name="model">The model.</param>
+    /// <param name="store">The meta-information store.</param>
+    private void AddTransactionInterceptorIfIsTransactional(ComponentModel model,
+                                                            TransactionMetaInfoStore store)
+    {
+        var metaInfo = store.GetMetaInfoFor(model.Implementation);
+        if (metaInfo == null)
+        {
+            return;
+        }
+
+        model.Dependencies.Add(
+            new DependencyModel(ObtainNodeName(), typeof(TransactionInterceptor), false));
+
+        model.Interceptors.AddFirst(new InterceptorReference(typeof(TransactionInterceptor)));
     }
 }

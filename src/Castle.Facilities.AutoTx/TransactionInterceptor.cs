@@ -14,169 +14,168 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx
+namespace Castle.Facilities.AutoTx;
+
+using System;
+using System.Reflection;
+
+using Castle.Core;
+using Castle.Core.Interceptor;
+using Castle.Core.Logging;
+
+using Castle.DynamicProxy;
+
+using Castle.MicroKernel;
+
+using Castle.Services.Transaction;
+
+/// <summary>
+/// Intercepts call for transactional components, coordinating the transaction creation,
+/// commit/rollback accordingly to the method execution.
+/// Rollback is invoked if an exception is threw.
+/// </summary>
+[Transient]
+public class TransactionInterceptor : IInterceptor, IOnBehalfAware
 {
-    using System;
-    using System.Reflection;
+    private readonly IKernel _kernel;
+    private readonly TransactionMetaInfoStore _metaInfoStore;
 
-    using Castle.Core;
-    using Castle.Core.Interceptor;
-    using Castle.Core.Logging;
-
-    using Castle.DynamicProxy;
-
-    using Castle.MicroKernel;
-
-    using Castle.Services.Transaction;
+    private TransactionMetaInfo? _metaInfo;
 
     /// <summary>
-    /// Intercepts call for transactional components, coordinating the transaction creation,
-    /// commit/rollback accordingly to the method execution.
-    /// Rollback is invoked if an exception is threw.
+    /// Initializes a new instance of the <see cref="TransactionInterceptor" /> class.
     /// </summary>
-    [Transient]
-    public class TransactionInterceptor : IInterceptor, IOnBehalfAware
+    /// <param name="kernel">The kernel.</param>
+    /// <param name="metaInfoStore">The meta-information store.</param>
+    public TransactionInterceptor(IKernel kernel, TransactionMetaInfoStore metaInfoStore)
     {
-        private readonly IKernel _kernel;
-        private readonly TransactionMetaInfoStore _metaInfoStore;
+        _kernel = kernel;
+        _metaInfoStore = metaInfoStore;
+    }
 
-        private TransactionMetaInfo? _metaInfo;
+    /// <summary>
+    /// Gets or sets the logger.
+    /// </summary>
+    /// <value>The logger.</value>
+    public ILogger Logger { get; set; } = NullLogger.Instance;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionInterceptor" /> class.
-        /// </summary>
-        /// <param name="kernel">The kernel.</param>
-        /// <param name="metaInfoStore">The meta-information store.</param>
-        public TransactionInterceptor(IKernel kernel, TransactionMetaInfoStore metaInfoStore)
+    #region IOnBehalfAware
+
+    /// <summary>
+    /// Sets the intercepted component's ComponentModel.
+    /// </summary>
+    /// <param name="target">The target's ComponentModel</param>
+    public void SetInterceptedComponentModel(ComponentModel target)
+    {
+        _metaInfo = _metaInfoStore.GetMetaInfoFor(target.Implementation);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Intercepts the specified invocation and creates a transaction if necessary.
+    /// </summary>
+    /// <param name="invocation">The invocation.</param>
+    /// <returns></returns>
+    public void Intercept(IInvocation invocation)
+    {
+        MethodInfo methodInfo;
+
+        if (invocation.Method.DeclaringType!.IsInterface)
         {
-            _kernel = kernel;
-            _metaInfoStore = metaInfoStore;
+            methodInfo = invocation.MethodInvocationTarget;
+        }
+        else
+        {
+            methodInfo = invocation.Method;
         }
 
-        /// <summary>
-        /// Gets or sets the logger.
-        /// </summary>
-        /// <value>The logger.</value>
-        public ILogger Logger { get; set; } = NullLogger.Instance;
-
-        #region IOnBehalfAware
-
-        /// <summary>
-        /// Sets the intercepted component's ComponentModel.
-        /// </summary>
-        /// <param name="target">The target's ComponentModel</param>
-        public void SetInterceptedComponentModel(ComponentModel target)
+        if (_metaInfo == null || !_metaInfo.Contains(methodInfo))
         {
-            _metaInfo = _metaInfoStore.GetMetaInfoFor(target.Implementation);
+            invocation.Proceed();
+            return;
         }
 
-        #endregion
+        var attribute = _metaInfo.GetTransactionAttributeFor(methodInfo);
+        var manager = _kernel.Resolve<ITransactionManager>();
+        var transaction = manager.CreateTransaction(attribute.Mode,
+                                                    attribute.IsolationLevel,
+                                                    attribute.IsDistributed,
+                                                    attribute.IsReadOnly);
 
-        /// <summary>
-        /// Intercepts the specified invocation and creates a transaction if necessary.
-        /// </summary>
-        /// <param name="invocation">The invocation.</param>
-        /// <returns></returns>
-        public void Intercept(IInvocation invocation)
+        if (transaction == null)
         {
-            MethodInfo methodInfo;
+            invocation.Proceed();
+            return;
+        }
 
-            if (invocation.Method.DeclaringType!.IsInterface)
+        transaction.Begin();
+
+        var rolledback = false;
+
+        try
+        {
+            if (_metaInfo.ShouldInject(methodInfo))
             {
-                methodInfo = invocation.MethodInvocationTarget;
+                var parameters = methodInfo.GetParameters();
+
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    if (parameters[i].ParameterType == typeof(ITransaction))
+                    {
+                        invocation.SetArgumentValue(i, transaction);
+                    }
+                }
+            }
+
+            invocation.Proceed();
+
+            if (transaction.IsRollbackOnlySet)
+            {
+                Logger.DebugFormat("Rolling back transaction '{0}'.", transaction.Name);
+
+                rolledback = true;
+                transaction.Rollback();
             }
             else
             {
-                methodInfo = invocation.Method;
+                Logger.DebugFormat("Committing transaction '{0}'.", transaction.Name);
+
+                transaction.Commit();
+            }
+        }
+        catch (TransactionException ex)
+        {
+            // Whoops.
+            // Special case; let's throw without attempt to rollback anything.
+
+            if (Logger.IsFatalEnabled)
+            {
+                Logger.Fatal("Fatal error during transaction processing.", ex);
             }
 
-            if (_metaInfo == null || !_metaInfo.Contains(methodInfo))
+            throw;
+        }
+        catch (Exception)
+        {
+            if (!rolledback)
             {
-                invocation.Proceed();
-                return;
-            }
-
-            var attribute = _metaInfo.GetTransactionAttributeFor(methodInfo);
-            var manager = _kernel.Resolve<ITransactionManager>();
-            var transaction = manager.CreateTransaction(attribute.Mode,
-                                                        attribute.IsolationLevel,
-                                                        attribute.IsDistributed,
-                                                        attribute.IsReadOnly);
-
-            if (transaction == null)
-            {
-                invocation.Proceed();
-                return;
-            }
-
-            transaction.Begin();
-
-            var rolledback = false;
-
-            try
-            {
-                if (_metaInfo.ShouldInject(methodInfo))
+                if (Logger.IsDebugEnabled)
                 {
-                    var parameters = methodInfo.GetParameters();
-
-                    for (var i = 0; i < parameters.Length; i++)
-                    {
-                        if (parameters[i].ParameterType == typeof(ITransaction))
-                        {
-                            invocation.SetArgumentValue(i, transaction);
-                        }
-                    }
+                    Logger.DebugFormat("Rolling back transaction '{0}' due to exception on method '{2}.{1}'.",
+                                       transaction.Name,
+                                       methodInfo.Name,
+                                       methodInfo.DeclaringType!.Name);
                 }
 
-                invocation.Proceed();
-
-                if (transaction.IsRollbackOnlySet)
-                {
-                    Logger.DebugFormat("Rolling back transaction '{0}'.", transaction.Name);
-
-                    rolledback = true;
-                    transaction.Rollback();
-                }
-                else
-                {
-                    Logger.DebugFormat("Committing transaction '{0}'.", transaction.Name);
-
-                    transaction.Commit();
-                }
+                transaction.Rollback();
             }
-            catch (TransactionException ex)
-            {
-                // Whoops.
-                // Special case; let's throw without attempt to rollback anything.
 
-                if (Logger.IsFatalEnabled)
-                {
-                    Logger.Fatal("Fatal error during transaction processing.", ex);
-                }
-
-                throw;
-            }
-            catch (Exception)
-            {
-                if (!rolledback)
-                {
-                    if (Logger.IsDebugEnabled)
-                    {
-                        Logger.DebugFormat("Rolling back transaction '{0}' due to exception on method '{2}.{1}'.",
-                                           transaction.Name,
-                                           methodInfo.Name,
-                                           methodInfo.DeclaringType!.Name);
-                    }
-
-                    transaction.Rollback();
-                }
-
-                throw;
-            }
-            finally
-            {
-                manager.Dispose(transaction);
-            }
+            throw;
+        }
+        finally
+        {
+            manager.Dispose(transaction);
         }
     }
 }

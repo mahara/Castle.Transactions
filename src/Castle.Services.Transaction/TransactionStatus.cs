@@ -14,17 +14,16 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+/// <summary>
+///
+/// </summary>
+public enum TransactionStatus
 {
-    /// <summary>
-    ///
-    /// </summary>
-    public enum TransactionStatus
-    {
-        NoTransaction,
-        Active,
-        Committed,
-        RolledBack,
-        Invalid
-    }
+    NoTransaction,
+    Active,
+    Committed,
+    RolledBack,
+    Invalid
 }

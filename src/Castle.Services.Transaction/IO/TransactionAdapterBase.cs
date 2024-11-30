@@ -14,133 +14,132 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO
+namespace Castle.Services.Transaction.IO;
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+
+using Castle.Core.Logging;
+
+/// <summary>
+/// Adapter base class for the file and directory adapters.
+/// </summary>
+public abstract class TransactionAdapterBase
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
+    private readonly bool _allowOutsideSpecifiedDirectory;
+    private readonly string? _specifiedDirectory;
 
-    using Castle.Core.Logging;
-
-    /// <summary>
-    /// Adapter base class for the file and directory adapters.
-    /// </summary>
-    public abstract class TransactionAdapterBase
+    protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
+                                     string? specifiedDirectory)
     {
-        private readonly bool _allowOutsideSpecifiedDirectory;
-        private readonly string? _specifiedDirectory;
-
-        protected TransactionAdapterBase(bool constrainToSpecifiedDirectory,
-                                         string? specifiedDirectory)
+        if (constrainToSpecifiedDirectory && specifiedDirectory == null)
         {
-            if (constrainToSpecifiedDirectory && specifiedDirectory == null)
-            {
-                throw new ArgumentNullException(nameof(specifiedDirectory));
-            }
-
-            if (constrainToSpecifiedDirectory && specifiedDirectory == string.Empty)
-            {
-                throw new ArgumentException("The specifified directory was empty.");
-            }
-
-            _allowOutsideSpecifiedDirectory = !constrainToSpecifiedDirectory;
-            _specifiedDirectory = specifiedDirectory;
+            throw new ArgumentNullException(nameof(specifiedDirectory));
         }
 
-        public ILogger Logger { get; set; } =
-            NullLogger.Instance;
-
-        /// <summary>
-        /// Gets the transaction manager, if there is one, or sets it.
-        /// </summary>
-        public ITransactionManager? TransactionManager { get; set; }
-
-        /// <summary>
-        /// Gets/sets whether to use transactions.
-        /// </summary>
-        public bool UseTransactions { get; set; } =
-            true;
-
-        public bool OnlyJoinExisting { get; set; }
-
-        protected bool HasTransaction([NotNullWhen(true)] out IFileTransaction? transaction)
+        if (constrainToSpecifiedDirectory && specifiedDirectory == string.Empty)
         {
-            transaction = null;
+            throw new ArgumentException("The specifified directory was empty.");
+        }
 
-            if (!UseTransactions)
-            {
-                return false;
-            }
+        _allowOutsideSpecifiedDirectory = !constrainToSpecifiedDirectory;
+        _specifiedDirectory = specifiedDirectory;
+    }
 
-            var transactionManager = TransactionManager;
-            if (transactionManager != null && transactionManager.CurrentTransaction != null)
-            {
-                foreach (var resource in transactionManager.CurrentTransaction.Resources())
-                {
-                    if (resource is not FileResourceAdapter)
-                    {
-                        continue;
-                    }
+    public ILogger Logger { get; set; } =
+        NullLogger.Instance;
 
-                    transaction = ((FileResourceAdapter) resource).Transaction;
+    /// <summary>
+    /// Gets the transaction manager, if there is one, or sets it.
+    /// </summary>
+    public ITransactionManager? TransactionManager { get; set; }
 
-                    return true;
-                }
+    /// <summary>
+    /// Gets/sets whether to use transactions.
+    /// </summary>
+    public bool UseTransactions { get; set; } =
+        true;
 
-                if (!OnlyJoinExisting)
-                {
-                    transaction = new FileTransaction("Auto-created File Transaction");
+    public bool OnlyJoinExisting { get; set; }
 
-                    transactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
+    protected bool HasTransaction([NotNullWhen(true)] out IFileTransaction? transaction)
+    {
+        transaction = null;
 
-                    return true;
-                }
-            }
-
+        if (!UseTransactions)
+        {
             return false;
         }
 
-        protected internal bool IsInAllowedDir(string path)
+        var transactionManager = TransactionManager;
+        if (transactionManager != null && transactionManager.CurrentTransaction != null)
         {
-            if (_allowOutsideSpecifiedDirectory)
+            foreach (var resource in transactionManager.CurrentTransaction.Resources())
             {
+                if (resource is not FileResourceAdapter)
+                {
+                    continue;
+                }
+
+                transaction = ((FileResourceAdapter) resource).Transaction;
+
                 return true;
             }
 
-            var tentativePath = PathInfo.Parse(path);
-
-            // If the given non-root is empty, we are looking at a relative path.
-            if (string.IsNullOrEmpty(tentativePath.Root))
+            if (!OnlyJoinExisting)
             {
+                transaction = new FileTransaction("Auto-created File Transaction");
+
+                transactionManager.CurrentTransaction.Enlist(new FileResourceAdapter(transaction));
+
                 return true;
             }
-
-            // BUG:     possible issues with NRT (Nullable References Type) in "_specifiedDirectory"
-            var specifiedPath = PathInfo.Parse(_specifiedDirectory!);
-
-            // They must be on the same drive.
-            if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
-                specifiedPath.DriveLetter != tentativePath.DriveLetter)
-            {
-                return false;
-            }
-
-            // We do not allow access to directories outside of the specified directory.
-            return specifiedPath.IsParentOf(tentativePath);
         }
 
-        protected void AssertAllowed(string path)
-        {
-            if (_allowOutsideSpecifiedDirectory)
-            {
-                return;
-            }
+        return false;
+    }
 
-            var fullPath = Path.GetFullPath(path);
-            if (!IsInAllowedDir(fullPath))
-            {
-                throw new UnauthorizedAccessException(
-                    $"Authorization required for handling path '{fullPath}' (passed as '{path}').");
-            }
+    protected internal bool IsInAllowedDir(string path)
+    {
+        if (_allowOutsideSpecifiedDirectory)
+        {
+            return true;
+        }
+
+        var tentativePath = PathInfo.Parse(path);
+
+        // If the given non-root is empty, we are looking at a relative path.
+        if (string.IsNullOrEmpty(tentativePath.Root))
+        {
+            return true;
+        }
+
+        // BUG:     possible issues with NRT (Nullable References Type) in "_specifiedDirectory"
+        var specifiedPath = PathInfo.Parse(_specifiedDirectory!);
+
+        // They must be on the same drive.
+        if (!string.IsNullOrEmpty(tentativePath.DriveLetter) &&
+            specifiedPath.DriveLetter != tentativePath.DriveLetter)
+        {
+            return false;
+        }
+
+        // We do not allow access to directories outside of the specified directory.
+        return specifiedPath.IsParentOf(tentativePath);
+    }
+
+    protected void AssertAllowed(string path)
+    {
+        if (_allowOutsideSpecifiedDirectory)
+        {
+            return;
+        }
+
+        var fullPath = Path.GetFullPath(path);
+        if (!IsInAllowedDir(fullPath))
+        {
+            throw new UnauthorizedAccessException(
+                $"Authorization required for handling path '{fullPath}' (passed as '{path}').");
         }
     }
 }

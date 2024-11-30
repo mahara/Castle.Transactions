@@ -14,75 +14,74 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
-{
-    using System;
+namespace Castle.Services.Transaction;
+
+using System;
 #if NETFRAMEWORK
-    using System.Runtime.ConstrainedExecution;
+using System.Runtime.ConstrainedExecution;
 #endif
-    using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 #if NETFRAMEWORK
-    using System.Security;
-    using System.Security.Permissions;
+using System.Security;
+using System.Security.Permissions;
 #endif
 
-    using Microsoft.Win32.SafeHandles;
+using Microsoft.Win32.SafeHandles;
+
+/// <summary>
+/// A safe file handle on the transaction resource.
+/// </summary>
+#if NETFRAMEWORK
+[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
+[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+#endif
+public sealed partial class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
+{
+    /// <summary>
+    /// Default constructor.
+    /// </summary>
+    public SafeTransactionHandle() :
+        base(true)
+    {
+    }
 
     /// <summary>
-    /// A safe file handle on the transaction resource.
+    /// Constructor for taking a pointer to a transaction.
     /// </summary>
+    /// <param name="handle">The transactional handle.</param>
 #if NETFRAMEWORK
-    [SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
-    [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 #endif
-    public sealed partial class SafeTransactionHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public SafeTransactionHandle(IntPtr handle) :
+        base(true)
     {
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public SafeTransactionHandle() :
-            base(true)
+        base.handle = handle;
+    }
+
+    protected override bool ReleaseHandle()
+    {
+        if (!(IsInvalid || IsClosed))
         {
+            return CloseHandle(handle);
         }
 
-        /// <summary>
-        /// Constructor for taking a pointer to a transaction.
-        /// </summary>
-        /// <param name="handle">The transactional handle.</param>
-#if NETFRAMEWORK
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-#endif
-        public SafeTransactionHandle(IntPtr handle) :
-            base(true)
-        {
-            base.handle = handle;
-        }
+        return IsInvalid || IsClosed;
+    }
 
-        protected override bool ReleaseHandle()
-        {
-            if (!(IsInvalid || IsClosed))
-            {
-                return CloseHandle(handle);
-            }
-
-            return IsInvalid || IsClosed;
-        }
-
-        /*
-            BOOL WINAPI CloseHandle(__in HANDLE hObject);
-         */
+    /*
+        BOOL WINAPI CloseHandle(__in HANDLE hObject);
+     */
 
 #if NET7_0_OR_GREATER
-        [LibraryImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool CloseHandle(IntPtr handle);
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CloseHandle(IntPtr handle);
 #else
-        [DllImport("kernel32.dll")]
+    [DllImport("kernel32.dll")]
 #if NETFRAMEWORK
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [SuppressUnmanagedCodeSecurity]
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+    [SuppressUnmanagedCodeSecurity]
 #endif
-        private static extern bool CloseHandle(IntPtr handle);
+    private static extern bool CloseHandle(IntPtr handle);
 #endif
-    }
 }

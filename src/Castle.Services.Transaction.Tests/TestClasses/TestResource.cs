@@ -14,42 +14,41 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using System;
+
+internal class TestResource : ResourceImpl
 {
-    using System;
+    private readonly Action _s;
+    private readonly Action _c;
+    private readonly Action _r;
 
-    internal class TestResource : ResourceImpl
+    public TestResource(Action s, Action c, Action r)
     {
-        private readonly Action _s;
-        private readonly Action _c;
-        private readonly Action _r;
+        _s = s;
+        _c = c;
+        _r = r;
+    }
 
-        public TestResource(Action s, Action c, Action r)
-        {
-            _s = s;
-            _c = c;
-            _r = r;
-        }
+    public override void Start()
+    {
+        base.Start();
 
-        public override void Start()
-        {
-            base.Start();
+        _s();
+    }
 
-            _s();
-        }
+    public override void Commit()
+    {
+        base.Commit();
 
-        public override void Commit()
-        {
-            base.Commit();
+        _c();
+    }
 
-            _c();
-        }
+    public override void Rollback()
+    {
+        base.Rollback();
 
-        public override void Rollback()
-        {
-            base.Rollback();
-
-            _r();
-        }
+        _r();
     }
 }

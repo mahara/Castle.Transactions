@@ -14,26 +14,25 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+/// <summary>
+/// Represents a contract for a resource that can be enlisted within transactions.
+/// </summary>
+public interface IResource
 {
     /// <summary>
-    /// Represents a contract for a resource that can be enlisted within transactions.
+    /// Implementors should start the transaction on the underlying resource.
     /// </summary>
-    public interface IResource
-    {
-        /// <summary>
-        /// Implementors should start the transaction on the underlying resource.
-        /// </summary>
-        void Start();
+    void Start();
 
-        /// <summary>
-        /// Implementors should commit the transaction on the underlying resource.
-        /// </summary>
-        void Commit();
+    /// <summary>
+    /// Implementors should commit the transaction on the underlying resource.
+    /// </summary>
+    void Commit();
 
-        /// <summary>
-        /// Implementors should rollback the transaction on the underlying resource.
-        /// </summary>
-        void Rollback();
-    }
+    /// <summary>
+    /// Implementors should rollback the transaction on the underlying resource.
+    /// </summary>
+    void Rollback();
 }

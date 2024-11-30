@@ -14,39 +14,38 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using System;
+
+public class ThrowsExceptionResource : ResourceImpl
 {
-    using System;
+    private readonly bool _throwOnCommit = false;
+    private readonly bool _throwOnRollback = false;
 
-    public class ThrowsExceptionResource : ResourceImpl
+    public ThrowsExceptionResource(bool throwOnCommit, bool throwOnRollback)
     {
-        private readonly bool _throwOnCommit = false;
-        private readonly bool _throwOnRollback = false;
+        _throwOnCommit = throwOnCommit;
+        _throwOnRollback = throwOnRollback;
+    }
 
-        public ThrowsExceptionResource(bool throwOnCommit, bool throwOnRollback)
+    public override void Commit()
+    {
+        if (_throwOnCommit)
         {
-            _throwOnCommit = throwOnCommit;
-            _throwOnRollback = throwOnRollback;
+            throw new Exception("Simulated commit error.");
         }
 
-        public override void Commit()
-        {
-            if (_throwOnCommit)
-            {
-                throw new Exception("Simulated commit error.");
-            }
+        base.Commit();
+    }
 
-            base.Commit();
+    public override void Rollback()
+    {
+        if (_throwOnRollback)
+        {
+            throw new Exception("Simulated rollback error.");
         }
 
-        public override void Rollback()
-        {
-            if (_throwOnRollback)
-            {
-                throw new Exception("Simulated rollback error.");
-            }
-
-            base.Rollback();
-        }
+        base.Rollback();
     }
 }

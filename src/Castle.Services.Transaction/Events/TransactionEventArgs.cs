@@ -14,20 +14,19 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+
+/// <summary>
+/// Event args for a transaction event.
+/// </summary>
+public class TransactionEventArgs : EventArgs
 {
-    using System;
-
-    /// <summary>
-    /// Event args for a transaction event.
-    /// </summary>
-    public class TransactionEventArgs : EventArgs
+    public TransactionEventArgs(ITransaction transaction)
     {
-        public TransactionEventArgs(ITransaction transaction)
-        {
-            Transaction = transaction;
-        }
-
-        public ITransaction Transaction { get; }
+        Transaction = transaction;
     }
+
+    public ITransaction Transaction { get; }
 }

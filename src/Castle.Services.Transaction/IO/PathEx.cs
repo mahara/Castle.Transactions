@@ -14,22 +14,21 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO
-{
-    public static class PathEx
-    {
-        public static PathInfo ToPathInfo(this string input)
-        {
-            return PathInfo.Parse(input);
-        }
+namespace Castle.Services.Transaction.IO;
 
-        /// <summary>
-        /// Combines an input path and a path together
-        /// using System.IO.Path.Combine and returns the result.
-        /// </summary>
-        public static string Combine(this string input, string path)
-        {
-            return System.IO.Path.Combine(input, path);
-        }
+public static class PathEx
+{
+    public static PathInfo ToPathInfo(this string input)
+    {
+        return PathInfo.Parse(input);
+    }
+
+    /// <summary>
+    /// Combines an input path and a path together
+    /// using System.IO.Path.Combine and returns the result.
+    /// </summary>
+    public static string Combine(this string input, string path)
+    {
+        return System.IO.Path.Combine(input, path);
     }
 }

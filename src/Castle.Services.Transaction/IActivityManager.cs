@@ -14,18 +14,17 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+/// <summary>
+/// Abstracts approaches to keep transaction activities
+/// that may differ based on the environments.
+/// </summary>
+public interface IActivityManager
 {
     /// <summary>
-    /// Abstracts approaches to keep transaction activities
-    /// that may differ based on the environments.
+    /// Gets the current activity.
     /// </summary>
-    public interface IActivityManager
-    {
-        /// <summary>
-        /// Gets the current activity.
-        /// </summary>
-        /// <value>The current activity.</value>
-        Activity CurrentActivity { get; }
-    }
+    /// <value>The current activity.</value>
+    Activity CurrentActivity { get; }
 }
