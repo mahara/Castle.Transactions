@@ -15,48 +15,47 @@
 #endregion
 
 #if NETFRAMEWORK
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+using System.Runtime.Remoting.Messaging;
+
+public class CallContextActivityManager : MarshalByRefObject, IActivityManager
 {
-    using System;
-    using System.Runtime.Remoting.Messaging;
+    private const string Key = "Castle.Services.Transaction.Activity";
 
-    public class CallContextActivityManager : MarshalByRefObject, IActivityManager
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CallContextActivityManager" /> class.
+    /// </summary>
+    public CallContextActivityManager()
     {
-        private const string Key = "Castle.Services.Transaction.Activity";
+        CallContext.SetData(Key, null);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CallContextActivityManager" /> class.
-        /// </summary>
-        public CallContextActivityManager()
+    /// <summary>
+    /// Gets the current activity.
+    /// </summary>
+    /// <value>The current activity.</value>
+    public Activity CurrentActivity
+    {
+        get
         {
-            CallContext.SetData(Key, null);
-        }
+            var activity = (Activity) CallContext.GetData(Key);
 
-        /// <summary>
-        /// Gets the current activity.
-        /// </summary>
-        /// <value>The current activity.</value>
-        public Activity CurrentActivity
-        {
-            get
+            if (activity == null)
             {
-                var activity = (Activity) CallContext.GetData(Key);
-
-                if (activity == null)
-                {
-                    activity = new Activity();
-                    CallContext.SetData(Key, activity);
-                }
-
-                return activity;
+                activity = new Activity();
+                CallContext.SetData(Key, activity);
             }
-        }
 
-        /// <inheritdoc />
-        public override object InitializeLifetimeService()
-        {
-            return null!;
+            return activity;
         }
+    }
+
+    /// <inheritdoc />
+    public override object InitializeLifetimeService()
+    {
+        return null!;
     }
 }
 #endif

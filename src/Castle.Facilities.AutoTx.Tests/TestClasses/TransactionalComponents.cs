@@ -14,27 +14,26 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
+namespace Castle.Facilities.AutoTx.Tests;
+
+public class TransactionalComponent1
 {
-    public class TransactionalComponent1
+    public virtual void Save()
     {
-        public virtual void Save()
-        {
-        }
-
-        public virtual void Create()
-        {
-        }
-
-        public virtual void Delete()
-        {
-        }
     }
 
-    public class TransactionalComponent2 : TransactionalComponent1
+    public virtual void Create()
     {
-        public virtual void SaveThat()
-        {
-        }
+    }
+
+    public virtual void Delete()
+    {
+    }
+}
+
+public class TransactionalComponent2 : TransactionalComponent1
+{
+    public virtual void SaveThat()
+    {
     }
 }

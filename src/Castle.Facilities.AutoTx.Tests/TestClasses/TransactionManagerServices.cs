@@ -14,45 +14,44 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
+namespace Castle.Facilities.AutoTx.Tests;
+
+using Castle.Services.Transaction;
+using Castle.Services.Transaction.IO;
+
+using NUnit.Framework;
+
+public interface ITransactionManagerService
 {
-    using Castle.Services.Transaction;
-    using Castle.Services.Transaction.IO;
+    IDirectoryAdapter DA { get; }
+    IFileAdapter FA { get; }
 
-    using NUnit.Framework;
+    void A(ITransaction? transaction);
+    void B(ITransaction? transaction);
+}
 
-    public interface ITransactionManagerService
+[Transactional]
+public class TransactionManagerService : ITransactionManagerService
+{
+    public TransactionManagerService(IDirectoryAdapter da, IFileAdapter fa)
     {
-        IDirectoryAdapter DA { get; }
-        IFileAdapter FA { get; }
-
-        void A(ITransaction? transaction);
-        void B(ITransaction? transaction);
+        DA = da;
+        FA = fa;
     }
 
-    [Transactional]
-    public class TransactionManagerService : ITransactionManagerService
+    public IDirectoryAdapter DA { get; }
+
+    public IFileAdapter FA { get; }
+
+    [Transaction]
+    public void A(ITransaction? transaction)
     {
-        public TransactionManagerService(IDirectoryAdapter da, IFileAdapter fa)
-        {
-            DA = da;
-            FA = fa;
-        }
+        Assert.That(transaction, Is.Null);
+    }
 
-        public IDirectoryAdapter DA { get; }
-
-        public IFileAdapter FA { get; }
-
-        [Transaction]
-        public void A(ITransaction? transaction)
-        {
-            Assert.That(transaction, Is.Null);
-        }
-
-        [Transaction, InjectTransaction]
-        public void B(ITransaction? transaction)
-        {
-            Assert.That(transaction, Is.Not.Null);
-        }
+    [Transaction, InjectTransaction]
+    public void B(ITransaction? transaction)
+    {
+        Assert.That(transaction, Is.Not.Null);
     }
 }

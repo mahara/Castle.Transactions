@@ -14,57 +14,56 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests
+namespace Castle.Services.Transaction.Tests;
+
+using System;
+
+public class ResourceImpl : IResource, IDisposable
 {
-    using System;
+    public bool WasDisposed;
 
-    public class ResourceImpl : IResource, IDisposable
+    public bool Started { get; private set; }
+
+    public bool Committed { get; private set; }
+
+    public bool Rolledback { get; private set; }
+
+    #region IResource Members
+
+    public virtual void Start()
     {
-        public bool WasDisposed;
-
-        public bool Started { get; private set; }
-
-        public bool Committed { get; private set; }
-
-        public bool Rolledback { get; private set; }
-
-        #region IResource Members
-
-        public virtual void Start()
+        if (Started)
         {
-            if (Started)
-            {
-                throw new ApplicationException("Start called before.");
-            }
-
-            Started = true;
+            throw new ApplicationException("Start called before.");
         }
 
-        public virtual void Commit()
-        {
-            if (Committed)
-            {
-                throw new ApplicationException("Commit called before.");
-            }
+        Started = true;
+    }
 
-            Committed = true;
+    public virtual void Commit()
+    {
+        if (Committed)
+        {
+            throw new ApplicationException("Commit called before.");
         }
 
-        public virtual void Rollback()
-        {
-            if (Rolledback)
-            {
-                throw new ApplicationException("Rollback called before.");
-            }
+        Committed = true;
+    }
 
-            Rolledback = true;
+    public virtual void Rollback()
+    {
+        if (Rolledback)
+        {
+            throw new ApplicationException("Rollback called before.");
         }
 
-        #endregion
+        Rolledback = true;
+    }
 
-        public void Dispose()
-        {
-            WasDisposed = true;
-        }
+    #endregion
+
+    public void Dispose()
+    {
+        WasDisposed = true;
     }
 }

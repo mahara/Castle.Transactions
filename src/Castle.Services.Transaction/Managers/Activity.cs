@@ -14,48 +14,47 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+using System.Collections.Generic;
+
+[Serializable]
+public class Activity : MarshalByRefObject
 {
-    using System;
-    using System.Collections.Generic;
+    private readonly Stack<ITransaction> _transactionStack = new(2);
+    private readonly Guid _id = Guid.NewGuid();
 
-    [Serializable]
-    public class Activity : MarshalByRefObject
+    public ITransaction? CurrentTransaction =>
+        _transactionStack.Count == 0 ? null : _transactionStack.Peek();
+
+    public void Push(ITransaction transaction)
     {
-        private readonly Stack<ITransaction> _transactionStack = new(2);
-        private readonly Guid _id = Guid.NewGuid();
+        _transactionStack.Push(transaction);
+    }
 
-        public ITransaction? CurrentTransaction =>
-            _transactionStack.Count == 0 ? null : _transactionStack.Peek();
+    public ITransaction Pop()
+    {
+        return _transactionStack.Pop();
+    }
 
-        public void Push(ITransaction transaction)
+    public override bool Equals(object? obj)
+    {
+        if (this == obj)
         {
-            _transactionStack.Push(transaction);
+            return true;
         }
 
-        public ITransaction Pop()
+        if (obj is not Activity activity)
         {
-            return _transactionStack.Pop();
+            return false;
         }
 
-        public override bool Equals(object? obj)
-        {
-            if (this == obj)
-            {
-                return true;
-            }
+        return Equals(_id, activity._id);
+    }
 
-            if (obj is not Activity activity)
-            {
-                return false;
-            }
-
-            return Equals(_id, activity._id);
-        }
-
-        public override int GetHashCode()
-        {
-            return _id.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return _id.GetHashCode();
     }
 }

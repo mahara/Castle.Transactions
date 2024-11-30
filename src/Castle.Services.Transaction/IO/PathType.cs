@@ -14,15 +14,14 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO
+namespace Castle.Services.Transaction.IO;
+
+public enum PathType
 {
-    public enum PathType
-    {
-        Device,
-        Server,
-        IPv4,
-        IPv6,
-        Drive,
-        Relative
-    }
+    Device,
+    Server,
+    IPv4,
+    IPv6,
+    Drive,
+    Relative
 }

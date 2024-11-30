@@ -14,38 +14,37 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
+using Castle.Core;
+
+[Serializable]
+public class RollbackResourceException : TransactionException
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
+    private readonly List<Pair<IResource, Exception>> _failedResources = [];
 
-    using Castle.Core;
-
-    [Serializable]
-    public class RollbackResourceException : TransactionException
+    public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources) :
+        base(message, null)
     {
-        private readonly List<Pair<IResource, Exception>> _failedResources = [];
-
-        public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources) :
-            base(message, null)
-        {
-            _failedResources.AddRange(failedResources);
-        }
+        _failedResources.AddRange(failedResources);
+    }
 
 #if NETFRAMEWORK
-        public RollbackResourceException(SerializationInfo info, StreamingContext context) :
-            base(info, context)
-        {
-        }
+    public RollbackResourceException(SerializationInfo info, StreamingContext context) :
+        base(info, context)
+    {
+    }
 
-        public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources) :
-            base(info, context)
-        {
-            _failedResources.AddRange(failedResources);
-        }
+    public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources) :
+        base(info, context)
+    {
+        _failedResources.AddRange(failedResources);
+    }
 #endif
 
-        public IList<Pair<IResource, Exception>> FailedResources => _failedResources;
-    }
+    public IList<Pair<IResource, Exception>> FailedResources => _failedResources;
 }
