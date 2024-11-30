@@ -14,44 +14,43 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests
+namespace Castle.Facilities.AutoTx.Tests;
+
+using System;
+using System.Transactions;
+
+using Castle.Services.Transaction;
+
+public class MockTransaction : TransactionBase
 {
-    using System;
-    using System.Transactions;
-
-    using Castle.Services.Transaction;
-
-    public class MockTransaction : TransactionBase
+    public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationLevel.Unspecified)
     {
-        public MockTransaction() : base(null, TransactionScopeOption.Required, IsolationLevel.Unspecified)
-        {
-        }
-
-        protected override void InnerBegin()
-        {
-        }
-
-        protected override void InnerCommit()
-        {
-        }
-
-        protected override void InnerRollback()
-        {
-        }
-
-        public override bool IsAmbient
-        {
-            get => throw new NotImplementedException();
-            protected set => throw new NotImplementedException();
-        }
-
-        public override bool IsReadOnly
-        {
-            get => throw new NotImplementedException();
-            protected set => throw new NotImplementedException();
-        }
-
-        public override bool IsChildTransaction =>
-           false;
     }
+
+    protected override void InnerBegin()
+    {
+    }
+
+    protected override void InnerCommit()
+    {
+    }
+
+    protected override void InnerRollback()
+    {
+    }
+
+    public override bool IsAmbient
+    {
+        get => throw new NotImplementedException();
+        protected set => throw new NotImplementedException();
+    }
+
+    public override bool IsReadOnly
+    {
+        get => throw new NotImplementedException();
+        protected set => throw new NotImplementedException();
+    }
+
+    public override bool IsChildTransaction =>
+       false;
 }

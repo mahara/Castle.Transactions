@@ -14,15 +14,14 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx
-{
-    using System;
+namespace Castle.Facilities.AutoTx;
 
-    /// <summary>
-    /// Tells the kernel to give the transaction instance to the method as a parameter.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public sealed class InjectTransactionAttribute : Attribute
-    {
-    }
+using System;
+
+/// <summary>
+/// Tells the kernel to give the transaction instance to the method as a parameter.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class InjectTransactionAttribute : Attribute
+{
 }

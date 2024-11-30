@@ -15,51 +15,50 @@
 #endregion
 
 #if NETFRAMEWORK
-namespace Castle.Services.Transaction
+namespace Castle.Services.Transaction;
+
+using System;
+using System.Threading;
+
+public class TLSActivityManager : MarshalByRefObject, IActivityManager
 {
-    using System;
-    using System.Threading;
+    private const string Key = "Castle.Services.Transaction.TLSActivity";
 
-    public class TLSActivityManager : MarshalByRefObject, IActivityManager
+    private readonly object _lockObj = new();
+    private static readonly LocalDataStoreSlot _dataSlot;
+
+    static TLSActivityManager()
     {
-        private const string Key = "Castle.Services.Transaction.TLSActivity";
+        _dataSlot = Thread.AllocateNamedDataSlot(Key);
+    }
 
-        private readonly object _lockObj = new();
-        private static readonly LocalDataStoreSlot _dataSlot;
-
-        static TLSActivityManager()
+    /// <summary>
+    /// Gets the current activity.
+    /// </summary>
+    /// <value>The current activity.</value>
+    public Activity CurrentActivity
+    {
+        get
         {
-            _dataSlot = Thread.AllocateNamedDataSlot(Key);
-        }
-
-        /// <summary>
-        /// Gets the current activity.
-        /// </summary>
-        /// <value>The current activity.</value>
-        public Activity CurrentActivity
-        {
-            get
+            lock (_lockObj)
             {
-                lock (_lockObj)
+                var activity = (Activity) Thread.GetData(_dataSlot);
+
+                if (activity == null)
                 {
-                    var activity = (Activity) Thread.GetData(_dataSlot);
-
-                    if (activity == null)
-                    {
-                        activity = new Activity();
-                        Thread.SetData(_dataSlot, activity);
-                    }
-
-                    return activity;
+                    activity = new Activity();
+                    Thread.SetData(_dataSlot, activity);
                 }
+
+                return activity;
             }
         }
+    }
 
-        /// <inheritdoc />
-        public override object InitializeLifetimeService()
-        {
-            return null!;
-        }
+    /// <inheritdoc />
+    public override object InitializeLifetimeService()
+    {
+        return null!;
     }
 }
 #endif
