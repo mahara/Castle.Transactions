@@ -94,6 +94,7 @@ namespace Castle.Services.Transaction.Tests
         #region State and Rollbacks
 
         [Test]
+        [Platform("Win")]
         public void ConstructorTest()
         {
             var txF = new FileTransaction();
@@ -102,6 +103,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CannotCommitAfterSettingRollbackOnly()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -123,6 +125,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void FailingResourceTransactionStillRolledBack()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -160,12 +163,14 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void FileModeOpenOrCreateEqualsOpenAlways()
         {
             Assert.That((int) FileMode.OpenOrCreate, Is.EqualTo(4));
         }
 
         [Test]
+        [Platform("Win")]
         public void ThrowsInvalidStateOnCreate()
         {
             using var txF = new FileTransaction();
@@ -189,6 +194,7 @@ namespace Castle.Services.Transaction.Tests
         //
 #if NETFRAMEWORK
         [Test]
+        [Platform("Win")]
         public void UsingTransactionScopeIsDistributedAlsoTestingStatusWhenRolledBack()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -215,6 +221,7 @@ namespace Castle.Services.Transaction.Tests
 #endif
 
         [Test]
+        [Platform("Win")]
         public void UsingNormalStates()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -241,6 +248,7 @@ namespace Castle.Services.Transaction.Tests
         #region Ignored Tests
 
         [Test]
+        [Platform("Win")]
         [Ignore("Not completely implemented.")]
         public void CanMoveDirectory()
         {
@@ -283,6 +291,7 @@ namespace Castle.Services.Transaction.Tests
         /// </list>
         ///  </remarks>
         [Test]
+        [Platform("Win")]
         [Ignore("MSDN is wrong in saying: 'If a non-transacted thread modifies the file before the transacted thread does, " +
                 "and the file is still open when the transaction attempts to open it, " +
                 "the transaction receives the error ERROR_TRANSACTIONAL_CONFLICT.'... " +

@@ -28,8 +28,6 @@ namespace Castle.Services.Transaction.Tests
     [TestFixture]
     public class FileTransactions_Directory_Tests
     {
-        #region Setup/Teardown
-
         private static readonly object _syncObject = new();
 
         private readonly List<string> _infosCreated = [];
@@ -72,9 +70,8 @@ namespace Castle.Services.Transaction.Tests
             Monitor.Exit(_syncObject);
         }
 
-        #endregion
-
         [Test]
+        [Platform("Win")]
         public void NoCommitMeansNoDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -98,6 +95,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void NonExistentDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -125,7 +123,9 @@ namespace Castle.Services.Transaction.Tests
             Assert.That(Directory.Exists("existing"), Is.False);
         }
 
-        [Test, Description("We are not in a distributed transaction if there is no transaction scope.")]
+        [Test]
+        [Description("We are not in a distributed transaction if there is no transaction scope.")]
+        [Platform("Win")]
         public void NotUsingTransactionScopeIsNotDistributedAboveNegated()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -145,6 +145,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void ExistingDirectoryWithTrailingBackslash()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -170,6 +171,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CreatingDirectoryInTransactionAndCommittingMeansExistsAfter()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -197,6 +199,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanCreateAndFindDirectoryWithinTransaction()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -220,6 +223,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanCreateDirectoryNLengthsDownInNonExistentDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -247,6 +251,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanDeleteNonRecursivelyEmptyDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -272,6 +277,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanDeleteDirectoryRecursively()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -304,6 +310,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanNotDeleteNonRecursivelyNonEmptyDirectory()
         {
             if (Environment.OSVersion.Version.Major < 6)

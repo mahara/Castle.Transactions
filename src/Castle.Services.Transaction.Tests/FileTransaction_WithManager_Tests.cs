@@ -59,6 +59,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void TransactionResourcesAreDisposed()
         {
             var tx = _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);
@@ -79,6 +80,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void NestedFileTransactionCanBeCommitted()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -131,12 +133,14 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void UsingNestedTransactionFileTransactionOnlyVotesToCommit()
         {
             // TODO: Implement proper exception handling when file transaction is voted to commit.
         }
 
         [Test]
+        [Platform("Win")]
         public void BugWhenResourceFailsAndTransactionCommits()
         {
             _transactionManager.CreateTransaction(TransactionScopeOption.Required, IsolationLevel.Unspecified);

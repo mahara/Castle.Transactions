@@ -77,6 +77,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CanMoveFile()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -135,6 +136,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CreateFileAndReplaceContents()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -171,6 +173,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CreateFileTransactionallyRollback()
         {
             if (Environment.OSVersion.Version.Major < 6)
@@ -207,6 +210,7 @@ namespace Castle.Services.Transaction.Tests
         }
 
         [Test]
+        [Platform("Win")]
         public void CreateFileTransactionallyCommit()
         {
             if (Environment.OSVersion.Version.Major < 6)
