@@ -42,15 +42,15 @@ namespace Castle.Services.Transaction.IO
         // https://learn.microsoft.com/en-us/archive/blogs/mpoulson/regular-expressions-and-ip-addresses-ipv4-and-ipv6
         // http://blogs.msdn.com/mpoulson/archive/2005/01/10/350037.aspx
 
-        public static readonly char[] WhitespaceTrimChars = new[] { ' ' };
-        public static readonly char[] SlashTrimChars = new[] { '\\', '/' };
+        public static readonly char[] WhitespaceTrimChars = [' '];
+        public static readonly char[] SlashTrimChars = ['\\', '/'];
 
         private static readonly List<char> _invalidChars;
 
         static Path()
         {
             //_reserved = new List<string>("CON|PRN|AUX|NUL|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9".Split('|'));
-            _invalidChars = new List<char>(GetInvalidPathChars());
+            _invalidChars = [.. GetInvalidPathChars()];
         }
 
         public static char DirectorySeparatorChar =>
@@ -60,7 +60,7 @@ namespace Castle.Services.Transaction.IO
             System.IO.Path.AltDirectorySeparatorChar;
 
         public static char[] DirectorySeparatorChars =>
-            new[] { DirectorySeparatorChar, AltDirectorySeparatorChar };
+            [DirectorySeparatorChar, AltDirectorySeparatorChar];
 
         /// <summary>
         /// Returns whether the path is rooted.
