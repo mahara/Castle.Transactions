@@ -16,10 +16,7 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 #if NETFRAMEWORK
 using System.Transactions;
 #endif
@@ -28,16 +25,22 @@ using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;
 
-using Path = Castle.Services.Transaction.IO.Path;
-using TransactionException = Castle.Services.Transaction.TransactionException;
-using TransactionStatus = Castle.Services.Transaction.TransactionStatus;
+using Path = IO.Path;
+using TransactionException = TransactionException;
+using TransactionStatus = TransactionStatus;
 
 [TestFixture]
 public class FileTransactionTests
 {
     #region Setup/Teardown
 
-    private static readonly object _syncObject = new();
+    private static readonly
+#if NET9_0_OR_GREATER
+        Lock
+#else
+        object
+#endif
+        _syncObject = new();
 
     private readonly List<string> _infosCreated = [];
 
@@ -119,9 +122,9 @@ public class FileTransactionTests
 
         txF.SetRollbackOnly();
 
-        Assert.Throws(typeof(TransactionException),
-                      txF.Commit,
-                      "Should not be able to commit after rollback is set.");
+        Assert.Throws<TransactionException>(
+            txF.Commit,
+            "Should not be able to commit after rollback is set.");
     }
 
     [Test]
@@ -158,7 +161,7 @@ public class FileTransactionTests
         catch (RollbackResourceException rex)
         {
             // Good.
-            Assert.That(rex.FailedResources[0].First, Is.InstanceOf(typeof(R)));
+            Assert.That(rex.FailedResources[0].First, Is.InstanceOf<R>());
         }
     }
 
@@ -175,9 +178,9 @@ public class FileTransactionTests
     {
         using var txF = new FileTransaction();
 
-        Assert.Throws(typeof(TransactionException),
-                      () => ((IDirectoryAdapter) txF).Create("lol"),
-                      "The transaction hasn't begun, throws.");
+        Assert.Throws<TransactionException>(
+            () => ((IDirectoryAdapter) txF).Create("lol"),
+            "The transaction hasn't begun, throws.");
     }
 
     #endregion
@@ -369,7 +372,7 @@ public class FileTransactionTests
             txF.Commit();
         }
 
-        if (exception != null)
+        if (exception is not null)
         {
             Console.WriteLine(exception);
 

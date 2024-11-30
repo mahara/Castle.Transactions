@@ -17,9 +17,6 @@
 #if NETFRAMEWORK
 namespace Castle.Services.Transaction;
 
-using System;
-using System.Threading;
-
 public class TLSActivityManager : MarshalByRefObject, IActivityManager
 {
     private const string Key = "Castle.Services.Transaction.TLSActivity";
@@ -44,7 +41,7 @@ public class TLSActivityManager : MarshalByRefObject, IActivityManager
             {
                 var activity = (Activity) Thread.GetData(_dataSlot);
 
-                if (activity == null)
+                if (activity is null)
                 {
                     activity = new Activity();
                     Thread.SetData(_dataSlot, activity);

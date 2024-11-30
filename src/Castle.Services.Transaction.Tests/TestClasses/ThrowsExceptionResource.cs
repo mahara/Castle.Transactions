@@ -16,8 +16,6 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-
 public class ThrowsExceptionResource : ResourceImpl
 {
     private readonly bool _throwOnCommit = false;

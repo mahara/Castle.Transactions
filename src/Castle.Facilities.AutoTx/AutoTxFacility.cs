@@ -132,7 +132,7 @@ public class AutoTxFacility : AbstractFacility
 
     private void AssertHasDirectories()
     {
-        if (!AllowAccessOutsideRootFolder && RootFolder == null)
+        if (!AllowAccessOutsideRootFolder && RootFolder is null)
         {
             throw new FacilityException("You have to specify a root directory.");
         }

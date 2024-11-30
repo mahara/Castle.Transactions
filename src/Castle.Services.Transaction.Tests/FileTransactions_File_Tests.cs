@@ -18,11 +18,8 @@
 
 namespace Castle.Services.Transaction.Tests;
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 
 using Castle.Services.Transaction.IO;
 
@@ -31,7 +28,13 @@ using NUnit.Framework;
 [TestFixture]
 public class FileTransactions_File_Tests
 {
-    private static readonly object _syncObject = new();
+    private static readonly
+#if NET9_0_OR_GREATER
+        Lock
+#else
+        object
+#endif
+        _syncObject = new();
 
     private readonly List<string> _infosCreated = [];
 
