@@ -36,7 +36,7 @@ namespace Castle.Services.Transaction.Tests
 
         private readonly object _lock = new();
 
-        private readonly List<string> _pathsCreated = new();
+        private readonly List<string> _pathsCreated = [];
 
         private string _testFixtureRootDirectoryPath;
         private string _testFixtureDirectoryPath;
@@ -317,9 +317,9 @@ namespace Castle.Services.Transaction.Tests
             Directory.CreateDirectory(directoryPath.Combine("three"));
 
             // 2. Write contents.
-            File.WriteAllLines(directoryPath.Combine("one").Combine("fileone"), new[] { "Hello world", "second line" });
-            File.WriteAllLines(directoryPath.Combine("one").Combine("filetwo"), new[] { "two", "second line" });
-            File.WriteAllLines(directoryPath.Combine("two").Combine("filethree"), new[] { "three", "second line" });
+            File.WriteAllLines(directoryPath.Combine("one").Combine("fileone"), ["Hello world", "second line"]);
+            File.WriteAllLines(directoryPath.Combine("one").Combine("filetwo"), ["two", "second line"]);
+            File.WriteAllLines(directoryPath.Combine("two").Combine("filethree"), ["three", "second line"]);
 
             // 3. Test them.
             using var txF = new FileTransaction();
