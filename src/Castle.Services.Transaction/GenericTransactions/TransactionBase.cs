@@ -23,8 +23,8 @@ namespace Castle.Services.Transaction
 {
     public abstract class TransactionBase : MarshalByRefObject, ITransaction, IDisposable
     {
-        private readonly List<IResource> _resources = new();
-        private readonly List<ISynchronization> _synchronizationObjects = new();
+        private readonly List<IResource> _resources = [];
+        private readonly List<ISynchronization> _synchronizationObjects = [];
 
         protected readonly string InnerName;
 
@@ -320,7 +320,7 @@ namespace Castle.Services.Transaction
 
         public IEnumerable<IResource> GetResources()
         {
-            return _resources.ToList();
+            return [.. _resources];
         }
 
         protected void AssertState(TransactionStatus status)
