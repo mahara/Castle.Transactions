@@ -43,25 +43,18 @@ echo "OSNAME: $OSNAME"
 dotnet build "Castle.Transactions.sln" --configuration Release || exit 1
 
 echo ------------------------------------
+echo Running .NET (net9.0) Unit Tests
+echo ------------------------------------
+
+dotnet test "artifacts\bin\Release\net9.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net9.0_TestResults.xml;format=nunit3" || exit 1
+dotnet test "artifacts\bin\Release\net9.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net9.0_TestResults.xml;format=nunit3" || exit 1
+
+echo ------------------------------------
 echo Running .NET (net8.0) Unit Tests
 echo ------------------------------------
 
 dotnet test "artifacts\bin\Release\net8.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net8.0_TestResults.xml;format=nunit3" || exit 1
 dotnet test "artifacts\bin\Release\net8.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net8.0_TestResults.xml;format=nunit3" || exit 1
-
-echo ------------------------------------
-echo Running .NET (net7.0) Unit Tests
-echo ------------------------------------
-
-dotnet test "artifacts\bin\Release\net7.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net7.0_TestResults.xml;format=nunit3" || exit 1
-dotnet test "artifacts\bin\Release\net7.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net7.0_TestResults.xml;format=nunit3" || exit 1
-
-echo ------------------------------------
-echo Running .NET (net6.0) Unit Tests
-echo ------------------------------------
-
-dotnet test "artifacts\bin\Release\net6.0\Castle.Services.Transaction.Tests\Castle.Services.Transaction.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Services.Transaction.Tests_net6.0_TestResults.xml;format=nunit3" || exit 1
-dotnet test "artifacts\bin\Release\net6.0\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.dll" --results-directory "artifacts\testresults\Release" --logger "nunit;LogFileName=Castle.Facilities.AutoTx.Tests_net6.0_TestResults.xml;format=nunit3" || exit 1
 
 echo --------------------------------------------
 echo Running .NET Framework (net48) Unit Tests
@@ -71,12 +64,10 @@ mono "artifacts\bin\Release\net48\Castle.Services.Transaction.Tests\Castle.Servi
 mono "artifacts\bin\Release\net48\Castle.Facilities.AutoTx.Tests\Castle.Facilities.AutoTx.Tests.exe" --work "artifacts\testresults\Release" --result "Castle.Facilities.AutoTx.Tests_net48_TestResults.xml;format=nunit3" || exit 1
 
 # Ensure that all unit test runs produced protocol files.
-if [[ !( -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net8.0_TestResults.xml" &&
+if [[ !( -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net9.0_TestResults.xml" &&
+         -f "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net9.0_TestResults.xml" &&
+         -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net8.0_TestResults.xml" &&
          -f "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net8.0_TestResults.xml" &&
-         -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net7.0_TestResults.xml" &&
-         -f "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net7.0_TestResults.xml" &&
-         -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net6.0_TestResults.xml" &&
-         -f "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net6.0_TestResults.xml" &&
          -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net48_TestResults.xml" &&
          -f "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net48_TestResults.xml" ) ]]; then
     echo "Incomplete test results. Some test runs might not have terminated properly. Failing the build."
@@ -84,24 +75,17 @@ if [[ !( -f "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net
 fi
 
 # Unit Test Failures
+NET_FAILCOUNT=$(grep -F "One or more child tests had errors." "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net9.0_TestResults.xml" "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net9.0_TestResults.xml" | wc -l)
+if [ $NET_FAILCOUNT -ne 0 ]
+then
+    echo ".NET (net9.0) Unit Tests have failed, failing the build."
+    exit 1
+fi
+
 NET_FAILCOUNT=$(grep -F "One or more child tests had errors." "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net8.0_TestResults.xml" "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net8.0_TestResults.xml" | wc -l)
 if [ $NET_FAILCOUNT -ne 0 ]
 then
     echo ".NET (net8.0) Unit Tests have failed, failing the build."
-    exit 1
-fi
-
-NET_FAILCOUNT=$(grep -F "One or more child tests had errors." "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net7.0_TestResults.xml" "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net7.0_TestResults.xml" | wc -l)
-if [ $NET_FAILCOUNT -ne 0 ]
-then
-    echo ".NET (net7.0) Unit Tests have failed, failing the build."
-    exit 1
-fi
-
-NET_FAILCOUNT=$(grep -F "One or more child tests had errors." "artifacts\testresults\Release\Castle.Services.Transaction.Tests_net6.0_TestResults.xml" "artifacts\testresults\Release\Castle.Facilities.AutoTx.Tests_net6.0_TestResults.xml" | wc -l)
-if [ $NET_FAILCOUNT -ne 0 ]
-then
-    echo ".NET (net6.0) Unit Tests have failed, failing the build."
     exit 1
 fi
 
