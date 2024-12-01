@@ -77,7 +77,7 @@ SET PROJECT_NAMES=^
     Castle.Services.Transaction.Tests;^
     Castle.Facilities.AutoTx.Tests
 
-SET TARGET_FRAMEWORKS=net8.0;net7.0;net6.0;net48
+SET TARGET_FRAMEWORKS=net9.0;net8.0;net48
 
 FOR %%G IN (%TARGET_FRAMEWORKS%) DO (
     SET TARGET_FRAMEWORK=%%G
