@@ -1,7 +1,14 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
 
-## 5.5.0 (2024-11-xx)
+## 5.5.0 (2024-12-xx)
+
+Improvements:
+- Added **`.NET 9.0`** support.
+
+Breaking Changes:
+- Removed **`.NET 7.0`** and **`.NET 6.0`** supports.
+- Replaced **`IndexRange`** with **`Microsoft.Bcl.Memory`**.
 
 
 ## 5.4.0 (2024-11-30)
