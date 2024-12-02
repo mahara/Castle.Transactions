@@ -30,7 +30,13 @@ namespace Castle.Services.Transaction
         [ThreadStatic]
         private static Activity? _activity;
 
-        private readonly object _lock = new();
+        private readonly
+#if NET9_0_OR_GREATER
+            Lock
+#else
+            object
+#endif
+            _lock = new();
 
         public Activity CurrentActivity
         {
