@@ -355,13 +355,13 @@ namespace Castle.Services.Transaction
                                _transactionHandle!);
 
             RecurseFiles(path,
-                         filePath =>
+                         static filePath =>
                          {
                              Console.WriteLine("File: '{0}'", filePath);
 
                              return true;
                          },
-                         directoryPath =>
+                         static directoryPath =>
                          {
                              Console.WriteLine("Directory: '{0}'", directoryPath);
 
