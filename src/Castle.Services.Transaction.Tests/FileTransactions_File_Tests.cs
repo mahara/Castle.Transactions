@@ -28,7 +28,13 @@ namespace Castle.Services.Transaction.Tests
     {
         private const string TestFixtureDirectoryName = nameof(FileTransactions_File_Tests);
 
-        private readonly object _lock = new();
+        private readonly
+#if NET9_0_OR_GREATER
+            Lock
+#else
+            object
+#endif
+            _lock = new();
 
         private readonly List<string> _pathsCreated = [];
 
@@ -48,7 +54,11 @@ namespace Castle.Services.Transaction.Tests
         [SetUp]
         public void SetUp()
         {
+#if NET9_0_OR_GREATER
+            _lock.Enter();
+#else
             Monitor.Enter(_lock);
+#endif
 
             if (Directory.Exists(_testFixtureDirectoryPath))
             {
@@ -78,7 +88,11 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete(_testFixtureDirectoryPath, true);
             }
 
+#if NET9_0_OR_GREATER
+            _lock.Exit();
+#else
             Monitor.Exit(_lock);
+#endif
         }
 
         [Test]
