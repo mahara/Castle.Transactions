@@ -46,9 +46,9 @@ namespace Castle.Services.Transaction
 
         public virtual void Dispose()
         {
-            _resources.Select(r => r as IDisposable)
-                      .Where(r => r is not null)
-                      .ForEach(r => r!.Dispose());
+            _resources.Select(static r => r as IDisposable)
+                      .Where(static r => r is not null)
+                      .ForEach(static r => r!.Dispose());
 
             _resources.Clear();
             _synchronizationObjects.Clear();

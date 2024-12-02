@@ -36,20 +36,20 @@ namespace Castle.Services.Transaction.Tests
         {
             var root = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(root is TransactionBase);
+            Assert.That(root, Is.InstanceOf<TransactionBase>());
 
             root.Begin();
 
             var child1 = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child1 is ChildTransaction);
+            Assert.That(child1, Is.InstanceOf<ChildTransaction>());
             Assert.That(child1.IsChildTransaction);
 
             child1.Begin();
 
             var child2 = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child2 is ChildTransaction);
+            Assert.That(child2, Is.InstanceOf<ChildTransaction>());
             Assert.That(child2.IsChildTransaction);
 
             child2.Begin();
@@ -64,25 +64,25 @@ namespace Castle.Services.Transaction.Tests
         {
             var root = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(root is TransactionBase);
+            Assert.That(root, Is.InstanceOf<TransactionBase>());
 
             root.Begin();
 
             var child1 = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child1 is ChildTransaction);
+            Assert.That(child1, Is.InstanceOf<ChildTransaction>());
 
             child1.Begin();
 
             var innerRoot = _transactionManager.CreateTransaction(TransactionMode.RequiresNew, IsolationLevel.Unspecified)!;
 
-            Assert.That(innerRoot is ChildTransaction, Is.False);
+            Assert.That(innerRoot, Is.Not.InstanceOf<ChildTransaction>());
 
             innerRoot.Begin();
 
             var child2 = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child2 is ChildTransaction);
+            Assert.That(child2, Is.InstanceOf<ChildTransaction>());
 
             child2.Begin();
 
@@ -106,7 +106,7 @@ namespace Castle.Services.Transaction.Tests
 
             var child1 = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child1 is ChildTransaction);
+            Assert.That(child1, Is.InstanceOf<ChildTransaction>());
 
             child1.Enlist(resource);
             child1.Begin();
@@ -239,13 +239,13 @@ namespace Castle.Services.Transaction.Tests
         {
             var root = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(root is TalkactiveTransaction);
+            Assert.That(root, Is.InstanceOf<TalkactiveTransaction>());
 
             root.Begin();
 
             var child = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child is ChildTransaction);
+            Assert.That(child, Is.InstanceOf<ChildTransaction>());
             Assert.That(child.IsChildTransaction);
 
             child.Begin();
@@ -269,13 +269,13 @@ namespace Castle.Services.Transaction.Tests
         {
             var root = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(root is TalkactiveTransaction);
+            Assert.That(root, Is.InstanceOf<TalkactiveTransaction>());
 
             root.Begin();
 
             var child = _transactionManager.CreateTransaction(TransactionMode.Requires, IsolationLevel.Unspecified)!;
 
-            Assert.That(child is ChildTransaction);
+            Assert.That(child, Is.InstanceOf<ChildTransaction>());
             Assert.That(child.IsChildTransaction);
 
             child.Begin();

@@ -18,7 +18,13 @@ namespace Castle.Services.Transaction
 {
     public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        private readonly object _lock = new();
+        private readonly
+#if NET9_0_OR_GREATER
+            Lock
+#else
+            object
+#endif
+            _lock = new();
 
         private readonly AsyncLocal<Activity> _data = new();
 
