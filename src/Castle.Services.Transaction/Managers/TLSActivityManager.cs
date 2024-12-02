@@ -18,7 +18,7 @@ namespace Castle.Services.Transaction
 {
     public class TLSActivityManager : MarshalByRefObject, IActivityManager
     {
-        private readonly ThreadLocal<Activity> _activity = new(() => new Activity());
+        private readonly ThreadLocal<Activity> _activity = new(static () => new Activity());
 
         public Activity CurrentActivity => _activity.Value!;
 
