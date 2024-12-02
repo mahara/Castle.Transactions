@@ -138,7 +138,12 @@ namespace Castle.Facilities.AutoTx
 
             if (!Enum.TryParse(transactionModeName, true, out TransactionMode transactionMode))
             {
-                var values = (string[]) Enum.GetValues(typeof(TransactionMode));
+                var values = (string[])
+#if NET5_0_OR_GREATER
+                    Enum.GetValues<TransactionMode>().Select(x => x.ToString());
+#else
+                    Enum.GetValues(typeof(TransactionMode));
+#endif
 
                 throw new FacilityException(
                     $"The configuration for the class '{implementation.FullName}', method '{method.Name}', " +
@@ -158,7 +163,12 @@ namespace Castle.Facilities.AutoTx
 
             if (!Enum.TryParse(isolationLevelName, true, out IsolationLevel isolationLevel))
             {
-                var values = (string[]) Enum.GetValues(typeof(IsolationLevel));
+                var values = (string[])
+#if NET5_0_OR_GREATER
+                    Enum.GetValues<IsolationLevel>().Select(x => x.ToString());
+#else
+                    Enum.GetValues(typeof(TransactionMode));
+#endif
 
                 throw new FacilityException(
                     $"The configuration for the class '{implementation.FullName}', method '{method.Name}', " +

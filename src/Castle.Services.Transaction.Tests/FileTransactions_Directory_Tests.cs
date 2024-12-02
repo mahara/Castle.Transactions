@@ -24,7 +24,13 @@ namespace Castle.Services.Transaction.Tests
     [Platform("Win")]
     public class FileTransactions_Directory_Tests
     {
-        private readonly object _lock = new();
+        private readonly
+#if NET9_0_OR_GREATER
+            Lock
+#else
+            object
+#endif
+            _lock = new();
 
         private readonly List<string> _fileSystemPathsCreated = [];
 
@@ -44,7 +50,11 @@ namespace Castle.Services.Transaction.Tests
         [SetUp]
         public void CleanOutListEtc()
         {
+#if NET9_0_OR_GREATER
+            _lock.Enter();
+#else
             Monitor.Enter(_lock);
+#endif
 
             _fileSystemPathsCreated.Clear();
         }
@@ -69,7 +79,11 @@ namespace Castle.Services.Transaction.Tests
                 Directory.Delete("testing", true);
             }
 
+#if NET9_0_OR_GREATER
+            _lock.Exit();
+#else
             Monitor.Exit(_lock);
+#endif
         }
 
         [Test]

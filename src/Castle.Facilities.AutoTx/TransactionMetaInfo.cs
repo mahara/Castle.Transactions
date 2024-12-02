@@ -25,7 +25,13 @@ namespace Castle.Facilities.AutoTx
     /// </summary>
     public class TransactionMetaInfo : MarshalByRefObject
     {
-        private readonly object _lock = new();
+        private readonly
+#if NET9_0_OR_GREATER
+            Lock
+#else
+            object
+#endif
+            _lock = new();
 
         private readonly Dictionary<MethodInfo, TransactionAttribute> _methodToAttribute = [];
         private readonly HashSet<MethodInfo> _methodsToInject = [];
