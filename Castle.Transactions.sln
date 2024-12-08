@@ -51,18 +51,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5B28214B-C4B
 		src\Project.Build.References.props = src\Project.Build.References.props
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{102234F4-050F-4E1C-824E-E3CE5367B5E0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Explicit.NuGet.Versions", "Explicit.NuGet.Versions", "{74F268BE-5BF4-4427-8A2C-34B4C30DBD55}"
-	ProjectSection(SolutionItems) = preProject
-		tools\Explicit.NuGet.Versions\Directory.Build.props = tools\Explicit.NuGet.Versions\Directory.Build.props
-		tools\Explicit.NuGet.Versions\Directory.Build.targets = tools\Explicit.NuGet.Versions\Directory.Build.targets
-		tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj = tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.csproj
-		tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln = tools\Explicit.NuGet.Versions\Explicit.NuGet.Versions.sln
-		tools\Explicit.NuGet.Versions\Program.cs = tools\Explicit.NuGet.Versions\Program.cs
-		tools\Explicit.NuGet.Versions\Project.Build.References.props = tools\Explicit.NuGet.Versions\Project.Build.References.props
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{BBAFF222-AC65-4137-AC35-8B5E2536C435}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A5F5C950-E591-459D-8AB9-A957A4FABFC5}"
@@ -107,8 +95,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5F7B9F1B-217C-49AF-8298-74367EE0FFA3} = {854CB877-2A9E-4D7A-B5ED-C2225289004C}
 		{5B28214B-C4BF-4151-92AB-BEABBD436DC9} = {854CB877-2A9E-4D7A-B5ED-C2225289004C}
-		{102234F4-050F-4E1C-824E-E3CE5367B5E0} = {854CB877-2A9E-4D7A-B5ED-C2225289004C}
-		{74F268BE-5BF4-4427-8A2C-34B4C30DBD55} = {102234F4-050F-4E1C-824E-E3CE5367B5E0}
 		{BBAFF222-AC65-4137-AC35-8B5E2536C435} = {854CB877-2A9E-4D7A-B5ED-C2225289004C}
 		{A5F5C950-E591-459D-8AB9-A957A4FABFC5} = {BBAFF222-AC65-4137-AC35-8B5E2536C435}
 		{EAFE6B41-F2DB-4ED2-B8C3-D1FBC2A31BF5} = {4DC9D87F-0C2A-436D-9E9D-095AE1DB0462}
