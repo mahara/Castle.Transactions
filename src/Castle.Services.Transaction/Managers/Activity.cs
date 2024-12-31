@@ -14,44 +14,45 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
-[Serializable]
-public class Activity : MarshalByRefObject
+namespace Castle.Services.Transaction
 {
-    private readonly Stack<ITransaction> _transactionStack = new(2);
-    private readonly Guid _id = Guid.NewGuid();
-
-    public ITransaction? CurrentTransaction =>
-        _transactionStack.Count == 0 ? null : _transactionStack.Peek();
-
-    public void Push(ITransaction transaction)
+    [Serializable]
+    public class Activity : MarshalByRefObject
     {
-        _transactionStack.Push(transaction);
-    }
+        private readonly Stack<ITransaction> _transactionStack = new(2);
+        private readonly Guid _id = Guid.NewGuid();
 
-    public ITransaction Pop()
-    {
-        return _transactionStack.Pop();
-    }
+        public ITransaction? CurrentTransaction =>
+            _transactionStack.Count == 0 ? null : _transactionStack.Peek();
 
-    public override bool Equals(object? obj)
-    {
-        if (this == obj)
+        public void Push(ITransaction transaction)
         {
-            return true;
+            _transactionStack.Push(transaction);
         }
 
-        if (obj is not Activity activity)
+        public ITransaction Pop()
         {
-            return false;
+            return _transactionStack.Pop();
         }
 
-        return Equals(_id, activity._id);
-    }
+        public override bool Equals(object? obj)
+        {
+            if (this == obj)
+            {
+                return true;
+            }
 
-    public override int GetHashCode()
-    {
-        return _id.GetHashCode();
+            if (obj is not Activity activity)
+            {
+                return false;
+            }
+
+            return Equals(_id, activity._id);
+        }
+
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
     }
 }

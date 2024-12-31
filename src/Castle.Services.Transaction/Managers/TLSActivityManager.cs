@@ -15,47 +15,48 @@
 #endregion
 
 #if NETFRAMEWORK
-namespace Castle.Services.Transaction;
-
-public class TLSActivityManager : MarshalByRefObject, IActivityManager
+namespace Castle.Services.Transaction
 {
-    private const string Key = "Castle.Services.Transaction.TLSActivity";
-
-    private readonly object _lockObj = new();
-    private static readonly LocalDataStoreSlot _dataSlot;
-
-    static TLSActivityManager()
+    public class TLSActivityManager : MarshalByRefObject, IActivityManager
     {
-        _dataSlot = Thread.AllocateNamedDataSlot(Key);
-    }
+        private const string Key = "Castle.Services.Transaction.TLSActivity";
 
-    /// <summary>
-    /// Gets the current activity.
-    /// </summary>
-    /// <value>The current activity.</value>
-    public Activity CurrentActivity
-    {
-        get
+        private readonly object _lockObj = new();
+        private static readonly LocalDataStoreSlot _dataSlot;
+
+        static TLSActivityManager()
         {
-            lock (_lockObj)
+            _dataSlot = Thread.AllocateNamedDataSlot(Key);
+        }
+
+        /// <summary>
+        /// Gets the current activity.
+        /// </summary>
+        /// <value>The current activity.</value>
+        public Activity CurrentActivity
+        {
+            get
             {
-                var activity = (Activity) Thread.GetData(_dataSlot);
-
-                if (activity is null)
+                lock (_lockObj)
                 {
-                    activity = new Activity();
-                    Thread.SetData(_dataSlot, activity);
-                }
+                    var activity = (Activity) Thread.GetData(_dataSlot);
 
-                return activity;
+                    if (activity is null)
+                    {
+                        activity = new Activity();
+                        Thread.SetData(_dataSlot, activity);
+                    }
+
+                    return activity;
+                }
             }
         }
-    }
 
-    /// <inheritdoc />
-    public override object InitializeLifetimeService()
-    {
-        return null!;
+        /// <inheritdoc />
+        public override object InitializeLifetimeService()
+        {
+            return null!;
+        }
     }
 }
 #endif

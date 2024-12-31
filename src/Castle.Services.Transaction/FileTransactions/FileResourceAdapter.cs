@@ -14,55 +14,56 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
-/// <summary>
-/// A resource adapter for a file transaction.
-/// </summary>
-public class FileResourceAdapter : IResource, IDisposable
+namespace Castle.Services.Transaction
 {
     /// <summary>
-    /// Constructor.
+    /// A resource adapter for a file transaction.
     /// </summary>
-    /// <param name="transaction"></param>
-    public FileResourceAdapter(IFileTransaction transaction)
+    public class FileResourceAdapter : IResource, IDisposable
     {
-        Transaction = transaction;
-    }
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="transaction"></param>
+        public FileResourceAdapter(IFileTransaction transaction)
+        {
+            Transaction = transaction;
+        }
 
-    /// <summary>
-    /// Gets the transaction this resouce adapter is an adapter for.
-    /// </summary>
-    public IFileTransaction Transaction { get; }
+        /// <summary>
+        /// Gets the transaction this resouce adapter is an adapter for.
+        /// </summary>
+        public IFileTransaction Transaction { get; }
 
-    /// <summary>
-    /// Implementors should start the transaction on the underlying resource.
-    /// </summary>
-    public void Start()
-    {
-        Transaction.Begin();
-    }
+        /// <summary>
+        /// Implementors should start the transaction on the underlying resource.
+        /// </summary>
+        public void Start()
+        {
+            Transaction.Begin();
+        }
 
-    /// <summary>
-    /// Implementors should commit the transaction on the underlying resource.
-    /// </summary>
-    public void Commit()
-    {
-        Transaction.Commit();
-    }
+        /// <summary>
+        /// Implementors should commit the transaction on the underlying resource.
+        /// </summary>
+        public void Commit()
+        {
+            Transaction.Commit();
+        }
 
-    /// <summary>
-    /// Implementors should rollback the transaction on the underlying resource.
-    /// </summary>
-    public void Rollback()
-    {
-        Transaction.Rollback();
-    }
+        /// <summary>
+        /// Implementors should rollback the transaction on the underlying resource.
+        /// </summary>
+        public void Rollback()
+        {
+            Transaction.Rollback();
+        }
 
-    public void Dispose()
-    {
-        Transaction.Dispose();
+        public void Dispose()
+        {
+            Transaction.Dispose();
 
-        GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
+        }
     }
 }

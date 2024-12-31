@@ -14,19 +14,20 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using Castle.Services.Transaction;
 
-public abstract class BaseTransactionalComp
+namespace Castle.Facilities.AutoTx.Tests
 {
-    [Transaction]
-    public virtual void BaseMethod()
+    public abstract class BaseTransactionalComp
+    {
+        [Transaction]
+        public virtual void BaseMethod()
+        {
+        }
+    }
+
+    [Transactional]
+    public class SubTransactionalComp : BaseTransactionalComp
     {
     }
-}
-
-[Transactional]
-public class SubTransactionalComp : BaseTransactionalComp
-{
 }

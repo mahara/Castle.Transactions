@@ -15,46 +15,47 @@
 #endregion
 
 #if NETFRAMEWORK
-namespace Castle.Services.Transaction;
-
 using System.Runtime.Remoting.Messaging;
 
-public class CallContextActivityManager : MarshalByRefObject, IActivityManager
+namespace Castle.Services.Transaction
 {
-    private const string Key = "Castle.Services.Transaction.Activity";
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CallContextActivityManager" /> class.
-    /// </summary>
-    public CallContextActivityManager()
+    public class CallContextActivityManager : MarshalByRefObject, IActivityManager
     {
-        CallContext.SetData(Key, null);
-    }
+        private const string Key = "Castle.Services.Transaction.Activity";
 
-    /// <summary>
-    /// Gets the current activity.
-    /// </summary>
-    /// <value>The current activity.</value>
-    public Activity CurrentActivity
-    {
-        get
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CallContextActivityManager" /> class.
+        /// </summary>
+        public CallContextActivityManager()
         {
-            var activity = (Activity) CallContext.GetData(Key);
-
-            if (activity is null)
-            {
-                activity = new Activity();
-                CallContext.SetData(Key, activity);
-            }
-
-            return activity;
+            CallContext.SetData(Key, null);
         }
-    }
 
-    /// <inheritdoc />
-    public override object InitializeLifetimeService()
-    {
-        return null!;
+        /// <summary>
+        /// Gets the current activity.
+        /// </summary>
+        /// <value>The current activity.</value>
+        public Activity CurrentActivity
+        {
+            get
+            {
+                var activity = (Activity) CallContext.GetData(Key);
+
+                if (activity is null)
+                {
+                    activity = new Activity();
+                    CallContext.SetData(Key, activity);
+                }
+
+                return activity;
+            }
+        }
+
+        /// <inheritdoc />
+        public override object InitializeLifetimeService()
+        {
+            return null!;
+        }
     }
 }
 #endif

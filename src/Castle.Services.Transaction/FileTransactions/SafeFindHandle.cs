@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using System.Security.Permissions;
@@ -23,42 +21,45 @@ using System.Security.Permissions;
 
 using Microsoft.Win32.SafeHandles;
 
-#if NETFRAMEWORK
-[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-#endif
-internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
+namespace Castle.Services.Transaction
 {
-    internal SafeFindHandle() :
-        base(true)
+#if NETFRAMEWORK
+    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+#endif
+    internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-    }
-
-    public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle) :
-        base(ownsHandle)
-    {
-        SetHandle(preExistingHandle);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (!(IsInvalid || IsClosed))
+        internal SafeFindHandle() :
+            base(true)
         {
-            FindClose(this);
         }
 
-        base.Dispose(disposing);
-    }
-
-    protected override bool ReleaseHandle()
-    {
-        if (!(IsInvalid || IsClosed))
+        public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle) :
+            base(ownsHandle)
         {
-            return FindClose(this);
+            SetHandle(preExistingHandle);
         }
 
-        return IsInvalid || IsClosed;
-    }
+        protected override void Dispose(bool disposing)
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                FindClose(this);
+            }
 
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool FindClose(SafeHandle hFindFile);
+            base.Dispose(disposing);
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            if (!(IsInvalid || IsClosed))
+            {
+                return FindClose(this);
+            }
+
+            return IsInvalid || IsClosed;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FindClose(SafeHandle hFindFile);
+    }
 }

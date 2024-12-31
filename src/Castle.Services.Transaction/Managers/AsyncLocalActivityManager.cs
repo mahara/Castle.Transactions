@@ -14,39 +14,40 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
-public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
+namespace Castle.Services.Transaction
 {
-    private readonly AsyncLocal<Activity?> _data = new();
-
-    public AsyncLocalActivityManager()
+    public class AsyncLocalActivityManager : MarshalByRefObject, IActivityManager
     {
-        _data.Value = null;
-    }
+        private readonly AsyncLocal<Activity?> _data = new();
 
-    public Activity CurrentActivity
-    {
-        get
+        public AsyncLocalActivityManager()
         {
-            var activity = _data.Value;
-
-            if (activity is null)
-            {
-                activity = new Activity();
-                _data.Value = activity;
-            }
-
-            return activity;
+            _data.Value = null;
         }
-    }
 
-    /// <inheritdoc />
+        public Activity CurrentActivity
+        {
+            get
+            {
+                var activity = _data.Value;
+
+                if (activity is null)
+                {
+                    activity = new Activity();
+                    _data.Value = activity;
+                }
+
+                return activity;
+            }
+        }
+
+        /// <inheritdoc />
 #if NET
-    [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
 #endif
-    public override object InitializeLifetimeService()
-    {
-        return null!;
+        public override object InitializeLifetimeService()
+        {
+            return null!;
+        }
     }
 }

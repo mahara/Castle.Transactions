@@ -14,330 +14,329 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests;
-
-using System.IO;
-
 using Castle.Services.Transaction.IO;
 
 using NUnit.Framework;
 
-[TestFixture]
-public class FileTransactions_Directory_Tests
+namespace Castle.Services.Transaction.Tests
 {
-    private static readonly object _syncObject = new();
-
-    private readonly List<string> _infosCreated = [];
-    private string _dllPath;
-
-    [SetUp]
-    public void CleanOutListEtc()
+    [TestFixture]
+    public class FileTransactions_Directory_Tests
     {
-        Monitor.Enter(_syncObject);
+        private static readonly object _syncObject = new();
 
-        _infosCreated.Clear();
-    }
+        private readonly List<string> _infosCreated = [];
+        private string _dllPath;
 
-    [SetUp]
-    public void Setup()
-    {
-        _dllPath = TestContext.CurrentContext.TestDirectory;
-    }
-
-    [TearDown]
-    public void RemoveAllCreatedFiles()
-    {
-        foreach (var filePath in _infosCreated)
+        [SetUp]
+        public void CleanOutListEtc()
         {
-            if (File.Exists(filePath))
+            Monitor.Enter(_syncObject);
+
+            _infosCreated.Clear();
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _dllPath = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [TearDown]
+        public void RemoveAllCreatedFiles()
+        {
+            foreach (var filePath in _infosCreated)
             {
-                File.Delete(filePath);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                else if (Directory.Exists(filePath))
+                {
+                    Directory.Delete(filePath);
+                }
             }
-            else if (Directory.Exists(filePath))
+
+            if (Directory.Exists("testing"))
             {
-                Directory.Delete(filePath);
+                Directory.Delete("testing", true);
             }
+
+            Monitor.Exit(_syncObject);
         }
 
-        if (Directory.Exists("testing"))
+        [Test]
+        [Platform("Win")]
+        public void NoCommitMeansNoDirectory()
         {
-            Directory.Delete("testing", true);
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
+
+                return;
+            }
+
+            var directoryPath = "testing";
+            Assert.That(Directory.Exists(directoryPath), Is.False);
+
+            using (var txF = new FileTransaction())
+            {
+                txF.Begin();
+
+                ((IDirectoryAdapter) txF).Create(directoryPath);
+            }
+
+            Assert.That(!Directory.Exists(directoryPath));
         }
 
-        Monitor.Exit(_syncObject);
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void NoCommitMeansNoDirectory()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void NonExistentDirectory()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
+                return;
+            }
+
+            using (var txF = new FileTransaction())
+            {
+                txF.Begin();
+
+                var adapter = (IDirectoryAdapter) txF;
+
+                Assert.That(adapter.Exists("/hahaha"), Is.False);
+                Assert.That(adapter.Exists("another_non_existent"), Is.False);
+
+                adapter.Create("existing");
+
+                Assert.That(adapter.Exists("existing"), Is.True);
+            }
+
+            // No commit.
+            Assert.That(Directory.Exists("existing"), Is.False);
         }
 
-        var directoryPath = "testing";
-        Assert.That(Directory.Exists(directoryPath), Is.False);
-
-        using (var txF = new FileTransaction())
+        [Test]
+        [Description("We are not in a distributed transaction if there is no transaction scope.")]
+        [Platform("Win")]
+        public void NotUsingTransactionScopeIsNotDistributedAboveNegated()
         {
-            txF.Begin();
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            ((IDirectoryAdapter) txF).Create(directoryPath);
+                return;
+            }
+
+            using var tx = new FileTransaction("Not distributed transaction");
+
+            tx.Begin();
+
+            Assert.That(tx.IsAmbient, Is.False);
+
+            tx.Commit();
         }
 
-        Assert.That(!Directory.Exists(directoryPath));
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void NonExistentDirectory()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void ExistingDirectoryWithTrailingBackslash()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
-        }
+                return;
+            }
 
-        using (var txF = new FileTransaction())
-        {
+            // From https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
+            // From http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
+            // An attempt to open a search with a trailing backslash always fails.
+            // --> So I need to make it succeed.
+            using var txF = new FileTransaction();
+
             txF.Begin();
 
             var adapter = (IDirectoryAdapter) txF;
+            adapter.Create("something");
 
-            Assert.That(adapter.Exists("/hahaha"), Is.False);
-            Assert.That(adapter.Exists("another_non_existent"), Is.False);
-
-            adapter.Create("existing");
-
-            Assert.That(adapter.Exists("existing"), Is.True);
+            Assert.That(adapter.Exists("something"));
+            Assert.That(adapter.Exists(@"something\"));
         }
 
-        // No commit.
-        Assert.That(Directory.Exists("existing"), Is.False);
-    }
-
-    [Test]
-    [Description("We are not in a distributed transaction if there is no transaction scope.")]
-    [Platform("Win")]
-    public void NotUsingTransactionScopeIsNotDistributedAboveNegated()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void CreatingDirectoryInTransactionAndCommittingMeansExistsAfter()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
+                return;
+            }
+
+            var directoryPath = "testing";
+            Assert.That(Directory.Exists(directoryPath), Is.False);
+
+            using (var txF = new FileTransaction())
+            {
+                txF.Begin();
+
+                ((IDirectoryAdapter) txF).Create(directoryPath);
+
+                txF.Commit();
+            }
+
+            Assert.That(Directory.Exists(directoryPath));
+
+            Directory.Delete(directoryPath);
         }
 
-        using var tx = new FileTransaction("Not distributed transaction");
-
-        tx.Begin();
-
-        Assert.That(tx.IsAmbient, Is.False);
-
-        tx.Commit();
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void ExistingDirectoryWithTrailingBackslash()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void CanCreateAndFindDirectoryWithinTransaction()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
+                return;
+            }
+
+            using var tx = new FileTransaction("s");
+
+            tx.Begin();
+
+            Assert.That(((IDirectoryAdapter) tx).Exists("something"), Is.False);
+
+            ((IDirectoryAdapter) tx).Create("something");
+
+            Assert.That(((IDirectoryAdapter) tx).Exists("something"));
+
+            tx.Rollback();
         }
 
-        // From https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
-        // From http://msdn.microsoft.com/en-us/library/aa364419(VS.85).aspx
-        // An attempt to open a search with a trailing backslash always fails.
-        // --> So I need to make it succeed.
-        using var txF = new FileTransaction();
-
-        txF.Begin();
-
-        var adapter = (IDirectoryAdapter) txF;
-        adapter.Create("something");
-
-        Assert.That(adapter.Exists("something"));
-        Assert.That(adapter.Exists(@"something\"));
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CreatingDirectoryInTransactionAndCommittingMeansExistsAfter()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void CanCreateDirectoryNLengthsDownInNonExistentDirectory()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
+                return;
+            }
+
+            var directoryPath = "testing/apa/apa2";
+            Assert.That(Directory.Exists(directoryPath), Is.False);
+
+            using (var txF = new FileTransaction())
+            {
+                txF.Begin();
+
+                ((IDirectoryAdapter) txF).Create(directoryPath);
+
+                txF.Commit();
+            }
+
+            Assert.That(Directory.Exists(directoryPath));
+
+            Directory.Delete(directoryPath);
         }
 
-        var directoryPath = "testing";
-        Assert.That(Directory.Exists(directoryPath), Is.False);
-
-        using (var txF = new FileTransaction())
+        [Test]
+        [Platform("Win")]
+        public void CanDeleteNonRecursivelyEmptyDirectory()
         {
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
+
+                return;
+            }
+
+            // 1. Create directory.
+            var directoryPath = _dllPath.CombinePathThenAssert("testing");
+
+            // 2. Test it.
+            using var tx = new FileTransaction("Can delete empty directory.");
+
+            IDirectoryAdapter adapter = tx;
+
+            tx.Begin();
+
+            Assert.That(adapter.Delete(directoryPath, false), "Successfully deleted.");
+
+            tx.Commit();
+        }
+
+        [Test]
+        [Platform("Win")]
+        public void CanDeleteDirectoryRecursively()
+        {
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
+
+                return;
+            }
+
+            // 1. Create directory.
+            var directoryPath = _dllPath.CombinePath("testing");
+            Directory.CreateDirectory(directoryPath);
+            Directory.CreateDirectory(directoryPath.CombinePath("one"));
+            Directory.CreateDirectory(directoryPath.CombinePath("two"));
+            Directory.CreateDirectory(directoryPath.CombinePath("three"));
+
+            // 2. Write contents.
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("fileone"), ["Hello world", "second line"]);
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("filetwo"), ["two", "second line"]);
+            File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "two").CombinePath("filethree"), ["three", "second line"]);
+
+            // 3. Test it.
+            using var txF = new FileTransaction();
+
             txF.Begin();
 
-            ((IDirectoryAdapter) txF).Create(directoryPath);
+            Assert.That(((IDirectoryAdapter) txF).Delete(directoryPath, true), Is.True);
 
             txF.Commit();
         }
 
-        Assert.That(Directory.Exists(directoryPath));
-
-        Directory.Delete(directoryPath);
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CanCreateAndFindDirectoryWithinTransaction()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
+        [Test]
+        [Platform("Win")]
+        public void CanNotDeleteNonRecursivelyNonEmptyDirectory()
         {
-            Assert.Ignore("TxF not supported.");
+            if (Environment.OSVersion.Version.Major < 6)
+            {
+                Assert.Ignore("TxF not supported.");
 
-            return;
+                return;
+            }
+
+            // 1. Create directory and file.
+            var directoryPath = _dllPath.CombinePathThenAssert("testing");
+            var filePath = directoryPath.CombinePath("file");
+            File.WriteAllText(filePath, "hello");
+
+            // 2. Test it.
+            using var tx = new FileTransaction("Can not delete non-empty directory");
+
+            IDirectoryAdapter directoryAdapter = tx;
+
+            tx.Begin();
+
+            Assert.That(directoryAdapter.Delete(directoryPath, false), Is.False,
+                        "Did not delete non-empty directory.");
+
+            IFileAdapter fileAdapter = tx;
+            fileAdapter.Delete(filePath);
+
+            Assert.That(directoryAdapter.Delete(directoryPath, false),
+                        "After deleting the file in the directory, the directory is also deleted.");
+
+            tx.Commit();
         }
-
-        using var tx = new FileTransaction("s");
-
-        tx.Begin();
-
-        Assert.That(((IDirectoryAdapter) tx).Exists("something"), Is.False);
-
-        ((IDirectoryAdapter) tx).Create("something");
-
-        Assert.That(((IDirectoryAdapter) tx).Exists("something"));
-
-        tx.Rollback();
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CanCreateDirectoryNLengthsDownInNonExistentDirectory()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
-        {
-            Assert.Ignore("TxF not supported.");
-
-            return;
-        }
-
-        var directoryPath = "testing/apa/apa2";
-        Assert.That(Directory.Exists(directoryPath), Is.False);
-
-        using (var txF = new FileTransaction())
-        {
-            txF.Begin();
-
-            ((IDirectoryAdapter) txF).Create(directoryPath);
-
-            txF.Commit();
-        }
-
-        Assert.That(Directory.Exists(directoryPath));
-
-        Directory.Delete(directoryPath);
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CanDeleteNonRecursivelyEmptyDirectory()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
-        {
-            Assert.Ignore("TxF not supported.");
-
-            return;
-        }
-
-        // 1. Create directory.
-        var directoryPath = _dllPath.CombinePathThenAssert("testing");
-
-        // 2. Test it.
-        using var tx = new FileTransaction("Can delete empty directory.");
-
-        IDirectoryAdapter adapter = tx;
-
-        tx.Begin();
-
-        Assert.That(adapter.Delete(directoryPath, false), "Successfully deleted.");
-
-        tx.Commit();
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CanDeleteDirectoryRecursively()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
-        {
-            Assert.Ignore("TxF not supported.");
-
-            return;
-        }
-
-        // 1. Create directory.
-        var directoryPath = _dllPath.CombinePath("testing");
-        Directory.CreateDirectory(directoryPath);
-        Directory.CreateDirectory(directoryPath.CombinePath("one"));
-        Directory.CreateDirectory(directoryPath.CombinePath("two"));
-        Directory.CreateDirectory(directoryPath.CombinePath("three"));
-
-        // 2. Write contents.
-        File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("fileone"), ["Hello world", "second line"]);
-        File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "one").CombinePath("filetwo"), ["two", "second line"]);
-        File.WriteAllLines(ExtensionMethods.CombinePath(directoryPath, "two").CombinePath("filethree"), ["three", "second line"]);
-
-        // 3. Test it.
-        using var txF = new FileTransaction();
-
-        txF.Begin();
-
-        Assert.That(((IDirectoryAdapter) txF).Delete(directoryPath, true), Is.True);
-
-        txF.Commit();
-    }
-
-    [Test]
-    [Platform("Win")]
-    public void CanNotDeleteNonRecursivelyNonEmptyDirectory()
-    {
-        if (Environment.OSVersion.Version.Major < 6)
-        {
-            Assert.Ignore("TxF not supported.");
-
-            return;
-        }
-
-        // 1. Create directory and file.
-        var directoryPath = _dllPath.CombinePathThenAssert("testing");
-        var filePath = directoryPath.CombinePath("file");
-        File.WriteAllText(filePath, "hello");
-
-        // 2. Test it.
-        using var tx = new FileTransaction("Can not delete non-empty directory");
-
-        IDirectoryAdapter directoryAdapter = tx;
-
-        tx.Begin();
-
-        Assert.That(directoryAdapter.Delete(directoryPath, false), Is.False,
-                    "Did not delete non-empty directory.");
-
-        IFileAdapter fileAdapter = tx;
-        fileAdapter.Delete(filePath);
-
-        Assert.That(directoryAdapter.Delete(directoryPath, false),
-                    "After deleting the file in the directory, the directory is also deleted.");
-
-        tx.Commit();
     }
 }

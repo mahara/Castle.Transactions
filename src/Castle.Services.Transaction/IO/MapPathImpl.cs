@@ -14,76 +14,77 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.IO;
-
-/// <summary>
-/// An implementation of the MapPath which seems to be working well with both testfixtures and online.
-/// Consumed by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
-/// </summary>
-public class MapPathImpl : IMapPath
+namespace Castle.Services.Transaction.IO
 {
-    private readonly Func<string, string>? _function;
-
     /// <summary>
-    /// Default constructor.
+    /// An implementation of the MapPath which seems to be working well with both testfixtures and online.
+    /// Consumed by <see cref="IDirectoryAdapter" /> (or any other object wanting the functionality).
     /// </summary>
-    public MapPathImpl()
+    public class MapPathImpl : IMapPath
     {
-    }
+        private readonly Func<string, string>? _function;
 
-    /// <summary>
-    /// Function may be null.
-    /// </summary>
-    /// <param name="function"></param>
-    public MapPathImpl(Func<string, string> function)
-    {
-        _function = function;
-    }
-
-    /// <summary>
-    /// Gets the absolute path given a string formatted as a map path,
-    /// for example:
-    /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
-    /// would all be valid map paths.
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    public string MapPath(string path)
-    {
-        if (Path.IsRooted(path))
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public MapPathImpl()
         {
-            return Path.GetFullPath(path);
         }
 
-        if (_function is not null)
+        /// <summary>
+        /// Function may be null.
+        /// </summary>
+        /// <param name="function"></param>
+        public MapPathImpl(Func<string, string> function)
         {
-            return _function(path);
+            _function = function;
         }
 
-        path = Path.NormalizeDirectorySeparatorChars(path);
-
-        if (path == string.Empty)
+        /// <summary>
+        /// Gets the absolute path given a string formatted as a map path,
+        /// for example:
+        /// "~/plugins" or "plugins/integrated" or "C:\a\b\c.txt" or "\\?\C:\a\b"
+        /// would all be valid map paths.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string MapPath(string path)
         {
-            return AppDomain.CurrentDomain.BaseDirectory;
-        }
+            if (Path.IsRooted(path))
+            {
+                return Path.GetFullPath(path);
+            }
 
-        if (path[0] == '~')
-        {
-            path = path[1..];
-        }
+            if (_function is not null)
+            {
+                return _function(path);
+            }
 
-        if (path == string.Empty)
-        {
-            return AppDomain.CurrentDomain.BaseDirectory;
-        }
+            path = Path.NormalizeDirectorySeparatorChars(path);
 
-        if (Path.DirectorySeparatorChar == path[0])
-        {
-            path = path[1..];
-        }
+            if (path == string.Empty)
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
 
-        return path == string.Empty ?
-               AppDomain.CurrentDomain.BaseDirectory :
-               Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
+            if (path[0] == '~')
+            {
+                path = path[1..];
+            }
+
+            if (path == string.Empty)
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
+
+            if (Path.DirectorySeparatorChar == path[0])
+            {
+                path = path[1..];
+            }
+
+            return path == string.Empty ?
+                   AppDomain.CurrentDomain.BaseDirectory :
+                   Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory.Combine(path));
+        }
     }
 }

@@ -14,15 +14,16 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
-public sealed class TransactionFailedEventArgs : TransactionEventArgs
+namespace Castle.Services.Transaction
 {
-    public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception) :
-        base(transaction)
+    public sealed class TransactionFailedEventArgs : TransactionEventArgs
     {
-        Exception = exception;
-    }
+        public TransactionFailedEventArgs(ITransaction transaction, TransactionException exception) :
+            base(transaction)
+        {
+            Exception = exception;
+        }
 
-    public TransactionException Exception { get; }
+        public TransactionException Exception { get; }
+    }
 }

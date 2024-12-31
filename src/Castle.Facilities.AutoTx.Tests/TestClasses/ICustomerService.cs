@@ -14,11 +14,12 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
-public interface ICustomerService
+namespace Castle.Facilities.AutoTx.Tests
 {
-    void Insert(string name, string address);
+    public interface ICustomerService
+    {
+        void Insert(string name, string address);
 
-    void Delete(int id);
+        void Delete(int id);
+    }
 }

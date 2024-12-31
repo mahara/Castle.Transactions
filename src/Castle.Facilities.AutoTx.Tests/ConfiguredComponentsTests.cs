@@ -14,86 +14,87 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using Castle.MicroKernel.Facilities;
 using Castle.Windsor;
 
 using NUnit.Framework;
 
-[TestFixture]
-public class ConfiguredComponentsTests
+namespace Castle.Facilities.AutoTx.Tests
 {
-    [Test]
-    public void IsTransactionalMissing()
+    [TestFixture]
+    public class ConfiguredComponentsTests
     {
-        static void Method()
+        [Test]
+        public void IsTransactionalMissing()
         {
-            _ = new WindsorContainer("IsTransactionalMissing.xml");
+            static void Method()
+            {
+                _ = new WindsorContainer("IsTransactionalMissing.xml");
+            }
+
+            Assert.That(Method,
+                        Throws.TypeOf<FacilityException>()
+                              .And.Message.EqualTo("The class 'Castle.Facilities.AutoTx.Tests.TransactionalComponent1' has configured transaction in a child node but has not specified 'isTransaction=true' on the component node."));
         }
 
-        Assert.That(Method,
-                    Throws.TypeOf<FacilityException>()
-                          .And.Message.EqualTo("The class 'Castle.Facilities.AutoTx.Tests.TransactionalComponent1' has configured transaction in a child node but has not specified 'isTransaction=true' on the component node."));
-    }
-
-    [Test]
-    public void HasIsTransactionalButNothingIsConfigured()
-    {
-        var container = new WindsorContainer("HasIsTransactionalButNothingIsConfigured.xml");
-
-        var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
-
-        var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
-        Assert.That(meta, Is.Null);
-    }
-
-    [Test]
-    public void HasConfiguration()
-    {
-        var container = new WindsorContainer("HasConfiguration.xml");
-
-        var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
-
-        var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
-        Assert.That(meta, Is.Not.Null);
-        Assert.That(meta.Methods.Count(), Is.EqualTo(3));
-    }
-
-    [Test]
-    public void HasInvalidMethod()
-    {
-        static void Method()
+        [Test]
+        public void HasIsTransactionalButNothingIsConfigured()
         {
-            _ = new WindsorContainer("HasInvalidMethod.xml");
+            var container = new WindsorContainer("HasIsTransactionalButNothingIsConfigured.xml");
+
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
+            Assert.That(meta, Is.Null);
         }
 
-        Assert.That(Method,
-                    Throws.TypeOf<Exception>()
-                          .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
-    }
+        [Test]
+        public void HasConfiguration()
+        {
+            var container = new WindsorContainer("HasConfiguration.xml");
 
-    [Test]
-    public void ValidConfigForInheritedMethods()
-    {
-        var container = new WindsorContainer("ValidConfigForInheritedMethods.xml");
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
 
-        var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent1));
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.Methods.Count(), Is.EqualTo(3));
+        }
 
-        var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent2));
-        Assert.That(meta, Is.Not.Null);
-        Assert.That(meta.Methods.Count(), Is.EqualTo(4));
-    }
+        [Test]
+        public void HasInvalidMethod()
+        {
+            static void Method()
+            {
+                _ = new WindsorContainer("HasInvalidMethod.xml");
+            }
 
-    [Test]
-    public void ConfigForServiceWithInterface()
-    {
-        var container = new WindsorContainer("ConfigForServiceWithInterface.xml");
+            Assert.That(Method,
+                        Throws.TypeOf<Exception>()
+                              .And.Message.EqualTo("The class Castle.Facilities.AutoTx.Tests.TransactionalComponent1 has tried to expose configuration for a method named HelloGoodbye which could not be found."));
+        }
 
-        var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+        [Test]
+        public void ValidConfigForInheritedMethods()
+        {
+            var container = new WindsorContainer("ValidConfigForInheritedMethods.xml");
 
-        var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService));
-        Assert.That(metaInfo, Is.Not.Null);
-        Assert.That(metaInfo.Methods.Count(), Is.EqualTo(2));
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+
+            var meta = metaInfoStore.GetMetaInfoFor(typeof(TransactionalComponent2));
+            Assert.That(meta, Is.Not.Null);
+            Assert.That(meta.Methods.Count(), Is.EqualTo(4));
+        }
+
+        [Test]
+        public void ConfigForServiceWithInterface()
+        {
+            var container = new WindsorContainer("ConfigForServiceWithInterface.xml");
+
+            var metaInfoStore = container.Resolve<TransactionMetaInfoStore>();
+
+            var metaInfo = metaInfoStore.GetMetaInfoFor(typeof(TransactionalService));
+            Assert.That(metaInfo, Is.Not.Null);
+            Assert.That(metaInfo.Methods.Count(), Is.EqualTo(2));
+        }
     }
 }

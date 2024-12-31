@@ -14,37 +14,38 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 #if NETFRAMEWORK
 using System.Runtime.Serialization;
 #endif
 
 using Castle.Core;
 
-[Serializable]
-public class RollbackResourceException : TransactionException
+namespace Castle.Services.Transaction
 {
-    private readonly List<Pair<IResource, Exception>> _failedResources = [];
-
-    public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources) :
-        base(message, null)
+    [Serializable]
+    public class RollbackResourceException : TransactionException
     {
-        _failedResources.AddRange(failedResources);
-    }
+        private readonly List<Pair<IResource, Exception>> _failedResources = [];
+
+        public RollbackResourceException(string message, IEnumerable<Pair<IResource, Exception>> failedResources) :
+            base(message, null)
+        {
+            _failedResources.AddRange(failedResources);
+        }
 
 #if NETFRAMEWORK
-    public RollbackResourceException(SerializationInfo info, StreamingContext context) :
-        base(info, context)
-    {
-    }
+        public RollbackResourceException(SerializationInfo info, StreamingContext context) :
+            base(info, context)
+        {
+        }
 
-    public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources) :
-        base(info, context)
-    {
-        _failedResources.AddRange(failedResources);
-    }
+        public RollbackResourceException(SerializationInfo info, StreamingContext context, IEnumerable<Pair<IResource, Exception>> failedResources) :
+            base(info, context)
+        {
+            _failedResources.AddRange(failedResources);
+        }
 #endif
 
-    public IList<Pair<IResource, Exception>> FailedResources => _failedResources;
+        public IList<Pair<IResource, Exception>> FailedResources => _failedResources;
+    }
 }

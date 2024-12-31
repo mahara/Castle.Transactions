@@ -14,31 +14,32 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using Castle.Services.Transaction;
 
-/// <summary>
-/// Summary description for MockTransactionManager.
-/// </summary>
-public class MockTransactionManager : DefaultTransactionManager
+namespace Castle.Facilities.AutoTx.Tests
 {
-    public MockTransactionManager()
+    /// <summary>
+    /// Summary description for MockTransactionManager.
+    /// </summary>
+    public class MockTransactionManager : DefaultTransactionManager
     {
-        SetupStatistics();
-    }
+        public MockTransactionManager()
+        {
+            SetupStatistics();
+        }
 
-    public int TransactionCount { get; private set; }
+        public int TransactionCount { get; private set; }
 
-    public int CommittedCount { get; private set; }
+        public int CommittedCount { get; private set; }
 
-    public int RolledBackCount { get; private set; }
+        public int RolledBackCount { get; private set; }
 
-    private void SetupStatistics()
-    {
-        TransactionCreated += (sender, ev) => { TransactionCount++; };
-        ChildTransactionCreated += (sender, ev) => { TransactionCount++; };
-        TransactionCompleted += (sender, ev) => { CommittedCount++; };
-        TransactionRolledBack += (sender, ev) => { RolledBackCount++; };
+        private void SetupStatistics()
+        {
+            TransactionCreated += (sender, ev) => { TransactionCount++; };
+            ChildTransactionCreated += (sender, ev) => { TransactionCount++; };
+            TransactionCompleted += (sender, ev) => { CommittedCount++; };
+            TransactionRolledBack += (sender, ev) => { RolledBackCount++; };
+        }
     }
 }

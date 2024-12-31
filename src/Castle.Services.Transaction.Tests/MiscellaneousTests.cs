@@ -14,20 +14,21 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests;
-
 using NUnit.Framework;
 
-public class MiscellaneousTests
+namespace Castle.Services.Transaction.Tests
 {
-    [Test]
-    [Description("As we are working on the same directories? We don't want to run the tests concurrently.")]
-    [Ignore("TODO: Thread.CurrentThread.GetApartmentState() = MTA???")]
-    public void CheckSTA()
+    public class MiscellaneousTests
     {
-        var state = Thread.CurrentThread.GetApartmentState();
+        [Test]
+        [Description("As we are working on the same directories? We don't want to run the tests concurrently.")]
+        [Ignore("TODO: Thread.CurrentThread.GetApartmentState() = MTA???")]
+        public void CheckSTA()
+        {
+            var state = Thread.CurrentThread.GetApartmentState();
 
-        // TODO: This somehow appears to be MTA in test projects.
-        Assert.That(state, Is.EqualTo(ApartmentState.STA));
+            // TODO: This somehow appears to be MTA in test projects.
+            Assert.That(state, Is.EqualTo(ApartmentState.STA));
+        }
     }
 }

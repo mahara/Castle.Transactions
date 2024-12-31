@@ -14,32 +14,33 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using Castle.Services.Transaction;
 
-[Transactional]
-public class GenericService<T>
+namespace Castle.Facilities.AutoTx.Tests
 {
-    [Transaction]
-    public virtual void Bar<K>()
+    [Transactional]
+    public class GenericService<T>
     {
-    }
+        [Transaction]
+        public virtual void Bar<K>()
+        {
+        }
 
-    [Transaction]
-    public virtual void Foo()
-    {
-    }
+        [Transaction]
+        public virtual void Foo()
+        {
+        }
 
-    [Transaction]
-    public virtual void Throw()
-    {
-        throw new Exception(typeof(T).FullName);
-    }
+        [Transaction]
+        public virtual void Throw()
+        {
+            throw new Exception(typeof(T).FullName);
+        }
 
-    [Transaction]
-    public virtual void Throw<K>()
-    {
-        throw new Exception(typeof(T).FullName);
+        [Transaction]
+        public virtual void Throw<K>()
+        {
+            throw new Exception(typeof(T).FullName);
+        }
     }
 }

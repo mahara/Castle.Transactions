@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using System.Transactions;
 
 using Castle.MicroKernel;
@@ -23,59 +21,62 @@ using Castle.Services.Transaction;
 
 using NUnit.Framework;
 
-/// <summary>
-/// Summary description for CustomerService.
-/// </summary>
-[Transactional]
-public class CustomerService
+namespace Castle.Facilities.AutoTx.Tests
 {
-    private readonly IKernel _kernel;
-
-    public CustomerService(IKernel kernel)
+    /// <summary>
+    /// Summary description for CustomerService.
+    /// </summary>
+    [Transactional]
+    public class CustomerService
     {
-        _kernel = kernel;
-    }
+        private readonly IKernel _kernel;
 
-    [Transaction(TransactionScopeOption.Required)]
-    public virtual void Insert(string name, string address)
-    {
-    }
+        public CustomerService(IKernel kernel)
+        {
+            _kernel = kernel;
+        }
 
-    [Transaction(TransactionScopeOption.Required)]
-    public virtual void Delete(int id)
-    {
-        throw new ApplicationException("Whopps. Problems!");
-    }
+        [Transaction(TransactionScopeOption.Required)]
+        public virtual void Insert(string name, string address)
+        {
+        }
 
-    [Transaction]
-    public virtual void Update(int id)
-    {
-        var tm = _kernel.Resolve<ITransactionManager>();
+        [Transaction(TransactionScopeOption.Required)]
+        public virtual void Delete(int id)
+        {
+            throw new ApplicationException("Whopps. Problems!");
+        }
 
-        Assert.That(tm.CurrentTransaction, Is.Not.Null);
-        Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
+        [Transaction]
+        public virtual void Update(int id)
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
 
-        tm.CurrentTransaction.SetRollbackOnly();
+            Assert.That(tm.CurrentTransaction, Is.Not.Null);
+            Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
 
-        Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
-    }
+            tm.CurrentTransaction.SetRollbackOnly();
 
-    [Transaction(TransactionScopeOption.Required)]
-    public virtual void DoSomethingNotMarkedAsReadOnly()
-    {
-        var tm = _kernel.Resolve<ITransactionManager>();
+            Assert.That(tm.CurrentTransaction.Status, Is.EqualTo(Services.Transaction.TransactionStatus.Active));
+        }
 
-        Assert.That(tm.CurrentTransaction, Is.Not.Null);
-        Assert.That(tm.CurrentTransaction.IsReadOnly, Is.False);
-    }
+        [Transaction(TransactionScopeOption.Required)]
+        public virtual void DoSomethingNotMarkedAsReadOnly()
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
+
+            Assert.That(tm.CurrentTransaction, Is.Not.Null);
+            Assert.That(tm.CurrentTransaction.IsReadOnly, Is.False);
+        }
 
 
-    [Transaction(TransactionScopeOption.Required, IsReadOnly = true)]
-    public virtual void DoSomethingReadOnly()
-    {
-        var tm = _kernel.Resolve<ITransactionManager>();
+        [Transaction(TransactionScopeOption.Required, IsReadOnly = true)]
+        public virtual void DoSomethingReadOnly()
+        {
+            var tm = _kernel.Resolve<ITransactionManager>();
 
-        Assert.That(tm.CurrentTransaction, Is.Not.Null);
-        Assert.That(tm.CurrentTransaction.IsReadOnly, Is.True);
+            Assert.That(tm.CurrentTransaction, Is.Not.Null);
+            Assert.That(tm.CurrentTransaction.IsReadOnly, Is.True);
+        }
     }
 }

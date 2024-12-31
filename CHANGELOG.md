@@ -74,6 +74,3 @@ Breaking Changes:
 Breaking Changes:
 - Upgraded [Castle.Core] version to 3.3.0
 - Upgraded [Castle.Windsor] version to 3.3.0
-
-
-

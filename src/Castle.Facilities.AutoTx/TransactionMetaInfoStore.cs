@@ -14,8 +14,6 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx;
-
 using System.Reflection;
 using System.Transactions;
 
@@ -25,173 +23,176 @@ using Castle.MicroKernel.Facilities;
 
 using Castle.Services.Transaction;
 
-/// <summary>
-/// A store for <see cref="TransactionMetaInfo" />.
-/// </summary>
-public class TransactionMetaInfoStore : MarshalByRefObject
+namespace Castle.Facilities.AutoTx
 {
-    private static readonly BindingFlags BindingFlags =
-        BindingFlags.Instance |
-        BindingFlags.Public |
-        BindingFlags.NonPublic |
-        BindingFlags.DeclaredOnly;
-    private static readonly string TransactionModeAttribute = "transactionMode";
-    private static readonly string IsolationLevelAttribute = "isolationLevel";
-
-    private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = [];
-
     /// <summary>
-    /// Creates meta-information from a type.
+    /// A store for <see cref="TransactionMetaInfo" />.
     /// </summary>
-    public TransactionMetaInfo CreateMetaInfoFromType(Type implementation)
+    public class TransactionMetaInfoStore : MarshalByRefObject
     {
-        var metaInfo = new TransactionMetaInfo();
+        private static readonly BindingFlags BindingFlags =
+            BindingFlags.Instance |
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.DeclaredOnly;
+        private static readonly string TransactionModeAttribute = "transactionMode";
+        private static readonly string IsolationLevelAttribute = "isolationLevel";
 
-        PopulateMetaInfoFromType(metaInfo, implementation);
+        private readonly Dictionary<Type, TransactionMetaInfo> _typeToMetaInfo = [];
 
-        RegisterMetaInfo(implementation, metaInfo);
-
-        return metaInfo;
-    }
-
-    private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type? implementation)
-    {
-        if (implementation is null ||
-            implementation == typeof(object) ||
-            implementation == typeof(MarshalByRefObject))
+        /// <summary>
+        /// Creates meta-information from a type.
+        /// </summary>
+        public TransactionMetaInfo CreateMetaInfoFromType(Type implementation)
         {
-            return;
+            var metaInfo = new TransactionMetaInfo();
+
+            PopulateMetaInfoFromType(metaInfo, implementation);
+
+            RegisterMetaInfo(implementation, metaInfo);
+
+            return metaInfo;
         }
 
-        var methods = implementation.GetMethods(BindingFlags);
-
-        foreach (var method in methods)
+        private static void PopulateMetaInfoFromType(TransactionMetaInfo metaInfo, Type? implementation)
         {
-            var attributes = method.GetCustomAttributes(typeof(TransactionAttribute), true);
-            if (attributes.Length > 0)
+            if (implementation is null ||
+                implementation == typeof(object) ||
+                implementation == typeof(MarshalByRefObject))
             {
-                metaInfo.Add(method, (TransactionAttribute) attributes[0]);
+                return;
+            }
 
-                // Only add the method as transaction injection if we also have specified a transaction attribute.
-                attributes = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
+            var methods = implementation.GetMethods(BindingFlags);
+
+            foreach (var method in methods)
+            {
+                var attributes = method.GetCustomAttributes(typeof(TransactionAttribute), true);
                 if (attributes.Length > 0)
                 {
-                    metaInfo.AddInjection(method);
+                    metaInfo.Add(method, (TransactionAttribute) attributes[0]);
+
+                    // Only add the method as transaction injection if we also have specified a transaction attribute.
+                    attributes = method.GetCustomAttributes(typeof(InjectTransactionAttribute), true);
+                    if (attributes.Length > 0)
+                    {
+                        metaInfo.AddInjection(method);
+                    }
                 }
+            }
+
+            PopulateMetaInfoFromType(metaInfo, implementation.BaseType);
+        }
+
+        /// <summary>
+        /// Create meta-information from the configuration about what methods should be overridden.
+        /// </summary>
+        public TransactionMetaInfo CreateMetaInfoFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration facilityConfiguration)
+        {
+            var metaInfo = GetMetaInfoFor(implementation);
+
+            metaInfo ??= new TransactionMetaInfo();
+
+            foreach (var method in methods)
+            {
+                var transactionMode = facilityConfiguration.Attributes[TransactionModeAttribute];
+                var isolationLevel = facilityConfiguration.Attributes[IsolationLevelAttribute];
+
+                var mode = GetTransactionMode(implementation, method, transactionMode);
+                var level = GetIsolationLevel(implementation, method, isolationLevel);
+
+                metaInfo.Add(method, new TransactionAttribute(mode, level));
+            }
+
+            RegisterMetaInfo(implementation, metaInfo);
+
+            return metaInfo;
+        }
+
+        /// <summary>
+        /// Gets the meta-information for the implementation.
+        /// </summary>
+        /// <param name="implementation"></param>
+        /// <returns></returns>
+        public TransactionMetaInfo? GetMetaInfoFor(Type implementation)
+        {
+            _typeToMetaInfo.TryGetValue(implementation, out var metaInfo);
+
+            return metaInfo;
+        }
+
+        private void RegisterMetaInfo(Type implementation, TransactionMetaInfo metaInfo)
+        {
+            _typeToMetaInfo[implementation] = metaInfo;
+        }
+
+        private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string? mode)
+        {
+            if (mode is null)
+            {
+                return TransactionScopeOption.Required;
+            }
+
+            try
+            {
+#if NET
+                return Enum.Parse<TransactionScopeOption>(mode, true);
+#else
+                return (TransactionScopeOption) Enum.Parse(typeof(TransactionScopeOption), mode, true);
+#endif
+            }
+            catch (Exception)
+            {
+#if NET
+                var values = Enum.GetValues<TransactionScopeOption>();
+#else
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
+#endif
+
+                var message = $"The configuration for the class '{implementation.FullName}', " +
+                              $"method '{method.Name}()', has specified '{mode}' on '{TransactionModeAttribute}' which is not supported. " +
+                              $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
+                throw new FacilityException(message);
             }
         }
 
-        PopulateMetaInfoFromType(metaInfo, implementation.BaseType);
-    }
-
-    /// <summary>
-    /// Create meta-information from the configuration about what methods should be overridden.
-    /// </summary>
-    public TransactionMetaInfo CreateMetaInfoFromConfig(Type implementation, IList<MethodInfo> methods, IConfiguration facilityConfiguration)
-    {
-        var metaInfo = GetMetaInfoFor(implementation);
-
-        metaInfo ??= new TransactionMetaInfo();
-
-        foreach (var method in methods)
+        private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string? level)
         {
-            var transactionMode = facilityConfiguration.Attributes[TransactionModeAttribute];
-            var isolationLevel = facilityConfiguration.Attributes[IsolationLevelAttribute];
+            if (level is null)
+            {
+                return IsolationLevel.Unspecified;
+            }
 
-            var mode = GetTransactionMode(implementation, method, transactionMode);
-            var level = GetIsolationLevel(implementation, method, isolationLevel);
-
-            metaInfo.Add(method, new TransactionAttribute(mode, level));
-        }
-
-        RegisterMetaInfo(implementation, metaInfo);
-
-        return metaInfo;
-    }
-
-    /// <summary>
-    /// Gets the meta-information for the implementation.
-    /// </summary>
-    /// <param name="implementation"></param>
-    /// <returns></returns>
-    public TransactionMetaInfo? GetMetaInfoFor(Type implementation)
-    {
-        _typeToMetaInfo.TryGetValue(implementation, out var metaInfo);
-
-        return metaInfo;
-    }
-
-    private void RegisterMetaInfo(Type implementation, TransactionMetaInfo metaInfo)
-    {
-        _typeToMetaInfo[implementation] = metaInfo;
-    }
-
-    private static TransactionScopeOption GetTransactionMode(Type implementation, MethodInfo method, string? mode)
-    {
-        if (mode is null)
-        {
-            return TransactionScopeOption.Required;
-        }
-
-        try
-        {
+            try
+            {
 #if NET
-            return Enum.Parse<TransactionScopeOption>(mode, true);
+                return Enum.Parse<IsolationLevel>(level, true);
 #else
-            return (TransactionScopeOption) Enum.Parse(typeof(TransactionScopeOption), mode, true);
+                return (IsolationLevel) Enum.Parse(typeof(IsolationLevel), level, true);
 #endif
-        }
-        catch (Exception)
-        {
+            }
+            catch (Exception)
+            {
 #if NET
-            var values = Enum.GetValues<TransactionScopeOption>();
+                var values = Enum.GetValues<TransactionScopeOption>();
 #else
-            var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
+                var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
 #endif
 
-            var message = $"The configuration for the class '{implementation.FullName}', " +
-                          $"method '{method.Name}()', has specified '{mode}' on '{TransactionModeAttribute}' which is not supported. " +
-                          $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
-            throw new FacilityException(message);
-        }
-    }
-
-    private static IsolationLevel GetIsolationLevel(Type implementation, MethodInfo method, string? level)
-    {
-        if (level is null)
-        {
-            return IsolationLevel.Unspecified;
+                var message = $"The configuration for the class '{implementation.FullName}', " +
+                              $"method '{method.Name}()', has specified '{level}' on '{IsolationLevelAttribute}' which is not supported. " +
+                              $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
+                throw new FacilityException(message);
+            }
         }
 
-        try
-        {
+        /// <inheritdoc />
 #if NET
-            return Enum.Parse<IsolationLevel>(level, true);
-#else
-            return (IsolationLevel) Enum.Parse(typeof(IsolationLevel), level, true);
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
 #endif
-        }
-        catch (Exception)
+        public override object InitializeLifetimeService()
         {
-#if NET
-            var values = Enum.GetValues<TransactionScopeOption>();
-#else
-            var values = (string[]) Enum.GetValues(typeof(TransactionScopeOption));
-#endif
-
-            var message = $"The configuration for the class '{implementation.FullName}', " +
-                          $"method '{method.Name}()', has specified '{level}' on '{IsolationLevelAttribute}' which is not supported. " +
-                          $"The possible values are {string.Join(", ", values.Select(x => $"'{x}'"))}.";
-            throw new FacilityException(message);
+            return null!;
         }
-    }
-
-    /// <inheritdoc />
-#if NET
-    [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
-#endif
-    public override object InitializeLifetimeService()
-    {
-        return null!;
     }
 }

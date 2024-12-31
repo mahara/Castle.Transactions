@@ -14,90 +14,91 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 using System.Transactions;
 
-public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
+namespace Castle.Services.Transaction
 {
-    private bool _isAmbient;
-    private bool _isReadOnly;
-
-    public event EventHandler<TransactionEventArgs>? TransactionCompleted;
-    public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
-    public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
-
-    public TalkactiveTransaction(TransactionScopeOption mode,
-                                 IsolationLevel isolationLevel,
-                                 bool isAmbient,
-                                 bool isReadOnly) :
-        base(string.Empty, mode, isolationLevel)
+    public sealed class TalkactiveTransaction : TransactionBase, IEventPublisher
     {
-        _isAmbient = isAmbient;
-        _isReadOnly = isReadOnly;
-    }
+        private bool _isAmbient;
+        private bool _isReadOnly;
 
-    public override bool IsAmbient
-    {
-        get => _isAmbient;
-        protected set => _isAmbient = value;
-    }
+        public event EventHandler<TransactionEventArgs>? TransactionCompleted;
+        public event EventHandler<TransactionFailedEventArgs>? TransactionFailed;
+        public event EventHandler<TransactionEventArgs>? TransactionRolledBack;
 
-    public override bool IsReadOnly
-    {
-        get => _isReadOnly;
-        protected set => _isReadOnly = value;
-    }
-
-    public override void Begin()
-    {
-        try
+        public TalkactiveTransaction(TransactionScopeOption mode,
+                                     IsolationLevel isolationLevel,
+                                     bool isAmbient,
+                                     bool isReadOnly) :
+            base(string.Empty, mode, isolationLevel)
         {
-            base.Begin();
+            _isAmbient = isAmbient;
+            _isReadOnly = isReadOnly;
         }
-        catch (TransactionException ex)
-        {
-            Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
 
-            throw;
+        public override bool IsAmbient
+        {
+            get => _isAmbient;
+            protected set => _isAmbient = value;
         }
+
+        public override bool IsReadOnly
+        {
+            get => _isReadOnly;
+            protected set => _isReadOnly = value;
+        }
+
+        public override void Begin()
+        {
+            try
+            {
+                base.Begin();
+            }
+            catch (TransactionException ex)
+            {
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
+                throw;
+            }
+        }
+
+        protected override void InnerBegin() { }
+
+        public override void Commit()
+        {
+            try
+            {
+                base.Commit();
+
+                Logger.TryLogFail(() => TransactionCompleted?.Fire(this, new TransactionEventArgs(this)));
+            }
+            catch (TransactionException ex)
+            {
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
+                throw;
+            }
+        }
+
+        protected override void InnerCommit() { }
+
+        public override void Rollback()
+        {
+            try
+            {
+                base.Rollback();
+
+                Logger.TryLogFail(() => TransactionRolledBack?.Fire(this, new TransactionEventArgs(this)));
+            }
+            catch (TransactionException ex)
+            {
+                Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
+
+                throw;
+            }
+        }
+
+        protected override void InnerRollback() { }
     }
-
-    protected override void InnerBegin() { }
-
-    public override void Commit()
-    {
-        try
-        {
-            base.Commit();
-
-            Logger.TryLogFail(() => TransactionCompleted?.Fire(this, new TransactionEventArgs(this)));
-        }
-        catch (TransactionException ex)
-        {
-            Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
-
-            throw;
-        }
-    }
-
-    protected override void InnerCommit() { }
-
-    public override void Rollback()
-    {
-        try
-        {
-            base.Rollback();
-
-            Logger.TryLogFail(() => TransactionRolledBack?.Fire(this, new TransactionEventArgs(this)));
-        }
-        catch (TransactionException ex)
-        {
-            Logger.TryLogFail(() => TransactionFailed?.Fire(this, new TransactionFailedEventArgs(this, ex)));
-
-            throw;
-        }
-    }
-
-    protected override void InnerRollback() { }
 }

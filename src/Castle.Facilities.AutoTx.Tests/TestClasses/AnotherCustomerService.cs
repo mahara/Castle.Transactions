@@ -14,23 +14,24 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Facilities.AutoTx.Tests;
-
 using System.Transactions;
 
 using Castle.Services.Transaction;
 
-[Transactional]
-public class AnotherCustomerService : ICustomerService
+namespace Castle.Facilities.AutoTx.Tests
 {
-    [Transaction(TransactionScopeOption.Required)]
-    public void Insert(string name, string address)
+    [Transactional]
+    public class AnotherCustomerService : ICustomerService
     {
-    }
+        [Transaction(TransactionScopeOption.Required)]
+        public void Insert(string name, string address)
+        {
+        }
 
-    [Transaction(TransactionScopeOption.Required)]
-    public void Delete(int id)
-    {
-        throw new ApplicationException("Whopps. Problems!");
+        [Transaction(TransactionScopeOption.Required)]
+        public void Delete(int id)
+        {
+            throw new ApplicationException("Whopps. Problems!");
+        }
     }
 }

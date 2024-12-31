@@ -14,28 +14,29 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 #if NETFRAMEWORK
 using System.Runtime.Serialization;
 #endif
 
-public class TransactionalConflictException : TransactionException
+namespace Castle.Services.Transaction
 {
-    public TransactionalConflictException(string message) :
-        base(message)
+    public class TransactionalConflictException : TransactionException
     {
-    }
+        public TransactionalConflictException(string message) :
+            base(message)
+        {
+        }
 
 #if NETFRAMEWORK
-    public TransactionalConflictException(string message, Exception innerException) :
-        base(message, innerException)
-    {
-    }
+        public TransactionalConflictException(string message, Exception innerException) :
+            base(message, innerException)
+        {
+        }
 
-    public TransactionalConflictException(SerializationInfo info, StreamingContext context) :
-        base(info, context)
-    {
-    }
+        public TransactionalConflictException(SerializationInfo info, StreamingContext context) :
+            base(info, context)
+        {
+        }
 #endif
+    }
 }

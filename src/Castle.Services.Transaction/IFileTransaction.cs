@@ -14,13 +14,14 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 using Castle.Services.Transaction.IO;
 
-/// <summary>
-/// An interface for a transaction acting on a file.
-/// </summary>
-public interface IFileTransaction : IFileAdapter, IDirectoryAdapter, ITransaction, IDisposable
+namespace Castle.Services.Transaction
 {
+    /// <summary>
+    /// An interface for a transaction acting on a file.
+    /// </summary>
+    public interface IFileTransaction : IFileAdapter, IDirectoryAdapter, ITransaction, IDisposable
+    {
+    }
 }

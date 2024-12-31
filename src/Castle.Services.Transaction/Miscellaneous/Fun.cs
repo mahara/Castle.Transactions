@@ -14,270 +14,271 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 using Castle.Core;
 using Castle.Core.Logging;
 
-/// <summary>
-/// Utility class for whatever is needed to make the code better.
-/// </summary>
-internal static class Fun
+namespace Castle.Services.Transaction
 {
-    public static void Fire<TEventArgs>(this EventHandler<TEventArgs> handler,
-                                        object sender,
-                                        TEventArgs args)
-        where TEventArgs : EventArgs
+    /// <summary>
+    /// Utility class for whatever is needed to make the code better.
+    /// </summary>
+    internal static class Fun
     {
-        if (handler is null)
+        public static void Fire<TEventArgs>(this EventHandler<TEventArgs> handler,
+                                            object sender,
+                                            TEventArgs args)
+            where TEventArgs : EventArgs
         {
-            return;
+            if (handler is null)
+            {
+                return;
+            }
+
+            handler(sender, args);
         }
 
-        handler(sender, args);
-    }
+        public static void AtomicRead(this ReaderWriterLockSlim sem, Action action)
+        {
+            AtomicRead(sem, action, false);
+        }
 
-    public static void AtomicRead(this ReaderWriterLockSlim sem, Action action)
-    {
-        AtomicRead(sem, action, false);
-    }
-
-    public static void AtomicRead(this ReaderWriterLockSlim sem, Action action, bool upgradable)
-    {
+        public static void AtomicRead(this ReaderWriterLockSlim sem, Action action, bool upgradable)
+        {
 #if NET8_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(sem);
-        ArgumentNullException.ThrowIfNull(action);
+            ArgumentNullException.ThrowIfNull(sem);
+            ArgumentNullException.ThrowIfNull(action);
 #else
-        if (sem is null)
-        {
-            throw new ArgumentNullException(nameof(sem));
-        }
+            if (sem is null)
+            {
+                throw new ArgumentNullException(nameof(sem));
+            }
 
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
 #endif
 
-        if (!upgradable)
-        {
-            sem.EnterReadLock();
-        }
-        else
-        {
-            sem.EnterUpgradeableReadLock();
-        }
-
-        try
-        {
-            action();
-        }
-        finally
-        {
             if (!upgradable)
             {
-                sem.ExitReadLock();
+                sem.EnterReadLock();
             }
             else
             {
-                sem.ExitUpgradeableReadLock();
+                sem.EnterUpgradeableReadLock();
+            }
+
+            try
+            {
+                action();
+            }
+            finally
+            {
+                if (!upgradable)
+                {
+                    sem.ExitReadLock();
+                }
+                else
+                {
+                    sem.ExitUpgradeableReadLock();
+                }
             }
         }
-    }
 
-    public static T AtomicRead<T>(this ReaderWriterLockSlim sem, Func<T> function)
-    {
+        public static T AtomicRead<T>(this ReaderWriterLockSlim sem, Func<T> function)
+        {
 #if NET8_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(sem);
-        ArgumentNullException.ThrowIfNull(function);
+            ArgumentNullException.ThrowIfNull(sem);
+            ArgumentNullException.ThrowIfNull(function);
 #else
-        if (sem is null)
-        {
-            throw new ArgumentNullException(nameof(sem));
-        }
+            if (sem is null)
+            {
+                throw new ArgumentNullException(nameof(sem));
+            }
 
-        if (function is null)
-        {
-            throw new ArgumentNullException(nameof(function));
-        }
+            if (function is null)
+            {
+                throw new ArgumentNullException(nameof(function));
+            }
 #endif
 
-        sem.EnterReadLock();
+            sem.EnterReadLock();
 
-        try
-        {
-            return function();
+            try
+            {
+                return function();
+            }
+            finally
+            {
+                sem.ExitReadLock();
+            }
         }
-        finally
-        {
-            sem.ExitReadLock();
-        }
-    }
 
-    public static void AtomicWrite(this ReaderWriterLockSlim sem, Action action)
-    {
+        public static void AtomicWrite(this ReaderWriterLockSlim sem, Action action)
+        {
 #if NET8_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(sem);
-        ArgumentNullException.ThrowIfNull(action);
+            ArgumentNullException.ThrowIfNull(sem);
+            ArgumentNullException.ThrowIfNull(action);
 #else
-        if (sem is null)
-        {
-            throw new ArgumentNullException(nameof(sem));
-        }
+            if (sem is null)
+            {
+                throw new ArgumentNullException(nameof(sem));
+            }
 
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
 #endif
 
-        sem.EnterWriteLock();
+            sem.EnterWriteLock();
 
-        try
-        {
-            action();
+            try
+            {
+                action();
+            }
+            finally
+            {
+                sem.ExitWriteLock();
+            }
         }
-        finally
-        {
-            sem.ExitWriteLock();
-        }
-    }
 
-    /// <summary>
-    /// Iterates over a sequence and performs the action on each.
-    /// </summary>
-    public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
-    {
+        /// <summary>
+        /// Iterates over a sequence and performs the action on each.
+        /// </summary>
+        public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
+        {
 #if NET8_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(items);
-        ArgumentNullException.ThrowIfNull(action);
+            ArgumentNullException.ThrowIfNull(items);
+            ArgumentNullException.ThrowIfNull(action);
 #else
-        if (items is null)
-        {
-            throw new ArgumentNullException(nameof(items));
-        }
+            if (items is null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
 
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
 #endif
 
-        foreach (var item in items)
+            foreach (var item in items)
+            {
+                action(item);
+            }
+        }
+
+        /// <summary>
+        /// Given a logger and action, performs the action and catches + logs exceptions.
+        /// </summary>
+        /// <returns>Whether the lambda was a success or not.</returns>
+        public static Error TryLogFail(this ILogger logger, Action action)
         {
-            action(item);
+            try
+            {
+                action();
+
+                return Error.OK;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.Message, e);
+
+                return new Error(false, e);
+            }
+        }
+
+        public static Pair<T, T2> And<T, T2>(this T first, T2 second)
+        {
+            return new Pair<T, T2>(first, second);
         }
     }
 
     /// <summary>
-    /// Given a logger and action, performs the action and catches + logs exceptions.
+    /// Error monad
     /// </summary>
-    /// <returns>Whether the lambda was a success or not.</returns>
-    public static Error TryLogFail(this ILogger logger, Action action)
+    internal readonly record struct Error
     {
-        try
+        public static Error OK = new(true, null);
+
+        private readonly Exception? _exception;
+        private readonly bool _success;
+
+        public Error(bool success, Exception? exception)
         {
-            action();
-
-            return Error.OK;
+            _success = success;
+            _exception = success ? null : exception;
         }
-        catch (Exception e)
+
+        /// <summary>
+        /// Takes a lambda what to do if the result failed. Returns the result so
+        /// that it can be managed in whatever way is needed.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public readonly Error Exception(Action<Exception?> action)
         {
-            logger.Error(e.Message, e);
+            if (!_success)
+            {
+                action(_exception);
+            }
 
-            return new Error(false, e);
+            return this;
         }
-    }
 
-    public static Pair<T, T2> And<T, T2>(this T first, T2 second)
-    {
-        return new Pair<T, T2>(first, second);
-    }
-}
+        public readonly Error Success(Action action)
+        {
+            if (_success)
+            {
+                action();
+            }
 
-/// <summary>
-/// Error monad
-/// </summary>
-internal readonly record struct Error
-{
-    public static Error OK = new(true, null);
-
-    private readonly Exception? _exception;
-    private readonly bool _success;
-
-    public Error(bool success, Exception? exception)
-    {
-        _success = success;
-        _exception = success ? null : exception;
+            return this;
+        }
     }
 
     /// <summary>
-    /// Takes a lambda what to do if the result failed. Returns the result so
-    /// that it can be managed in whatever way is needed.
+    /// Error monad
     /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public readonly Error Exception(Action<Exception?> action)
+    /// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
+    internal readonly struct Error<T>
     {
-        if (!_success)
+        private readonly Exception? _exception;
+        private readonly bool _success;
+        private readonly T _parameter;
+
+        public Error(bool success, Exception? exception, T parameter)
         {
-            action(_exception);
+            _success = success;
+            _parameter = parameter;
+            _exception = success ? null : exception;
         }
 
-        return this;
-    }
-
-    public readonly Error Success(Action action)
-    {
-        if (_success)
+        /// <summary>
+        /// Takes a lambda what to do if the result failed. Returns the result so
+        /// that it can be managed in whatever way is needed.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public readonly Error<T> Exception(Action<Exception?> action)
         {
-            action();
+            if (!_success)
+            {
+                action(_exception);
+            }
+
+            return this;
         }
 
-        return this;
-    }
-}
-
-/// <summary>
-/// Error monad
-/// </summary>
-/// <typeparam name="T">Encapsulated success-action parameter type</typeparam>
-internal readonly struct Error<T>
-{
-    private readonly Exception? _exception;
-    private readonly bool _success;
-    private readonly T _parameter;
-
-    public Error(bool success, Exception? exception, T parameter)
-    {
-        _success = success;
-        _parameter = parameter;
-        _exception = success ? null : exception;
-    }
-
-    /// <summary>
-    /// Takes a lambda what to do if the result failed. Returns the result so
-    /// that it can be managed in whatever way is needed.
-    /// </summary>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public readonly Error<T> Exception(Action<Exception?> action)
-    {
-        if (!_success)
+        public readonly Error<T> Success(Action<T> action)
         {
-            action(_exception);
+            if (_success)
+            {
+                action(_parameter);
+            }
+
+            return this;
         }
-
-        return this;
-    }
-
-    public readonly Error<T> Success(Action<T> action)
-    {
-        if (_success)
-        {
-            action(_parameter);
-        }
-
-        return this;
     }
 }

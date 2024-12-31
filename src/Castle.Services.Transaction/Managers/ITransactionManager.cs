@@ -14,69 +14,70 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction;
-
 using System.Transactions;
 
-/// <summary>
-/// Manages the creation and disposal of <see cref="ITransaction" /> instances.
-/// </summary>
-public interface ITransactionManager : IEventPublisher
+namespace Castle.Services.Transaction
 {
     /// <summary>
-    /// Raised when a top level transaction was created.
+    /// Manages the creation and disposal of <see cref="ITransaction" /> instances.
     /// </summary>
-    event EventHandler<TransactionEventArgs> TransactionCreated;
+    public interface ITransactionManager : IEventPublisher
+    {
+        /// <summary>
+        /// Raised when a top level transaction was created.
+        /// </summary>
+        event EventHandler<TransactionEventArgs> TransactionCreated;
 
-    /// <summary>
-    /// Raised when the transaction was disposed.
-    /// </summary>
-    event EventHandler<TransactionEventArgs> TransactionDisposed;
+        /// <summary>
+        /// Raised when the transaction was disposed.
+        /// </summary>
+        event EventHandler<TransactionEventArgs> TransactionDisposed;
 
-    /// <summary>
-    /// Raised when a child transaction was created.
-    /// </summary>
-    event EventHandler<TransactionEventArgs> ChildTransactionCreated;
+        /// <summary>
+        /// Raised when a child transaction was created.
+        /// </summary>
+        event EventHandler<TransactionEventArgs> ChildTransactionCreated;
 
-    /// <summary>
-    /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
-    /// </summary>
-    ITransaction? CreateTransaction(TransactionScopeOption mode,
-                                    IsolationLevel isolationLevel);
+        /// <summary>
+        /// <see cref="CreateTransaction(TransactionScopeOption,IsolationLevel,bool,bool)" />.
+        /// </summary>
+        ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                        IsolationLevel isolationLevel);
 
-    /// <summary>
-    /// Creates a transaction.
-    /// </summary>
-    /// <param name="mode">The mode of the transaction.</param>
-    /// <param name="isolationLevel">The isolation level.</param>
-    /// <param name="isAmbient">if set to <c>true</c>, the TM will create a distributed transaction.</param>
-    /// <param name="isReadOnly">if set to <c>true</c>, the TM will create a read only transaction.</param>
-    /// <returns>
-    /// null &lt;- If transactions are just supported, but there is no ambient transaction
-    /// null &lt;- If transactions are not supported and there indeed is no ambient transaction (if there is, see exception docs)
-    ///
-    /// </returns>
-    /// <exception cref="TransactionModeUnsupportedException">
-    /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
-    /// and yet there is an ambient transaction in the transaction manager which is active.
-    /// </exception>
-    ITransaction? CreateTransaction(TransactionScopeOption mode,
-                                    IsolationLevel isolationLevel,
-                                    bool isAmbient,
-                                    bool isReadOnly);
+        /// <summary>
+        /// Creates a transaction.
+        /// </summary>
+        /// <param name="mode">The mode of the transaction.</param>
+        /// <param name="isolationLevel">The isolation level.</param>
+        /// <param name="isAmbient">if set to <c>true</c>, the TM will create a distributed transaction.</param>
+        /// <param name="isReadOnly">if set to <c>true</c>, the TM will create a read only transaction.</param>
+        /// <returns>
+        /// null &lt;- If transactions are just supported, but there is no ambient transaction
+        /// null &lt;- If transactions are not supported and there indeed is no ambient transaction (if there is, see exception docs)
+        ///
+        /// </returns>
+        /// <exception cref="TransactionModeUnsupportedException">
+        /// transactionMode = <see cref="TransactionScopeOption.Suppress" />
+        /// and yet there is an ambient transaction in the transaction manager which is active.
+        /// </exception>
+        ITransaction? CreateTransaction(TransactionScopeOption mode,
+                                        IsolationLevel isolationLevel,
+                                        bool isAmbient,
+                                        bool isReadOnly);
 
-    /// <summary>
-    /// Returns the current <see cref="ITransaction" />.
-    /// The transaction manager will probably need to hold the created transaction
-    /// in the thread or in some sort of context.
-    /// </summary>
-    ITransaction? CurrentTransaction { get; }
+        /// <summary>
+        /// Returns the current <see cref="ITransaction" />.
+        /// The transaction manager will probably need to hold the created transaction
+        /// in the thread or in some sort of context.
+        /// </summary>
+        ITransaction? CurrentTransaction { get; }
 
-    /// <summary>
-    /// Dispose the transaction passed appropriately, removing it from the list of tracked transactions,
-    /// calling its dispose method and raise the <see cref="TransactionDisposed" /> event.
-    /// </summary>
-    /// <param name="transaction">The transaction to dispose.</param>
-    /// <exception cref="ArgumentNullException">Transaction is null.</exception>
-    void Dispose(ITransaction transaction);
+        /// <summary>
+        /// Dispose the transaction passed appropriately, removing it from the list of tracked transactions,
+        /// calling its dispose method and raise the <see cref="TransactionDisposed" /> event.
+        /// </summary>
+        /// <param name="transaction">The transaction to dispose.</param>
+        /// <exception cref="ArgumentNullException">Transaction is null.</exception>
+        void Dispose(ITransaction transaction);
+    }
 }

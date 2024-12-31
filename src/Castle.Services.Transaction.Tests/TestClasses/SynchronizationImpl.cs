@@ -14,27 +14,28 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests;
-
-public class SynchronizationImpl : ISynchronization
+namespace Castle.Services.Transaction.Tests
 {
-    public SynchronizationImpl()
+    public class SynchronizationImpl : ISynchronization
     {
-    }
+        public SynchronizationImpl()
+        {
+        }
 
-    public DateTime Before { get; private set; } =
-        DateTime.MinValue;
+        public DateTime Before { get; private set; } =
+            DateTime.MinValue;
 
-    public DateTime After { get; private set; } =
-        DateTime.MinValue;
+        public DateTime After { get; private set; } =
+            DateTime.MinValue;
 
-    public void BeforeCompletion()
-    {
-        Before = DateTime.Now;
-    }
+        public void BeforeCompletion()
+        {
+            Before = DateTime.Now;
+        }
 
-    public void AfterCompletion()
-    {
-        After = DateTime.Now;
+        public void AfterCompletion()
+        {
+            After = DateTime.Now;
+        }
     }
 }

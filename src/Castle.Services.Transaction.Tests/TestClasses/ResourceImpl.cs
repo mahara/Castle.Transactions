@@ -14,56 +14,57 @@
 // limitations under the License.
 #endregion
 
-namespace Castle.Services.Transaction.Tests;
-
-public class ResourceImpl : IResource, IDisposable
+namespace Castle.Services.Transaction.Tests
 {
-    public bool WasDisposed;
-
-    public bool Started { get; private set; }
-
-    public bool Committed { get; private set; }
-
-    public bool Rolledback { get; private set; }
-
-    #region IResource Members
-
-    public virtual void Start()
+    public class ResourceImpl : IResource, IDisposable
     {
-        if (Started)
+        public bool WasDisposed;
+
+        public bool Started { get; private set; }
+
+        public bool Committed { get; private set; }
+
+        public bool Rolledback { get; private set; }
+
+        #region IResource Members
+
+        public virtual void Start()
         {
-            throw new ApplicationException("Start called before.");
+            if (Started)
+            {
+                throw new ApplicationException("Start called before.");
+            }
+
+            Started = true;
         }
 
-        Started = true;
-    }
-
-    public virtual void Commit()
-    {
-        if (Committed)
+        public virtual void Commit()
         {
-            throw new ApplicationException("Commit called before.");
+            if (Committed)
+            {
+                throw new ApplicationException("Commit called before.");
+            }
+
+            Committed = true;
         }
 
-        Committed = true;
-    }
-
-    public virtual void Rollback()
-    {
-        if (Rolledback)
+        public virtual void Rollback()
         {
-            throw new ApplicationException("Rollback called before.");
+            if (Rolledback)
+            {
+                throw new ApplicationException("Rollback called before.");
+            }
+
+            Rolledback = true;
         }
 
-        Rolledback = true;
-    }
+        #endregion
 
-    #endregion
+        public void Dispose()
+        {
+            WasDisposed = true;
 
-    public void Dispose()
-    {
-        WasDisposed = true;
-
-        GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
+        }
     }
 }
