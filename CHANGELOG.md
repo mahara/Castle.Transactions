@@ -1,7 +1,12 @@
 # Castle.Transactions (Castle.Services.Transaction &amp; Castle.Facilities.AutoTx) - Changelog
 
 
-## 5.6.0 (2025-01-xx)
+## 5.6.0 (2025-12-xx)
+
+### All
+
+Improvements:
+- Added support for **`.NET 10.0`**.
 
 
 ## 5.5.0 (2024-12-19)
