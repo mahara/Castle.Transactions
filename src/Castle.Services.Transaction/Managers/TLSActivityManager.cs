@@ -46,10 +46,7 @@ namespace Castle.Services.Transaction
                 {
                     lock (_lock)
                     {
-                        if (_activity is null)
-                        {
-                            _activity = new Activity();
-                        }
+                        _activity ??= new Activity();
                     }
                 }
 
