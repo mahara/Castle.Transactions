@@ -117,8 +117,8 @@ namespace Explicit.NuGet.Versions
                     var version = element.GetAttribute("version");
                     if (!string.IsNullOrEmpty(version) &&
                         !version.Contains('*', StringComparison.Ordinal) &&
-                        !version.StartsWith('[') && !version.StartsWith('(') &&
-                        !version.EndsWith(']') && !version.EndsWith(')'))
+                        !version.StartsWith('[', StringComparison.Ordinal) && !version.StartsWith('(', StringComparison.Ordinal) &&
+                        !version.EndsWith(']', StringComparison.Ordinal) && !version.EndsWith(')', StringComparison.Ordinal))
                     {
                         element.SetAttribute("version", $"[{version}]");
                     }
@@ -152,9 +152,9 @@ namespace Explicit.NuGet.Versions
 
         record NuspecContentEntry
         {
-            public string EntryName { get; init; } = string.Empty;
+            public required string EntryName { get; init; }
 
-            public string Contents { get; set; } = string.Empty;
+            public required string Contents { get; set; }
         }
 
         sealed class StringWriterWithEncoding : StringWriter
