@@ -104,8 +104,8 @@ namespace Explicit.NuGet.Versions
                     dependencyId.StartsWith(packageIdPrefixFilter, StringComparison.OrdinalIgnoreCase))
                 {
                     var dependencyVersion = node.Attributes!["version"]!.Value;
-                    if (!dependencyVersion.StartsWith('[') &&
-                        !dependencyVersion.EndsWith(']'))
+                    if (!dependencyVersion.StartsWith('[', StringComparison.Ordinal) &&
+                        !dependencyVersion.EndsWith(']', StringComparison.Ordinal))
                     {
                         node.Attributes!["version"]!.Value = $"[{dependencyVersion}]";
                     }
