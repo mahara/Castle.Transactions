@@ -17,7 +17,9 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
+#if !NET11_0_OR_GREATER
 using Castle.Services.Transaction.Utilities;
+#endif
 
 namespace Castle.Services.Transaction.IO
 {
@@ -263,8 +265,8 @@ namespace Castle.Services.Transaction.IO
             }
 #endif
 
-            if (path.EndsWith('\\') ||
-                path.EndsWith('/'))
+            if (path.EndsWith('\\', StringComparison.Ordinal) ||
+                path.EndsWith('/', StringComparison.Ordinal))
             {
                 return string.Empty;
             }
@@ -293,7 +295,7 @@ namespace Castle.Services.Transaction.IO
 #endif
 
             var fileName = GetFileName(path);
-            var lastPeriodIndex = fileName.LastIndexOf('.');
+            var lastPeriodIndex = fileName.LastIndexOf('.', StringComparison.Ordinal);
             //return lastPeriodIndex == -1 ? fileName : fileName.Substring(0, lastPeriodIndex);
             return lastPeriodIndex == -1 ? fileName : fileName[..lastPeriodIndex];
         }
@@ -324,7 +326,7 @@ namespace Castle.Services.Transaction.IO
 #endif
 
             var fileName = GetFileName(path);
-            var lastPeriodIndex = fileName.LastIndexOf('.');
+            var lastPeriodIndex = fileName.LastIndexOf('.', StringComparison.Ordinal);
             //return lastPeriodIndex == -1 ? string.Empty : fileName.Substring(lastPeriodIndex + 1);
             return lastPeriodIndex == -1 ? string.Empty : fileName[(lastPeriodIndex + 1)..];
         }
