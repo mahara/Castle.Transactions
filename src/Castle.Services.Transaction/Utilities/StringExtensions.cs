@@ -15,10 +15,13 @@
 #endregion
 
 using System.Diagnostics.CodeAnalysis;
-#if NETFRAMEWORK
+#if !NET11_0_OR_GREATER || NETFRAMEWORK
 using System.Globalization;
 #endif
 using System.Runtime.CompilerServices;
+#if !NET11_0_OR_GREATER && !NETFRAMEWORK
+using System.Runtime.InteropServices;
+#endif
 
 namespace Castle.Services.Transaction.Utilities
 {
@@ -215,7 +218,60 @@ namespace Castle.Services.Transaction.Utilities
                 _ => throw new ArgumentOutOfRangeException(nameof(comparisonType), comparisonType, null)
             };
         }
+#endif
 
+#if !NET11_0_OR_GREATER
+        /// <summary>
+        ///     Reports the zero-based index of the last occurrence of the specified Unicode character in this <see cref="string" /> instance.
+        ///     A parameter specifies the type of search to use for the specified character.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <param name="value">The character to seek.</param>
+        /// <param name="comparisonType">
+        ///     One of the enumeration values that specifies the rules to use in the comparison.
+        /// </param>
+        /// <returns>
+        ///     The zero-based index of the last occurrence of <c>value</c> if found;
+        ///     otherwise, -1.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.lastindexof" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf(
+            this string? str,
+            char value,
+            StringComparison comparisonType)
+        {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(str);
+#else
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+#endif
+
+            return comparisonType switch
+            {
+                StringComparison.Ordinal => str.LastIndexOf(value),
+#if NET
+                StringComparison.OrdinalIgnoreCase => str.AsSpan().LastIndexOf(MemoryMarshal.CreateReadOnlySpan(ref value, 1), StringComparison.OrdinalIgnoreCase),
+#else
+                StringComparison.OrdinalIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(str, value, CompareOptions.OrdinalIgnoreCase),
+#endif
+                StringComparison.CurrentCulture => CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(str, value, CompareOptions.None),
+                StringComparison.CurrentCultureIgnoreCase => CultureInfo.CurrentCulture.CompareInfo.LastIndexOf(str, value, CompareOptions.IgnoreCase),
+                StringComparison.InvariantCulture => CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(str, value, CompareOptions.None),
+                StringComparison.InvariantCultureIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.LastIndexOf(str, value, CompareOptions.IgnoreCase),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparisonType), comparisonType, null)
+            };
+        }
+#endif
+
+#if NETFRAMEWORK
         /// <summary>
         ///     Determines whether the <see cref="string" /> instance starts with the specified character.
         /// </summary>
@@ -268,6 +324,48 @@ namespace Castle.Services.Transaction.Utilities
             }
 
             return str.Length > 0 && str[^1] == value;
+        }
+#endif
+
+#if !NET11_0_OR_GREATER
+        /// <summary>
+        ///     Determines whether the end of this <see cref="string" /> instance matches the specified character.
+        /// </summary>
+        /// <param name="str">The input string.</param>
+        /// <param name="value">The character to compare to the character at the end of this instance.</param>
+        /// <param name="comparisonType">
+        ///     One of the enumeration values that specifies the rules to use in the comparison.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true" /> if <c>value</c> matches the end of this instance;
+        ///     otherwise, <see langword="false" />.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="str" /> is <see langword="null" />.</exception>
+        /// <remarks>
+        ///     REFERENCES:
+        ///     -   <see href="https://learn.microsoft.com/en-us/dotnet/api/system.string.endswith" />
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWith(
+            this string? str,
+            char value,
+            StringComparison comparisonType)
+        {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(str);
+#else
+            if (str is null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+#endif
+
+#if NET
+            return str.AsSpan().EndsWith(MemoryMarshal.CreateReadOnlySpan(ref value, 1), comparisonType);
+#else
+            ReadOnlySpan<char> target = stackalloc char[] { value };
+            return str.AsSpan().EndsWith(target, comparisonType);
+#endif
         }
 #endif
     }
